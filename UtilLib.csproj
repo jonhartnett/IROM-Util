@@ -1,0 +1,148 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{67E893F2-4D13-4A54-AB54-7CA9B4B8F14F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>UtilLib</RootNamespace>
+    <AssemblyName>UtilLib</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+    <NoWin32Manifest>False</NoWin32Manifest>
+    <SignAssembly>False</SignAssembly>
+    <DelaySign>False</DelaySign>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <NoStdLib>False</NoStdLib>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>None</DebugType>
+    <Optimize>True</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
+    <BaseIntermediateOutputPath>obj\</BaseIntermediateOutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
+    <BaseAddress>4194304</BaseAddress>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <RegisterForComInterop>False</RegisterForComInterop>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Data\DataMap2D.cs" />
+    <Compile Include="Data\DataMapExtensions2D.cs" />
+    <Compile Include="Data\IChannelManager2D.cs" />
+    <Compile Include="Data\UnsafeDataMapOperations2D.cs" />
+    <Compile Include="Input\KeyboardButton.cs" />
+    <Compile Include="Input\InputEventArgs.cs" />
+    <Compile Include="Input\MouseButton.cs" />
+    <Compile Include="Render\Colors\ARGB.cs" />
+    <Compile Include="Render\Colors\ColorUtil.cs" />
+    <Compile Include="Render\Colors\RGB.cs" />
+    <Compile Include="Render\Images\Image.cs" />
+    <Compile Include="Render\Images\Render.cs" />
+    <Compile Include="Util\ArrayFixer.cs" />
+    <Compile Include="Util\ByteHash.cs" />
+    <Compile Include="Util\Cast.cs" />
+    <Compile Include="Math\Complex.cs" />
+    <Compile Include="Math\FastMath.cs" />
+    <Compile Include="Util\Collection\LocklessLinkedList.cs" />
+    <Compile Include="Util\Collection\MultiValueDictionary.cs" />
+    <Compile Include="Util\Timer.cs" />
+    <Compile Include="Util\Hash.cs" />
+    <Compile Include="Util\RNG.cs" />
+    <Compile Include="Util\Interpolation.cs" />
+    <Compile Include="Math\Measure.cs" />
+    <Compile Include="Util\Pool\MobiusPool.cs" />
+    <Compile Include="Util\Pool\ObjectPool.cs" />
+    <Compile Include="Util\Operator.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Util\Pool\ReferencePool.cs" />
+    <Compile Include="Math\SqrtTable.cs" />
+    <Compile Include="Util\RuntimeCompiler.cs" />
+    <Compile Include="Util\Util.cs" />
+    <Compile Include="Vector\Matrix3.cs" />
+    <Compile Include="Vector\Matrix4.cs" />
+    <Compile Include="Vector\Point1D.cs" />
+    <Compile Include="Vector\Point2D.cs" />
+    <Compile Include="Vector\Point3D.cs" />
+    <Compile Include="Vector\Point4D.cs" />
+    <Compile Include="Vector\Quaternion.cs" />
+    <Compile Include="Vector\Rectangle.cs" />
+    <Compile Include="Vector\Vec1D.cs" />
+    <Compile Include="Vector\Vec2D.cs" />
+    <Compile Include="Vector\Vec3D.cs" />
+    <Compile Include="Vector\Vec4D.cs" />
+    <Compile Include="Vector\VectorUtil.cs" />
+    <Compile Include="Vector\Viewport.cs" />
+    <Compile Include="WinAPI\DeviceContext.cs" />
+    <Compile Include="WinAPI\DIBImage.cs" />
+    <Compile Include="WinAPI\DIBSection.cs" />
+    <Compile Include="WinAPI\FrameBuffer.cs" />
+    <Compile Include="WinAPI\FrameDoubleBuffer.cs" />
+    <Compile Include="WinAPI\FrameSingleBuffer.cs" />
+    <Compile Include="WinAPI\FrameTripleBuffer.cs" />
+    <Compile Include="WinAPI\MessageLoop.cs" />
+    <Compile Include="WinAPI\Window.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ProfilingSessions\Session20150201_174704.sdps" />
+    <Content Include="ProfilingSessions\Session20150201_184127.sdps" />
+    <Content Include="ProfilingSessions\Session20150208_200022.sdps" />
+    <Content Include="ProfilingSessions\Session20150213_212921.sdps" />
+    <Content Include="ProfilingSessions\Session20150214_140459.sdps" />
+    <Content Include="ProfilingSessions\Session20150221_174517.sdps" />
+    <Content Include="ProfilingSessions\Session20150222_181704.sdps" />
+    <Content Include="ProfilingSessions\Session20150222_182512.sdps" />
+    <Content Include="ProfilingSessions\Session20150222_183542.sdps" />
+    <Content Include="ProfilingSessions\Session20150224_094630.sdps" />
+    <Content Include="ProfilingSessions\Session20150513_192054.sdps" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Data" />
+    <Folder Include="Input" />
+    <Folder Include="Util\Collection" />
+    <Folder Include="WinAPI" />
+    <Folder Include="Vector" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
