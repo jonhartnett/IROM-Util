@@ -23,31 +23,28 @@
 		/// Gets the current frame to be displayed.
 		/// </summary>
 		/// <returns>The display frame.</returns>
-		public DIBImage GetDisplayFrame()
+		public override DIBImage GetDisplayFrame()
 		{
-			lock(this) return Screen;
+			return Screen;
 		}
 		
 		/// <summary>
 		/// Gets the current frame for rendering.
 		/// </summary>
 		/// <returns>The render frame.</returns>
-		public Image GetRenderFrame()
+		public override Image GetRenderFrame()
 		{
 			//always match buffer bounds to current window bounds
 			if(Buffer.Width != Width || Buffer.Height != Height)
 			{
 				Buffer.Resize(Width, Height);
 			}
-			lock(this) 
+			//always match screen bounds to current window bounds
+			if(Screen.Width != Width || Screen.Height != Height)
 			{
-				//always match screen bounds to current window bounds
-				if(Screen.Width != Width || Screen.Height != Height)
-				{
-					Screen.Resize(Width, Height);
-				}
-				Screen.Copy(Buffer);
+				Screen.Resize(Width, Height);
 			}
+			Screen.Copy(Buffer);
 			return Buffer;
 		}
 	}

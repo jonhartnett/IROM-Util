@@ -27,7 +27,7 @@
 		/// Gets the current frame to be displayed.
 		/// </summary>
 		/// <returns>The display frame.</returns>
-		public DIBImage GetDisplayFrame()
+		public override DIBImage GetDisplayFrame()
 		{
 			lock(this) Util.Swap(ref FrontBuffer, ref MiddleBuffer);
 			//always match screen bounds to current window bounds
@@ -43,7 +43,7 @@
 		/// Gets the current frame for rendering.
 		/// </summary>
 		/// <returns>The render frame.</returns>
-		public Image GetRenderFrame()
+		public override Image GetRenderFrame()
 		{
 			lock(this) Util.Swap(ref BackBuffer, ref MiddleBuffer);
 			//always match buffer bounds to current window bounds

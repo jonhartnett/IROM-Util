@@ -23,12 +23,12 @@
 		/// Gets the current frame to be displayed.
 		/// </summary>
 		/// <returns>The display frame.</returns>
-		public DIBImage GetDisplayFrame();
+		public abstract DIBImage GetDisplayFrame();
 		
 		/// <summary>
 		/// Gets the current frame for rendering.
 		/// </summary>
 		/// <returns>The render frame.</returns>
-		public Image GetRenderFrame();
+		public abstract Image GetRenderFrame();
 	}
 }

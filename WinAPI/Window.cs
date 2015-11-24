@@ -468,7 +468,7 @@
 			paras.Height = dimension.Height;
 			
 			//create buffer if null
-			Buffer = new FrameBuffer();
+			Buffer = (FrameBuffer)BufferType.GetConstructor(Type.EmptyTypes).Invoke(Type.EmptyTypes);
 			
 			//start message loop
 			MessageLoopObj = new MessageLoop();
