@@ -220,6 +220,8 @@
         /// <returns>The blended <see cref="ARGB"/>.</returns>
         public static ARGB operator &(ARGB dest, ARGB src)
         {
+        	if(src.A == 255) return src;
+        	if(src.A == 0) return dest;
         	double srcA = src.A / 255D;
         	return new ARGB((byte)(src.A + dest.A),
         					(byte)((src.R * srcA) + (dest.R * (1 - srcA))),

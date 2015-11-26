@@ -26,7 +26,7 @@
 		/// <param name="y">The y coord to blit to.</param>
 		public static void BlendBlit(this Image map, Image src, int x, int y)
 		{
-			dest.BlendBlit(src, new Point2D(x, y));
+			map.BlendBlit(src, new Point2D(x, y));
 		}
 		
 		/// <summary>
@@ -35,9 +35,9 @@
 		/// <param name="map">The <see cref="Image"/>.</param>
 		/// <param name="src">The source <see cref="Image"/>.</param>
 		/// <param name="position">The position to blit to.</param>
-		public static void BlendBlit(this Image map, Image src, Point2D position)
+		public unsafe static void BlendBlit(this Image map, Image src, Point2D position)
 		{
-			Rectangle clip = VectorUtil.Overlap((Rectangle)map.Size, ((Rectangle)src.Size) + position, dest.GetClip());
+			Rectangle clip = VectorUtil.Overlap((Rectangle)map.Size, ((Rectangle)src.Size) + position, map.GetClip());
 			if(clip.IsValid())
 			{
 				ARGB* destData = (ARGB*)map.BeginUnsafeOperation();
@@ -60,7 +60,75 @@
 					endIndex = destIndex + (destStride * clip.Width);
 					while(destIndex != endIndex)
 					{
-						*destIndex &= *srcIndex;
+						/*if((*srcIndex).A == 255)
+							*destIndex = *srcIndex;
+						else
+						if((*srcIndex).A != 0)*/
+							*destIndex &= *srcIndex;
+						destIndex += destStride;
+						srcIndex += srcStride;
+					}
+				}
+				map.EndUnsafeOperation();
+				src.EndUnsafeOperation();
+			}
+		}
+		
+		/// <summary>
+		/// Copies the given <see cref="Image"/> onto this <see cref="Image"/>, masking the src and dest.
+		/// </summary>
+		/// <param name="dest">The src <see cref="Image"/>.</param>
+		/// <param name="src">The dest <see cref="Image"/>.</param>
+		public static void MaskCopy(this Image dest, Image src)
+		{
+			dest.MaskBlit(src, 0, 0);
+		}
+		
+		/// <summary>
+		/// Blits the source <see cref="Image"/> to this <see cref="Image"/> in the given position, masking the pixels.
+		/// </summary>
+		/// <param name="map">The <see cref="Image"/>.</param>
+		/// <param name="src">The source <see cref="Image"/>.</param>
+		/// <param name="x">The x coord to blit to.</param>
+		/// <param name="y">The y coord to blit to.</param>
+		public static void MaskBlit(this Image map, Image src, int x, int y)
+		{
+			map.MaskBlit(src, new Point2D(x, y));
+		}
+		
+		/// <summary>
+		/// Blits the source <see cref="Image"/> to this <see cref="Image"/> in the given position, masking the pixels.
+		/// </summary>
+		/// <param name="map">The <see cref="Image"/>.</param>
+		/// <param name="src">The source <see cref="Image"/>.</param>
+		/// <param name="position">The position to blit to.</param>
+		public unsafe static void MaskBlit(this Image map, Image src, Point2D position)
+		{
+			Rectangle clip = VectorUtil.Overlap((Rectangle)map.Size, ((Rectangle)src.Size) + position, map.GetClip());
+			if(clip.IsValid())
+			{
+				ARGB* destData = (ARGB*)map.BeginUnsafeOperation();
+				ARGB* srcData = (ARGB*)src.BeginUnsafeOperation();
+				destData += map.GetRawDataOffset();
+				srcData += src.GetRawDataOffset();
+				int destStride = map.GetRawDataStride();
+				int srcStride = src.GetRawDataStride();
+				int destWidth = map.Width;
+				int srcWidth = src.Width;
+				
+				ARGB* destIndex;
+				ARGB* srcIndex;
+				ARGB* endIndex;
+				
+				for(int j = clip.Min.Y; j <= clip.Max.Y; j++)
+				{
+					destIndex = destData + ((clip.Min.X + (j * destWidth)) * destStride);
+					srcIndex = srcData + (((clip.Min.X - position.X) + ((j - position.Y) * srcWidth)) * srcStride);
+					endIndex = destIndex + (destStride * clip.Width);
+					while(destIndex != endIndex)
+					{
+						if((*srcIndex).A != 0)
+							*destIndex = *srcIndex;
 						destIndex += destStride;
 						srcIndex += srcStride;
 					}
