@@ -8,14 +8,14 @@
 	using System.Runtime.InteropServices;
 	
 	/// <summary>
-	/// A color image with <see cref="RGB"/> storage. Channel data is in bytes.
+	/// A color image with <see cref="ARGB"/> storage. Channel data is in bytes.
 	/// </summary>
-	public class Image : DataMap2D<RGB>
+	public class Image : DataMap2D<ARGB>
     {
 		/// <summary>
 		/// The internal data array.
 		/// </summary>
-        private RGB[,] Data;
+        private ARGB[,] Data;
         
         /// <summary>
         /// The <see cref="GCHandle"/> for fixing <see cref="Data"/>.
@@ -41,7 +41,7 @@
         	
         }
         
-        public new RGB this[int x, int y]
+        public new ARGB this[int x, int y]
         {
         	[MethodImpl(MethodImplOptions.AggressiveInlining)]
         	get
@@ -55,7 +55,7 @@
 			}
         }
         
-        public new RGB this[Point2D coords]
+        public new ARGB this[Point2D coords]
         {
         	[MethodImpl(MethodImplOptions.AggressiveInlining)]
         	get
@@ -73,7 +73,7 @@
         /// Returns the raw <see cref="RGB"/> data array.
         /// </summary>
         /// <returns>The data array.</returns>
-        public RGB[,] GetRawData()
+        public ARGB[,] GetRawData()
         {
             return Data;
         }
@@ -87,19 +87,19 @@
         	return new ImageChannelManager(this);
         }
         
-        protected override RGB BaseGet(int x, int y)
+        protected override ARGB BaseGet(int x, int y)
         {
         	return Data[y, x];
         }
         
-        protected override void BaseSet(int x, int y, RGB value)
+        protected override void BaseSet(int x, int y, ARGB value)
         {
         	Data[y, x] = value;
         }
         
         protected override void BaseResize(int width, int height)
         {
-            RGB[,] newData = new RGB[height, width];
+            ARGB[,] newData = new ARGB[height, width];
             if(Data != null)
             {
                 for (int y = 0; y < Data.GetLength(0) && y < newData.GetLength(0); y++)
@@ -216,7 +216,7 @@
             /// <summary>
             /// Strong types.
             /// </summary>
-            private static readonly string[] StrongTypes = {"RED", "GREEN", "BLUE"};
+            private static readonly string[] StrongTypes = {"ALPHA", "RED", "GREEN", "BLUE"};
             /// <summary>
             /// Weak types.
             /// </summary>
@@ -224,13 +224,14 @@
             /// <summary>
             /// All types.
             /// </summary>
-            private static readonly string[] AllTypes = {"RED", "GREEN", "BLUE", "GREY"};
+            private static readonly string[] AllTypes = {"ALPHA", "RED", "GREEN", "BLUE", "GREY"};
             /// <summary>
         	/// The parent <see cref="Image"/>.
         	/// </summary>
             private readonly Image Parent;
             
             //static channel instances
+            private readonly ImageAlphaChannel AlphaChannel;
             private readonly ImageRedChannel RedChannel;
             private readonly ImageGreenChannel GreenChannel;
             private readonly ImageBlueChannel BlueChannel;
@@ -239,6 +240,7 @@
             internal ImageChannelManager(Image img)
             {
                 Parent = img;
+                AlphaChannel = new ImageAlphaChannel(Parent);
                 RedChannel = new ImageRedChannel(Parent);
                 GreenChannel = new ImageGreenChannel(Parent);
                 BlueChannel = new ImageBlueChannel(Parent);
@@ -269,6 +271,7 @@
 			{
 				switch(type)
 				{
+					case "Alpha": return AlphaChannel;
 					case "RED": return RedChannel;
 					case "GREEN": return GreenChannel;
 					case "BLUE": return BlueChannel;
@@ -322,6 +325,45 @@
 	        {
 	        	return 4;
         	}
+        }
+        
+        /// <summary>
+        /// The Alpha channel for <see cref="Image"/>s.
+        /// </summary>
+        public class ImageAlphaChannel : ImageChannel
+        {
+            internal ImageAlphaChannel(Image img) : base(img)
+            {
+            }
+
+	    	public new byte this[int x, int y]
+	    	{
+	    		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	        	get
+				{
+	        		return Parent.Data[y, x].A;
+				}
+	        	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+				set
+				{
+					Parent.Data[y, x].A = value;
+				}
+	    	}
+	    	
+	    	protected override byte BaseGet(int x, int y)
+	        {
+	        	return this[x, y];
+	        }
+	        
+	        protected override void BaseSet(int x, int y, byte value)
+	        {
+	        	this[x, y] = value;
+	        }
+	        
+	        public override int GetRawDataOffset()
+	        {
+	        	return 2;
+	        }
         }
         
         /// <summary>

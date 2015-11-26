@@ -8,6 +8,69 @@
 	public static class Render
 	{
 		/// <summary>
+		/// Copies the given <see cref="Image"/> onto this <see cref="Image"/>, blending the src and dest.
+		/// </summary>
+		/// <param name="dest">The src <see cref="Image"/>.</param>
+		/// <param name="src">The dest <see cref="Image"/>.</param>
+		public static void BlendCopy(this Image dest, Image src)
+		{
+			dest.BlendBlit(src, 0, 0);
+		}
+		
+		/// <summary>
+		/// Blits the source <see cref="Image"/> to this <see cref="Image"/> in the given position, blending the pixels.
+		/// </summary>
+		/// <param name="map">The <see cref="Image"/>.</param>
+		/// <param name="src">The source <see cref="Image"/>.</param>
+		/// <param name="x">The x coord to blit to.</param>
+		/// <param name="y">The y coord to blit to.</param>
+		public static void BlendBlit(this Image map, Image src, int x, int y)
+		{
+			dest.BlendBlit(src, new Point2D(x, y));
+		}
+		
+		/// <summary>
+		/// Blits the source <see cref="Image"/> to this <see cref="Image"/> in the given position.
+		/// </summary>
+		/// <param name="map">The <see cref="Image"/>.</param>
+		/// <param name="src">The source <see cref="Image"/>.</param>
+		/// <param name="position">The position to blit to.</param>
+		public static void BlendBlit(this Image map, Image src, Point2D position)
+		{
+			Rectangle clip = VectorUtil.Overlap((Rectangle)map.Size, ((Rectangle)src.Size) + position, dest.GetClip());
+			if(clip.IsValid())
+			{
+				ARGB* destData = (ARGB*)map.BeginUnsafeOperation();
+				ARGB* srcData = (ARGB*)src.BeginUnsafeOperation();
+				destData += map.GetRawDataOffset();
+				srcData += src.GetRawDataOffset();
+				int destStride = map.GetRawDataStride();
+				int srcStride = src.GetRawDataStride();
+				int destWidth = map.Width;
+				int srcWidth = src.Width;
+				
+				ARGB* destIndex;
+				ARGB* srcIndex;
+				ARGB* endIndex;
+				
+				for(int j = clip.Min.Y; j <= clip.Max.Y; j++)
+				{
+					destIndex = destData + ((clip.Min.X + (j * destWidth)) * destStride);
+					srcIndex = srcData + (((clip.Min.X - position.X) + ((j - position.Y) * srcWidth)) * srcStride);
+					endIndex = destIndex + (destStride * clip.Width);
+					while(destIndex != endIndex)
+					{
+						*destIndex &= *srcIndex;
+						destIndex += destStride;
+						srcIndex += srcStride;
+					}
+				}
+				map.EndUnsafeOperation();
+				src.EndUnsafeOperation();
+			}
+		}
+		
+		/// <summary>
 		/// Fills a circle in this <see cref="Image"/> with the given value.
 		/// </summary>
 		/// <param name="image">The <see cref="Image"/>.</param>
@@ -15,7 +78,7 @@
 		/// <param name="r">The radius of the circle.</param>
 		/// <param name="value">The value.</param>
 		/// <param name="aa">True if the circle is anti-aliased.</param>
-		public static void FillCircle(this Image image, Point2D c, double r, RGB value, bool aa)
+		public static void FillCircle(this Image image, Point2D c, double r, ARGB value, bool aa)
 		{
 			image.FillEllipse(c, r, r, value, aa);
 		}
@@ -29,7 +92,7 @@
 		/// <param name="ry">The y radius of the ellipse.</param>
 		/// <param name="value">The value.</param>
 		/// <param name="aa">True if the ellipse is anti-aliased.</param>
-		public static void FillEllipse(this Image image, Point2D c, double rx, double ry, RGB value, bool aa)
+		public static void FillEllipse(this Image image, Point2D c, double rx, double ry, ARGB value, bool aa)
 		{
 			if(!aa)
 			{
@@ -107,7 +170,7 @@
 		/// <param name = "r">The radius.</param>
 		/// <param name="value">The value.</param>
 		/// <param name="aa">True if the rect is anti-aliased.</param>
-		public static void FillRoundedRectangle(this Image image, Rectangle rect, double r, RGB value, bool aa)
+		public static void FillRoundedRectangle(this Image image, Rectangle rect, double r, ARGB value, bool aa)
 		{
 			image.FillRoundedRectangle(rect, r, r, value, aa);
 		}
@@ -121,7 +184,7 @@
 		/// <param name = "ry">The y radius.</param>
 		/// <param name="value">The value.</param>
 		/// <param name="aa">True if the rect is anti-aliased.</param>
-		public static void FillRoundedRectangle(this Image image, Rectangle rect, double rx, double ry, RGB value, bool aa)
+		public static void FillRoundedRectangle(this Image image, Rectangle rect, double rx, double ry, ARGB value, bool aa)
 		{
 			if(!aa)
 			{
@@ -185,7 +248,7 @@
 			}
 		}
 		
-		private static void FillRightXScan(this Image image, int x1, double x2, int y, RGB value)
+		private static void FillRightXScan(this Image image, int x1, double x2, int y, ARGB value)
 		{
 			if(x1 <= x2)
 			{
@@ -194,11 +257,12 @@
 				{
 					image[x, y] = value;
 				}
-				image[ix2, y] &= new ARGB((byte)((1 - (ix2 - x2)) * 255), value);
+				value.A = (byte)(value.A * (1 - (ix2 - x2)));
+				image[ix2, y] &= value;
 			}
 		}
 		
-		private static void FillLeftXScan(this Image image, double x1, int x2, int y, RGB value)
+		private static void FillLeftXScan(this Image image, double x1, int x2, int y, ARGB value)
 		{
 			if(x1 <= x2)
 			{
@@ -207,11 +271,12 @@
 				{
 					image[x, y] = value;
 				}
-				image[ix1, y] &= new ARGB((byte)((1 - (x1 - ix1)) * 255), value);
+				value.A = (byte)(value.A * (1 - (x1 - ix1)));
+				image[ix1, y] &= value;
 			}
 		}
 		
-		private static void FillUpYScan(this Image image, int x, int y1, double y2, RGB value)
+		private static void FillUpYScan(this Image image, int x, int y1, double y2, ARGB value)
 		{
 			if(y1 <= y2)
 			{
@@ -220,11 +285,12 @@
 				{
 					image[x, y] = value;
 				}
-				image[x, iy2] &= new ARGB((byte)((1 - (iy2 - y2)) * 255), value);
+				value.A = (byte)(value.A * (1 - (iy2 - y2)));
+				image[x, iy2] &= value;
 			}
 		}
 		
-		private static void FillDownYScan(this Image image, int x, double y1, int y2, RGB value)
+		private static void FillDownYScan(this Image image, int x, double y1, int y2, ARGB value)
 		{
 			if(y1 <= y2)
 			{
@@ -233,7 +299,8 @@
 				{
 					image[x, y] = value;
 				}
-				image[x, iy1] &= new ARGB((byte)((1 - (y1 - iy1)) * 255), value);
+				value.A = (byte)(value.A * (1 - (y1 - iy1)));
+				image[x, iy1] &= value;
 			}
 		}
 	}

@@ -6,7 +6,7 @@
 	/// <summary>
 	/// An image with <see cref="DIBSection"/> storage that can be quickly blitted to the screen.
 	/// </summary>
-	public unsafe sealed class DIBImage : DataMap2D<RGB>
+	public unsafe sealed class DIBImage : DataMap2D<ARGB>
 	{
 		/// <summary>
 		/// The <see cref="DIBSection"/> for this <see cref="DIBImage"/>
@@ -20,7 +20,7 @@
 		/// <summary>
 		/// The pointer to the internal RGB data.
 		/// </summary>
-		public RGB* Data
+		public ARGB* Data
 		{
 			get;
 			private set;
@@ -44,12 +44,12 @@
             throw new NotImplementedException("Not implemented for purposes of performance. Channel operations should not be performed on DIBImages.");
         }
 		
-		protected override RGB BaseGet(int x, int y)
+		protected override ARGB BaseGet(int x, int y)
         {
         	throw new NotImplementedException("Not implemented for purposes of performance. Use this[int].");
         }
         
-        protected override void BaseSet(int x, int y, RGB value)
+        protected override void BaseSet(int x, int y, ARGB value)
         {
         	throw new NotImplementedException("Not implemented for purposes of performance. Use this[int].");
         }
@@ -57,7 +57,7 @@
         /// <summary>
         /// Unimplemented. Use this[int]
         /// </summary>
-		public new RGB this[int x, int y]
+		public new ARGB this[int x, int y]
         {
 			get
 			{
@@ -75,24 +75,24 @@
         /// </summary>
         /// <param name="index">The pixel index.</param>
         /// <returns>The pixel.</returns>
-		public RGB this[int index]
+		public ARGB this[int index]
         {
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				return *(RGB*)(Data + index);
+				return *(ARGB*)(Data + index);
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
-				*(RGB*)(Data + index) = value;
+				*(ARGB*)(Data + index) = value;
 			}
 		}
         
         protected override void BaseResize(int w, int h)
         {
         	Section = new DIBSection(w, h);
-        	Data = (RGB*)Section.Data;
+        	Data = (ARGB*)Section.Data;
         }
         
         public override bool UnsafeOperationsSupported()

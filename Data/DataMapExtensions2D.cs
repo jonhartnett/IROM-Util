@@ -8,11 +8,6 @@
 	/// </summary>
 	public static class DataMapExtensions2D
 	{
-		public enum FillMode
-		{
-			REPLACE, ADD, SUBTRACT
-		}
-		
 		/// <summary>
 		/// The infinite clipping rectangle.
 		/// </summary>

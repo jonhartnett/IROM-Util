@@ -213,6 +213,21 @@
         }
         
         /// <summary>
+        /// Blends the given <see cref="ARGB"/>s.
+        /// </summary>
+        /// <param name="dest">The background <see cref="ARGB"/>.</param>
+        /// <param name="src">The foreground <see cref="ARGB"/>.</param>
+        /// <returns>The blended <see cref="ARGB"/>.</returns>
+        public static ARGB operator &(ARGB dest, ARGB src)
+        {
+        	double srcA = src.A / 255D;
+        	return new ARGB((byte)(src.A + dest.A),
+        					(byte)((src.R * srcA) + (dest.R * (1 - srcA))),
+        	                (byte)((src.G * srcA) + (dest.G * (1 - srcA))), 
+        	                (byte)((src.B * srcA) + (dest.B * (1 - srcA))));
+        }
+        
+        /// <summary>
         /// True if the <see cref="ARGB"/>s are equal.
         /// </summary>
         /// <param name="color">The first <see cref="ARGB"/>.</param>
