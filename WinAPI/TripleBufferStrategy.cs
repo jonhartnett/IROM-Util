@@ -5,22 +5,22 @@
 	/// <summary>
 	/// A buffer strategy for a Frame.
 	/// </summary>
-	public class FrameTripleBuffer : FrameBuffer
+	public class TripleBufferStrategy : FrameBufferStrategy
 	{
 		private readonly DIBImage Screen;
-		private Image FrontBuffer;
-		private Image MiddleBuffer;
-		private Image BackBuffer;
+		private FrameBuffer FrontBuffer;
+		private FrameBuffer MiddleBuffer;
+		private FrameBuffer BackBuffer;
 		
 		/// <summary>
-		/// Creates a new <see cref="FrameTripleBuffer"/>.
+		/// Creates a new <see cref="TripleBufferStrategy"/>.
 		/// </summary>
-		public FrameTripleBuffer()
+		public TripleBufferStrategy()
 		{
 			Screen = new DIBImage(1, 1);
-			FrontBuffer = new Image(1, 1);
-			MiddleBuffer = new Image(1, 1);
-			BackBuffer = new Image(1, 1);
+			FrontBuffer = new FrameBuffer();
+			MiddleBuffer = new FrameBuffer();
+			BackBuffer = new FrameBuffer();
 		}
 		
 		/// <summary>
@@ -35,7 +35,7 @@
 			{
 				Screen.Resize(Width, Height);
 			}
-			Screen.Copy(FrontBuffer);
+			Screen.Copy(FrontBuffer.Image);
 			return Screen;
 		}
 		
@@ -43,14 +43,11 @@
 		/// Gets the current frame for rendering.
 		/// </summary>
 		/// <returns>The render frame.</returns>
-		public override Image GetRenderFrame()
+		public override FrameBuffer GetRenderFrame()
 		{
 			lock(this) Util.Swap(ref BackBuffer, ref MiddleBuffer);
 			//always match buffer bounds to current window bounds
-			if(BackBuffer.Width != Width || BackBuffer.Height != Height)
-			{
-				BackBuffer.Resize(Width, Height);
-			}
+			BackBuffer.Image.Resize(Width, Height);
 			return BackBuffer;
 		}
 	}

@@ -60,7 +60,7 @@
 		/// <summary>
 		/// The frame buffer instance.
 		/// </summary>
-		private FrameBuffer Buffer;
+		private FrameBufferStrategy Buffer;
 		
 		/// <summary>
 		/// True if this object has already been disposed.
@@ -352,7 +352,7 @@
 		/// </summary>
 		/// <param name="width">The width.</param>
 		/// <param name="height">The height.</param>
-		public Window(int width, int height) : this(width, height, typeof(FrameDoubleBuffer))
+		public Window(int width, int height) : this(width, height, typeof(DoubleBufferStrategy))
 		{
 			
 		}
@@ -367,7 +367,7 @@
 		{
 			Width = width;
 			Height = height;
-			if(!frameBufferType.IsSubclassOf(typeof(FrameBuffer)) || frameBufferType.GetConstructor(Type.EmptyTypes) == null)
+			if(!frameBufferType.IsSubclassOf(typeof(FrameBufferStrategy)) || frameBufferType.GetConstructor(Type.EmptyTypes) == null)
 			{
 				throw new Exception("[Window] Frame buffer type must be a subclass of FrameBuffer and have a default constructor");
 			}
@@ -441,7 +441,7 @@
 		/// Returns the <see cref="Image"/> to render to this frame.
 		/// </summary>
 		/// <returns>The render target.</returns>
-		public Image GetRenderBuffer()
+		public FrameBuffer GetRenderBuffer()
 		{
 			return Buffer != null ? Buffer.GetRenderFrame() : null;
 		}
@@ -468,7 +468,7 @@
 			paras.Height = dimension.Height;
 			
 			//create buffer if null
-			Buffer = (FrameBuffer)BufferType.GetConstructor(Type.EmptyTypes).Invoke(Type.EmptyTypes);
+			Buffer = (FrameBufferStrategy)BufferType.GetConstructor(Type.EmptyTypes).Invoke(Type.EmptyTypes);
 			
 			//start message loop
 			MessageLoopObj = new MessageLoop();

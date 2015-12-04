@@ -5,18 +5,18 @@
 	/// <summary>
 	/// A buffer strategy for a Frame.
 	/// </summary>
-	public class FrameSingleBuffer : FrameBuffer
+	public class SingleBufferStrategy : FrameBufferStrategy
 	{
 		private readonly DIBImage Screen;
-		private readonly Image Buffer;
+		private readonly FrameBuffer Buffer;
 		
 		/// <summary>
-		/// Creates a new <see cref="FrameTripleBuffer"/>.
+		/// Creates a new <see cref="SingleBufferStrategy"/>.
 		/// </summary>
-		public FrameSingleBuffer()
+		public SingleBufferStrategy()
 		{
 			Screen = new DIBImage(1, 1);
-			Buffer = new Image(1, 1);
+			Buffer = new FrameBuffer();
 		}
 		
 		/// <summary>
@@ -32,19 +32,13 @@
 		/// Gets the current frame for rendering.
 		/// </summary>
 		/// <returns>The render frame.</returns>
-		public override Image GetRenderFrame()
+		public override FrameBuffer GetRenderFrame()
 		{
 			//always match buffer bounds to current window bounds
-			if(Buffer.Width != Width || Buffer.Height != Height)
-			{
-				Buffer.Resize(Width, Height);
-			}
+			Buffer.Image.Resize(Width, Height);
 			//always match screen bounds to current window bounds
-			if(Screen.Width != Width || Screen.Height != Height)
-			{
-				Screen.Resize(Width, Height);
-			}
-			Screen.Copy(Buffer);
+			Screen.Resize(Width, Height);
+			Screen.Copy(Buffer.Image);
 			return Buffer;
 		}
 	}
