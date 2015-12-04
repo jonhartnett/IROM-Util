@@ -176,7 +176,10 @@
         /// <returns>The sum <see cref="ARGB"/>.</returns>
         public static ARGB operator +(ARGB color, ARGB color2)
         {
-        	return new ARGB(color.A, (byte)(color.R + color2.R), (byte)(color.G + color2.G), (byte)(color.B + color2.B));
+        	return new ARGB((byte)Math.Min(color.A + color2.A, 255), 
+        	                (byte)Math.Min(color.R + color2.R, 255), 
+        	                (byte)Math.Min(color.G + color2.G, 255), 
+        	                (byte)Math.Min(color.B + color2.B, 255));
         }
 
         /// <summary>
@@ -187,7 +190,10 @@
         /// <returns>The difference <see cref="ARGB"/>.</returns>
         public static ARGB operator -(ARGB color, ARGB color2)
         {
-        	return new ARGB(color.A, (byte)(color.R - color2.R), (byte)(color.G - color2.G), (byte)(color.B - color2.B));
+        	return new ARGB((byte)Math.Max(color.A - color2.A, 0), 
+        	                (byte)Math.Max(color.R - color2.R, 0),
+        	                (byte)Math.Max(color.G - color2.G, 0),
+        	                (byte)Math.Max(color.B - color2.B, 0));
         }
 
         /// <summary>
@@ -198,7 +204,24 @@
         /// <returns>The product <see cref="ARGB"/>.</returns>
         public static ARGB operator *(ARGB color, double val)
         {
-        	return new ARGB(color.A, (byte)(color.R * val), (byte)(color.G * val), (byte)(color.B * val));
+        	return new ARGB((byte)Util.Clip((int)(color.A * val), 0, 255), 
+        	                (byte)Util.Clip((int)(color.R * val), 0, 255), 
+        	                (byte)Util.Clip((int)(color.G * val), 0, 255), 
+        	                (byte)Util.Clip((int)(color.B * val), 0, 255));
+        }
+        
+        /// <summary>
+        /// Multiplies the given <see cref="ARGB"/> and <see cref="Vec4D"/>.
+        /// </summary>
+        /// <param name="color">The <see cref="ARGB"/>.</param>
+        /// <param name="vec">The <see cref="Vec4D"/>.</param>
+        /// <returns>The product <see cref="ARGB"/>.</returns>
+        public static ARGB operator *(ARGB color, Vec4D vec)
+        {
+        	return new ARGB((byte)Util.Clip((int)(color.A * vec.W), 0, 255),
+        				    (byte)Util.Clip((int)(color.R * vec.X), 0, 255),
+        	                (byte)Util.Clip((int)(color.G * vec.Y), 0, 255), 
+        	                (byte)Util.Clip((int)(color.B * vec.Z), 0, 255));
         }
 
         /// <summary>
@@ -209,7 +232,24 @@
         /// <returns>The quotient <see cref="ARGB"/>.</returns>
         public static ARGB operator /(ARGB color, double val)
         {
-            return new ARGB(color.A, (byte)(color.R / val), (byte)(color.G / val), (byte)(color.B / val));
+            return new ARGB((byte)Util.Clip((int)(color.A / val), 0, 255), 
+        	                (byte)Util.Clip((int)(color.R / val), 0, 255), 
+        	                (byte)Util.Clip((int)(color.G / val), 0, 255), 
+        	                (byte)Util.Clip((int)(color.B / val), 0, 255));
+        }
+        
+        /// <summary>
+        /// Divides the given <see cref="ARGB"/> and <see cref="Vec4D"/>.
+        /// </summary>
+        /// <param name="color">The <see cref="ARGB"/>.</param>
+        /// <param name="vec">The <see cref="Vec4D"/>.</param>
+        /// <returns>The quotient <see cref="ARGB"/>.</returns>
+        public static ARGB operator /(ARGB color, Vec4D vec)
+        {
+        	return new ARGB((byte)Util.Clip((int)(color.A / vec.W), 0, 255),
+        				    (byte)Util.Clip((int)(color.R / vec.X), 0, 255),
+        	                (byte)Util.Clip((int)(color.G / vec.Y), 0, 255), 
+        	                (byte)Util.Clip((int)(color.B / vec.Z), 0, 255));
         }
         
         /// <summary>

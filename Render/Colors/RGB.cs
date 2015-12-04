@@ -167,7 +167,9 @@
         /// <returns>The sum <see cref="RGB"/>.</returns>
         public static RGB operator +(RGB color, RGB color2)
         {
-        	return new RGB((byte)Math.Min(color.R + color2.R, 255), (byte)Math.Min(color.G + color2.G, 255), (byte)Math.Min(color.B + color2.B, 255));
+        	return new RGB((byte)Math.Min(color.R + color2.R, 255), 
+        	               (byte)Math.Min(color.G + color2.G, 255), 
+        	               (byte)Math.Min(color.B + color2.B, 255));
         }
 
         /// <summary>
@@ -178,7 +180,9 @@
         /// <returns>The difference <see cref="RGB"/>.</returns>
         public static RGB operator -(RGB color, RGB color2)
         {
-        	return new RGB((byte)Math.Max(color.R - color2.R, 0), (byte)Math.Max(color.G - color2.G, 0), (byte)Math.Max(color.B - color2.B, 0));
+        	return new RGB((byte)Math.Max(color.R - color2.R, 0), 
+        	               (byte)Math.Max(color.G - color2.G, 0), 
+        	               (byte)Math.Max(color.B - color2.B, 0));
         }
 
         /// <summary>
@@ -189,7 +193,9 @@
         /// <returns>The product <see cref="RGB"/>.</returns>
         public static RGB operator *(RGB color, double val)
         {
-        	return new RGB((byte)(color.R * val), (byte)(color.G * val), (byte)(color.B * val));
+        	return new RGB((byte)Util.Clip((int)(color.R * val), 0, 255), 
+        	               (byte)Util.Clip((int)(color.G * val), 0, 255), 
+        	               (byte)Util.Clip((int)(color.B * val), 0, 255));
         }
         
         /// <summary>
@@ -200,7 +206,9 @@
         /// <returns>The product <see cref="RGB"/>.</returns>
         public static RGB operator *(RGB color, Vec3D vec)
         {
-        	return new RGB((byte)(color.R * vec.X), (byte)(color.G * vec.Y), (byte)(color.B * vec.Z));
+        	return new RGB((byte)Util.Clip((int)(color.R * vec.X), 0, 255), 
+        	               (byte)Util.Clip((int)(color.G * vec.Y), 0, 255), 
+        	               (byte)Util.Clip((int)(color.B * vec.Z), 0, 255));
         }
 
         /// <summary>
@@ -211,7 +219,9 @@
         /// <returns>The quotient <see cref="RGB"/>.</returns>
         public static RGB operator /(RGB color, double val)
         {
-            return new RGB((byte)(color.R / val), (byte)(color.G / val), (byte)(color.B / val));
+            return new RGB((byte)Util.Clip((int)(color.R / val), 0, 255), 
+        	               (byte)Util.Clip((int)(color.G / val), 0, 255), 
+        	               (byte)Util.Clip((int)(color.B / val), 0, 255));
         }
         
         /// <summary>
@@ -222,7 +232,9 @@
         /// <returns>The quotient <see cref="RGB"/>.</returns>
         public static RGB operator /(RGB color, Vec3D vec)
         {
-        	return new RGB((byte)(color.R / vec.X), (byte)(color.G / vec.Y), (byte)(color.B / vec.Z));
+        	return new RGB((byte)Util.Clip((int)(color.R / vec.X), 0, 255), 
+        	               (byte)Util.Clip((int)(color.G / vec.Y), 0, 255), 
+        	               (byte)Util.Clip((int)(color.B / vec.Z), 0, 255));
         }
         
         /// <summary>
