@@ -41,36 +41,42 @@
 		/// <param name="parser">The parsing method.</param>
 		public static void SetParser<T>(Parser<T> parser)
 		{
-			parsers[typeof(T)] = new Parser<object>(parser);
+			parsers[typeof(T)] = ((string str, out object result) => 
+			{
+			    T typedResult;
+				bool worked = parser(str, out typedResult);
+				result = typedResult as object;
+				return worked;
+			});
 		}
 		
 		/// <summary>
 		/// Sets a serializer for configuration. If one is missing, uses ToString().
 		/// </summary>
 		/// <param name="serializer">The serializing method.</param>
-		public static void SetSerialize<T>(Serializer<T> serializer)
+		public static void SetSerializer<T>(Serializer<T> serializer)
 		{
-			serializers[typeof(T)] = new Serializer<object>(serializer);
+			serializers[typeof(T)] = (value => serializer((T)value));
 		}
 		
 		static AutoConfig()
 		{
 			//set default parsers
-			SetParser(bool.TryParse);
-			SetParser(byte.TryParse);
-			SetParser(sbyte.TryParse);
-			SetParser(ushort.TryParse);
-			SetParser(short.TryParse);
-			SetParser(uint.TryParse);
-			SetParser(int.TryParse);
-			SetParser(ulong.TryParse);
-			SetParser(long.TryParse);
-			SetParser(float.TryParse);
-			SetParser(double.TryParse);
-			SetParser(decimal.TryParse);
-			SetParser(DateTime.TryParse);
-			SetParser(char.TryParse);
-			SetParser((string v, out string r) => 
+			SetParser<bool>(bool.TryParse);
+			SetParser<byte>(byte.TryParse);
+			SetParser<sbyte>(sbyte.TryParse);
+			SetParser<ushort>(ushort.TryParse);
+			SetParser<short>(short.TryParse);
+			SetParser<uint>(uint.TryParse);
+			SetParser<int>(int.TryParse);
+			SetParser<ulong>(ulong.TryParse);
+			SetParser<long>(long.TryParse);
+			SetParser<float>(float.TryParse);
+			SetParser<double>(double.TryParse);
+			SetParser<decimal>(decimal.TryParse);
+			SetParser<DateTime>(DateTime.TryParse);
+			SetParser<char>(char.TryParse);
+			SetParser<string>((string v, out string r) => 
 	        {
 	          	r = v;
 	          	return true;
@@ -132,7 +138,7 @@
 						
 						IConfig config;
 						//if exists and right scope (static or instance) and right file
-						if(fields.TryGetValue(parts[0], out config) && ((instance == null) == config.IsStatic) && (fileID == config.GetFileID()))
+						if(fields.TryGetValue(parts[0], out config) && ((instance == null) == config.IsStatic()) && (fileID == config.GetFileID()))
 						{
 							Parser<object> parser;
 							if(parsers.TryGetValue(config.GetFieldType(), out parser))
@@ -150,7 +156,7 @@
 					}
 				}
 			}
-			if(!isReadonly) Save(type, instance, path);
+			if(!isReadonly) Save(type, instance, path, fileID);
 		}
 		
 		public static void Save(Type type, object instance, string path, uint fileID)
@@ -162,7 +168,7 @@
 				foreach(var field in fields)
 				{
 					//if right scope (static or instance) and right file
-					if((instance == null) == field.Value.IsStatic && (fileID == field.Value.GetFileID()))
+					if((instance == null) == field.Value.IsStatic() && (fileID == field.Value.GetFileID()))
 					{
 						Serializer<object> serializer;
 						serializers.TryGetValue(field.Value.GetFieldType(), out serializer);
