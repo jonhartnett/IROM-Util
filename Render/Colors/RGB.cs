@@ -272,5 +272,25 @@
         {
         	return !(color == color2);
         }
+        
+        static RGB()
+		{
+			AutoConfig.SetParser<RGB>(TryParse);
+		}
+        
+        public static bool TryParse(string str, out RGB result)
+        {
+        	result = default(RGB);
+        	str = str.Trim();
+        	if(str.Length < "(0,0,0)".Length || str[0] != '(' || str[str.Length - 1] != ')') return false;
+        	//remove ( and )
+        	str = str.Substring(1, str.Length - 2);
+        	string[] parts = str.Split(',');
+        	if(parts.Length != 3) return false;
+        	if(!byte.TryParse(parts[0], out result.R) || 
+        	   !byte.TryParse(parts[1], out result.G) || 
+        	   !byte.TryParse(parts[2], out result.B)) return false;
+        	return true;
+        }
     }
 }

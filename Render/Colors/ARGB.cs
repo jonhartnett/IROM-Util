@@ -290,5 +290,26 @@
         {
         	return !(color == color2);
         }
+        
+        static ARGB()
+		{
+			AutoConfig.SetParser<ARGB>(TryParse);
+		}
+        
+        public static bool TryParse(string str, out ARGB result)
+        {
+        	result = default(ARGB);
+        	str = str.Trim();
+        	if(str.Length < "(0,0,0,0)".Length || str[0] != '(' || str[str.Length - 1] != ')') return false;
+        	//remove ( and )
+        	str = str.Substring(1, str.Length - 2);
+        	string[] parts = str.Split(',');
+        	if(parts.Length != 4) return false;
+        	if(!byte.TryParse(parts[0], out result.A) || 
+        	   !byte.TryParse(parts[1], out result.R) || 
+        	   !byte.TryParse(parts[2], out result.G) || 
+        	   !byte.TryParse(parts[3], out result.B)) return false;
+        	return true;
+        }
     }
 }
