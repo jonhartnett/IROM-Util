@@ -82,50 +82,6 @@
         }
         
         /// <summary>
-        /// Component-wise clips this <see cref="Point2D"/> to between min and max.
-        /// </summary>
-        /// <param name="min">The min point.</param>
-        /// <param name="max">The max point.</param>
-        /// <returns>The component-wise clipped point.</returns>
-        public Point2D Clip(Point2D min, Point2D max)
-        {
-        	Point2D point;
-        	
-        	if(X <= min.X) point.X = min.X;
-        	else if(X >= max.X) point.X = max.X;
-        	else point.X = X;
-        	
-        	if(Y <= min.Y) point.Y = min.Y;
-        	else if(Y >= max.Y) point.Y = max.Y;
-        	else point.Y = Y;
-        	
-        	return point;
-        }
-        
-        /// <summary>
-        /// Component-wise wraps this <see cref="Point2D"/> to between min (inclusive) and max (exclusive).
-        /// </summary>
-        /// <param name="min">The min point.</param>
-        /// <param name="max">The max point.</param>
-        /// <returns>The component-wise wrapped point.</returns>
-        public Point2D Wrap(Point2D min, Point2D max)
-        {
-        	Point2D point = this;
-        	
-        	point.X -= min.X;
-			point.X %= max.X - min.X;
-        	if(point.X < 0) point.X += max.X;
-        	else point.X += min.X;
-        	
-        	point.Y -= min.Y;
-			point.Y %= max.Y - min.Y;
-        	if(point.Y < 0) point.Y += max.Y;
-        	else point.Y += min.Y;
-        	
-        	return point;
-        }
-        
-        /// <summary>
         /// Implicit cast to <see cref="Vec2D"/>.
         /// </summary>
         /// <param name="point">The point to cast.</param>

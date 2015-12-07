@@ -70,37 +70,6 @@
         	// disable NonReadonlyReferencedInGetHashCode
         	return (int)Hash.PerformStaticHash((uint)X.GetHashCode());
         }
-        
-        /// <summary>
-        /// Component-wise clips this <see cref="Point1D"/> to between min and max.
-        /// </summary>
-        /// <param name="min">The min point.</param>
-        /// <param name="max">The max point.</param>
-        /// <returns>The component-wise clipped point.</returns>
-        public Point1D Clip(Point1D min, Point1D max)
-        {
-        	Point1D point;
-        	if(X <= min.X) point.X = min.X;
-        	else if(X >= max.X) point.X = max.X;
-        	else point.X = X;
-        	return point;
-        }
-        
-        /// <summary>
-        /// Component-wise wraps this <see cref="Point1D"/> to between min (inclusive) and max (exclusive).
-        /// </summary>
-        /// <param name="min">The min point.</param>
-        /// <param name="max">The max point.</param>
-        /// <returns>The component-wise wrapped point.</returns>
-        public Point1D Wrap(Point1D min, Point1D max)
-        {
-        	Point1D point = this;
-        	point.X -= min.X;
-			point.X %= max.X - min.X;
-        	if(point.X< 0) point.X += max.X;
-        	else point.X += min.X;
-        	return point;
-        }
 
         /// <summary>
         /// Implicit cast to the data type.

@@ -7,6 +7,358 @@
 	/// </summary>
 	public static class VectorUtil
 	{
+		/// <summary>
+        /// Component-wise clips the given <see cref="Vec1D"/> to between min and max.
+        /// </summary>
+        /// <param name="value">The resulting value.</param>
+        /// <param name="min">The min vec.</param>
+        /// <param name="max">The max vec.</param>
+        /// <returns>The component-wise clipped vec.</returns>
+        public static Vec1D Clip(Vec1D value, Vec1D min, Vec1D max)
+        {
+        	Vec1D vec = value;
+        	if(value.X <= min.X) vec.X = min.X;
+        	else if(value.X >= max.X) vec.X = max.X;
+        	return vec;
+        }
+        
+        /// <summary>
+        /// Component-wise clips the given <see cref="Vec2D"/> to between min and max.
+        /// </summary>
+        /// <param name="value">The resulting value.</param>
+        /// <param name="min">The min vec.</param>
+        /// <param name="max">The max vec.</param>
+        /// <returns>The component-wise clipped vec.</returns>
+        public static Vec2D Clip(Vec2D value, Vec2D min, Vec2D max)
+        {
+        	Vec2D vec = value;
+        	if(value.X <= min.X) vec.X = min.X;
+        	else if(value.X >= max.X) vec.X = max.X;
+        	
+        	if(value.Y <= min.Y) vec.Y = min.Y;
+        	else if(value.Y >= max.Y) vec.Y = max.Y;
+        	return vec;
+        }
+        
+        /// <summary>
+        /// Component-wise clips the given <see cref="Vec3D"/> to between min and max.
+        /// </summary>
+        /// <param name="value">The resulting value.</param>
+        /// <param name="min">The min vec.</param>
+        /// <param name="max">The max vec.</param>
+        /// <returns>The component-wise clipped vec.</returns>
+        public static Vec3D Clip(Vec3D value, Vec3D min, Vec3D max)
+        {
+        	Vec3D vec = value;
+        	if(value.X <= min.X) vec.X = min.X;
+        	else if(value.X >= max.X) vec.X = max.X;
+        	
+        	if(value.Y <= min.Y) vec.Y = min.Y;
+        	else if(value.Y >= max.Y) vec.Y = max.Y;
+        	
+        	if(value.Z <= min.Z) vec.Z = min.Z;
+        	else if(value.Z >= max.Z) vec.Z = max.Z;
+        	return vec;
+        }
+        
+        /// <summary>
+        /// Component-wise clips the given <see cref="Vec4D"/> to between min and max.
+        /// </summary>
+        /// <param name="value">The resulting value.</param>
+        /// <param name="min">The min vec.</param>
+        /// <param name="max">The max vec.</param>
+        /// <returns>The component-wise clipped vec.</returns>
+        public static Vec4D Clip(Vec4D value, Vec4D min, Vec4D max)
+        {
+        	Vec4D vec = value;
+        	if(value.X <= min.X) vec.X = min.X;
+        	else if(value.X >= max.X) vec.X = max.X;
+        	
+        	if(value.Y <= min.Y) vec.Y = min.Y;
+        	else if(value.Y >= max.Y) vec.Y = max.Y;
+        	
+        	if(value.Z <= min.Z) vec.Z = min.Z;
+        	else if(value.Z >= max.Z) vec.Z = max.Z;
+        	
+        	if(value.W <= min.W) vec.W = min.W;
+        	else if(value.W >= max.W) vec.W = max.W;
+        	return vec;
+        }
+        
+        /// <summary>
+        /// Component-wise wraps the given <see cref="Vec1D"/> to between min (inclusive) and max (exclusive).
+        /// </summary>
+        /// <param name="value">The resulting value.</param>
+        /// <param name="min">The min vec.</param>
+        /// <param name="max">The max vec.</param>
+        /// <returns>The component-wise wrapped vec.</returns>
+        public static Vec1D Wrap(Vec1D value, Vec1D min, Vec1D max)
+        {
+        	Vec1D vec = value;
+        	vec.X -= min.X;
+			vec.X %= max.X - min.X;
+        	if(vec.X< 0) vec.X += max.X - min.X;
+        	vec.X += min.X;
+        	return vec;
+        }
+        
+        /// <summary>
+        /// Component-wise wraps the given <see cref="Vec2D"/> to between min (inclusive) and max (exclusive).
+        /// </summary>
+        /// <param name="value">The resulting value.</param>
+        /// <param name="min">The min vec.</param>
+        /// <param name="max">The max vec.</param>
+        /// <returns>The component-wise wrapped vec.</returns>
+        public static Vec2D Wrap(Vec2D value, Vec2D min, Vec2D max)
+        {
+        	Vec2D vec = value;
+        	vec.X -= min.X;
+			vec.X %= max.X - min.X;
+        	if(vec.X< 0) vec.X += max.X - min.X;
+        	vec.X += min.X;
+        	
+        	vec.Y -= min.Y;
+			vec.Y %= max.Y - min.Y;
+        	if(vec.Y< 0) vec.Y += max.Y - min.Y;
+        	vec.Y += min.Y;
+        	return vec;
+        }
+		
+        /// <summary>
+        /// Component-wise wraps the given <see cref="Vec3D"/> to between min (inclusive) and max (exclusive).
+        /// </summary>
+        /// <param name="value">The resulting value.</param>
+        /// <param name="min">The min vec.</param>
+        /// <param name="max">The max vec.</param>
+        /// <returns>The component-wise wrapped vec.</returns>
+        public static Vec3D Wrap(Vec3D value, Vec3D min, Vec3D max)
+        {
+        	Vec3D vec = value;
+        	vec.X -= min.X;
+			vec.X %= max.X - min.X;
+        	if(vec.X< 0) vec.X += max.X - min.X;
+        	vec.X += min.X;
+        	
+        	vec.Y -= min.Y;
+			vec.Y %= max.Y - min.Y;
+        	if(vec.Y< 0) vec.Y += max.Y - min.Y;
+        	vec.Y += min.Y;
+        	
+        	vec.Z -= min.Z;
+			vec.Z %= max.Z - min.Z;
+        	if(vec.Z< 0) vec.Z += max.Z - min.Z;
+        	vec.Z += min.Z;
+        	return vec;
+        }
+        
+        /// <summary>
+        /// Component-wise wraps the given <see cref="Vec4D"/> to between min (inclusive) and max (exclusive).
+        /// </summary>
+        /// <param name="value">The resulting value.</param>
+        /// <param name="min">The min vec.</param>
+        /// <param name="max">The max vec.</param>
+        /// <returns>The component-wise wrapped vec.</returns>
+        public static Vec4D Wrap(Vec4D value, Vec4D min, Vec4D max)
+        {
+        	Vec4D vec = value;
+        	vec.X -= min.X;
+			vec.X %= max.X - min.X;
+        	if(vec.X< 0) vec.X += max.X - min.X;
+        	vec.X += min.X;
+        	
+        	vec.Y -= min.Y;
+			vec.Y %= max.Y - min.Y;
+        	if(vec.Y< 0) vec.Y += max.Y - min.Y;
+        	vec.Y += min.Y;
+        	
+        	vec.Z -= min.Z;
+			vec.Z %= max.Z - min.Z;
+        	if(vec.Z< 0) vec.Z += max.Z - min.Z;
+        	vec.Z += min.Z;
+        	
+        	vec.W -= min.W;
+			vec.W %= max.W - min.W;
+        	if(vec.W< 0) vec.W += max.W - min.W;
+        	vec.W += min.W;
+        	return vec;
+        }
+        
+        /// <summary>
+        /// Component-wise clips the given <see cref="Point1D"/> to between min and max.
+        /// </summary>
+        /// <param name="value">The resulting value.</param>
+        /// <param name="min">The min vec.</param>
+        /// <param name="max">The max vec.</param>
+        /// <returns>The component-wise clipped vec.</returns>
+        public static Point1D Clip(Point1D value, Point1D min, Point1D max)
+        {
+        	Point1D vec = value;
+        	if(value.X <= min.X) vec.X = min.X;
+        	else if(value.X >= max.X) vec.X = max.X;
+        	return vec;
+        }
+        
+        /// <summary>
+        /// Component-wise clips the given <see cref="Point2D"/> to between min and max.
+        /// </summary>
+        /// <param name="value">The resulting value.</param>
+        /// <param name="min">The min vec.</param>
+        /// <param name="max">The max vec.</param>
+        /// <returns>The component-wise clipped vec.</returns>
+        public static Point2D Clip(Point2D value, Point2D min, Point2D max)
+        {
+        	Point2D vec = value;
+        	if(value.X <= min.X) vec.X = min.X;
+        	else if(value.X >= max.X) vec.X = max.X;
+        	
+        	if(value.Y <= min.Y) vec.Y = min.Y;
+        	else if(value.Y >= max.Y) vec.Y = max.Y;
+        	return vec;
+        }
+        
+        /// <summary>
+        /// Component-wise clips the given <see cref="Point3D"/> to between min and max.
+        /// </summary>
+        /// <param name="value">The resulting value.</param>
+        /// <param name="min">The min vec.</param>
+        /// <param name="max">The max vec.</param>
+        /// <returns>The component-wise clipped vec.</returns>
+        public static Point3D Clip(Point3D value, Point3D min, Point3D max)
+        {
+        	Point3D vec = value;
+        	if(value.X <= min.X) vec.X = min.X;
+        	else if(value.X >= max.X) vec.X = max.X;
+        	
+        	if(value.Y <= min.Y) vec.Y = min.Y;
+        	else if(value.Y >= max.Y) vec.Y = max.Y;
+        	
+        	if(value.Z <= min.Z) vec.Z = min.Z;
+        	else if(value.Z >= max.Z) vec.Z = max.Z;
+        	return vec;
+        }
+        
+        /// <summary>
+        /// Component-wise clips the given <see cref="Point4D"/> to between min and max.
+        /// </summary>
+        /// <param name="value">The resulting value.</param>
+        /// <param name="min">The min vec.</param>
+        /// <param name="max">The max vec.</param>
+        /// <returns>The component-wise clipped vec.</returns>
+        public static Point4D Clip(Point4D value, Point4D min, Point4D max)
+        {
+        	Point4D vec = value;
+        	if(value.X <= min.X) vec.X = min.X;
+        	else if(value.X >= max.X) vec.X = max.X;
+        	
+        	if(value.Y <= min.Y) vec.Y = min.Y;
+        	else if(value.Y >= max.Y) vec.Y = max.Y;
+        	
+        	if(value.Z <= min.Z) vec.Z = min.Z;
+        	else if(value.Z >= max.Z) vec.Z = max.Z;
+        	
+        	if(value.W <= min.W) vec.W = min.W;
+        	else if(value.W >= max.W) vec.W = max.W;
+        	return vec;
+        }
+        
+        /// <summary>
+        /// Component-wise wraps the given <see cref="Point1D"/> to between min (inclusive) and max (exclusive).
+        /// </summary>
+        /// <param name="value">The resulting value.</param>
+        /// <param name="min">The min vec.</param>
+        /// <param name="max">The max vec.</param>
+        /// <returns>The component-wise wrapped vec.</returns>
+        public static Point1D Wrap(Point1D value, Point1D min, Point1D max)
+        {
+        	Point1D vec = value;
+        	vec.X -= min.X;
+			vec.X %= max.X - min.X;
+        	if(vec.X< 0) vec.X += max.X - min.X;
+        	vec.X += min.X;
+        	return vec;
+        }
+        
+        /// <summary>
+        /// Component-wise wraps the given <see cref="Point2D"/> to between min (inclusive) and max (exclusive).
+        /// </summary>
+        /// <param name="value">The resulting value.</param>
+        /// <param name="min">The min vec.</param>
+        /// <param name="max">The max vec.</param>
+        /// <returns>The component-wise wrapped vec.</returns>
+        public static Point2D Wrap(Point2D value, Point2D min, Point2D max)
+        {
+        	Point2D vec = value;
+        	vec.X -= min.X;
+			vec.X %= max.X - min.X;
+        	if(vec.X< 0) vec.X += max.X - min.X;
+        	vec.X += min.X;
+        	
+        	vec.Y -= min.Y;
+			vec.Y %= max.Y - min.Y;
+        	if(vec.Y< 0) vec.Y += max.Y - min.Y;
+        	vec.Y += min.Y;
+        	return vec;
+        }
+		
+        /// <summary>
+        /// Component-wise wraps the given <see cref="Point3D"/> to between min (inclusive) and max (exclusive).
+        /// </summary>
+        /// <param name="value">The resulting value.</param>
+        /// <param name="min">The min vec.</param>
+        /// <param name="max">The max vec.</param>
+        /// <returns>The component-wise wrapped vec.</returns>
+        public static Point3D Wrap(Point3D value, Point3D min, Point3D max)
+        {
+        	Point3D vec = value;
+        	vec.X -= min.X;
+			vec.X %= max.X - min.X;
+        	if(vec.X< 0) vec.X += max.X - min.X;
+        	vec.X += min.X;
+        	
+        	vec.Y -= min.Y;
+			vec.Y %= max.Y - min.Y;
+        	if(vec.Y< 0) vec.Y += max.Y - min.Y;
+        	vec.Y += min.Y;
+        	
+        	vec.Z -= min.Z;
+			vec.Z %= max.Z - min.Z;
+        	if(vec.Z< 0) vec.Z += max.Z - min.Z;
+        	vec.Z += min.Z;
+        	return vec;
+        }
+        
+        /// <summary>
+        /// Component-wise wraps the given <see cref="Point4D"/> to between min (inclusive) and max (exclusive).
+        /// </summary>
+        /// <param name="value">The resulting value.</param>
+        /// <param name="min">The min vec.</param>
+        /// <param name="max">The max vec.</param>
+        /// <returns>The component-wise wrapped vec.</returns>
+        public static Point4D Wrap(Point4D value, Point4D min, Point4D max)
+        {
+        	Point4D vec = value;
+        	vec.X -= min.X;
+			vec.X %= max.X - min.X;
+        	if(vec.X< 0) vec.X += max.X - min.X;
+        	vec.X += min.X;
+        	
+        	vec.Y -= min.Y;
+			vec.Y %= max.Y - min.Y;
+        	if(vec.Y< 0) vec.Y += max.Y - min.Y;
+        	vec.Y += min.Y;
+        	
+        	vec.Z -= min.Z;
+			vec.Z %= max.Z - min.Z;
+        	if(vec.Z< 0) vec.Z += max.Z - min.Z;
+        	vec.Z += min.Z;
+        	
+        	vec.W -= min.W;
+			vec.W %= max.W - min.W;
+        	if(vec.W< 0) vec.W += max.W - min.W;
+        	vec.W += min.W;
+        	return vec;
+        }
+        
         /// <summary>
         /// Returns the component-wise max of the given vectors.
         /// </summary>

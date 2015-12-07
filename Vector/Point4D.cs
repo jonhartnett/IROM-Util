@@ -100,68 +100,6 @@
         }
         
         /// <summary>
-        /// Component-wise clips this <see cref="Point4D"/> to between min and max.
-        /// </summary>
-        /// <param name="min">The min point.</param>
-        /// <param name="max">The max point.</param>
-        /// <returns>The component-wise clipped point.</returns>
-        public Point4D Clip(Point4D min, Point4D max)
-        {
-        	Point4D point;
-        	
-        	if(X <= min.X) point.X = min.X;
-        	else if(X >= max.X) point.X = max.X;
-        	else point.X = X;
-        	
-        	if(Y <= min.Y) point.Y = min.Y;
-        	else if(Y >= max.Y) point.Y = max.Y;
-        	else point.Y = Y;
-        	
-        	if(Z <= min.Z) point.Z = min.Z;
-        	else if(Z >= max.Z) point.Z = max.Z;
-        	else point.Z = Z;
-        	
-        	if(W <= min.W) point.W = min.W;
-        	else if(W >= max.W) point.W = max.W;
-        	else point.W = W;
-        	
-        	return point;
-        }
-        
-        /// <summary>
-        /// Component-wise wraps this <see cref="Point4D"/> to between min (inclusive) and max (exclusive).
-        /// </summary>
-        /// <param name="min">The min point.</param>
-        /// <param name="max">The max point.</param>
-        /// <returns>The component-wise wrapped point.</returns>
-        public Point4D Wrap(Point4D min, Point4D max)
-        {
-        	Point4D point = this;
-        	
-        	point.X -= min.X;
-			point.X %= max.X - min.X;
-        	if(point.X < 0) point.X += max.X - min.X;
-        	point.X += min.X;
-        	
-        	point.Y -= min.Y;
-			point.Y %= max.Y - min.Y;
-        	if(point.Y < 0) point.Y += max.Y - min.Y;
-        	point.Y += min.Y;
-        	
-        	point.Z -= min.Z;
-			point.Z %= max.Z - min.Z;
-        	if(point.Z < 0) point.Z += max.Z - min.Z;
-        	point.Z += min.Z;
-        	
-        	point.W -= min.W;
-			point.W %= max.W - min.W;
-        	if(point.W < 0) point.W += max.W - min.W;
-        	point.W += min.W;
-        	
-        	return point;
-        }
-        
-        /// <summary>
         /// Implicit cast to <see cref="Vec4D"/>.
         /// </summary>
         /// <param name="point">The point to cast.</param>

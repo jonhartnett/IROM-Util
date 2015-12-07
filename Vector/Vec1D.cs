@@ -70,37 +70,6 @@
         	// disable NonReadonlyReferencedInGetHashCode
         	return (int)Hash.PerformStaticHash((uint)X.GetHashCode());
         }
-        
-        /// <summary>
-        /// Component-wise clips this <see cref="Vec1D"/> to between min and max.
-        /// </summary>
-        /// <param name="min">The min vec.</param>
-        /// <param name="max">The max vec.</param>
-        /// <returns>The component-wise clipped vec.</returns>
-        public Vec1D Clip(Vec1D min, Vec1D max)
-        {
-        	Vec1D vec;
-        	if(X <= min.X) vec.X = min.X;
-        	else if(X >= max.X) vec.X = max.X;
-        	else vec.X = X;
-        	return vec;
-        }
-        
-        /// <summary>
-        /// Component-wise wraps this <see cref="Vec1D"/> to between min (inclusive) and max (exclusive).
-        /// </summary>
-        /// <param name="min">The min vec.</param>
-        /// <param name="max">The max vec.</param>
-        /// <returns>The component-wise wrapped vec.</returns>
-        public Vec1D Wrap(Vec1D min, Vec1D max)
-        {
-        	Vec1D vec = this;
-        	vec.X -= min.X;
-			vec.X %= max.X - min.X;
-        	if(vec.X< 0) vec.X += max.X - min.X;
-        	vec.X += min.X;
-        	return vec;
-        }
 
         /// <summary>
         /// Implicit cast to the data type.

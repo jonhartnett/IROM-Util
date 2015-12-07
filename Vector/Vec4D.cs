@@ -100,68 +100,6 @@
         }
         
         /// <summary>
-        /// Component-wise clips this <see cref="Vec4D"/> to between min and max.
-        /// </summary>
-        /// <param name="min">The min vec.</param>
-        /// <param name="max">The max vec.</param>
-        /// <returns>The component-wise clipped vec.</returns>
-        public Vec4D Clip(Vec4D min, Vec4D max)
-        {
-        	Vec4D vec;
-        	
-        	if(X <= min.X) vec.X = min.X;
-        	else if(X >= max.X) vec.X = max.X;
-        	else vec.X = X;
-        	
-        	if(Y <= min.Y) vec.Y = min.Y;
-        	else if(Y >= max.Y) vec.Y = max.Y;
-        	else vec.Y = Y;
-        	
-        	if(Z <= min.Z) vec.Z = min.Z;
-        	else if(Z >= max.Z) vec.Z = max.Z;
-        	else vec.Z = Z;
-        	
-        	if(W <= min.W) vec.W = min.W;
-        	else if(W >= max.W) vec.W = max.W;
-        	else vec.W = W;
-        	
-        	return vec;
-        }
-        
-        /// <summary>
-        /// Component-wise wraps this <see cref="Vec4D"/> to between min (inclusive) and max (exclusive).
-        /// </summary>
-        /// <param name="min">The min vec.</param>
-        /// <param name="max">The max vec.</param>
-        /// <returns>The component-wise wrapped vec.</returns>
-        public Vec4D Wrap(Vec4D min, Vec4D max)
-        {
-        	Vec4D vec = this;
-        	
-        	vec.X -= min.X;
-			vec.X %= max.X - min.X;
-        	if(vec.X < 0) vec.X += max.X - min.X;
-        	vec.X += min.X;
-        	
-        	vec.Y -= min.Y;
-			vec.Y %= max.Y - min.Y;
-        	if(vec.Y < 0) vec.Y += max.Y - min.Y;
-        	vec.Y += min.Y;
-        	
-        	vec.Z -= min.Z;
-			vec.Z %= max.Z - min.Z;
-        	if(vec.Z < 0) vec.Z += max.Z - min.Z;
-        	vec.Z += min.Z;
-        	
-        	vec.W -= min.W;
-			vec.W %= max.W - min.W;
-        	if(vec.W < 0) vec.W += max.W - min.W;
-        	vec.W += min.W;
-        	
-        	return vec;
-        }
-        
-        /// <summary>
         /// Returns the squared length of this <see cref="Vec4D"/>.
         /// </summary>
         /// <returns>The squared length.</returns>

@@ -91,59 +91,6 @@
         }
         
         /// <summary>
-        /// Component-wise clips this <see cref="Vec3D"/> to between min and max.
-        /// </summary>
-        /// <param name="min">The min vec.</param>
-        /// <param name="max">The max vec.</param>
-        /// <returns>The component-wise clipped vec.</returns>
-        public Vec3D Clip(Vec3D min, Vec3D max)
-        {
-        	Vec3D vec;
-        	
-        	if(X <= min.X) vec.X = min.X;
-        	else if(X >= max.X) vec.X = max.X;
-        	else vec.X = X;
-        	
-        	if(Y <= min.Y) vec.Y = min.Y;
-        	else if(Y >= max.Y) vec.Y = max.Y;
-        	else vec.Y = Y;
-        	
-        	if(Z <= min.Z) vec.Z = min.Z;
-        	else if(Z >= max.Z) vec.Z = max.Z;
-        	else vec.Z = Z;
-        	
-        	return vec;
-        }
-        
-        /// <summary>
-        /// Component-wise wraps this <see cref="Vec3D"/> to between min (inclusive) and max (exclusive).
-        /// </summary>
-        /// <param name="min">The min vec.</param>
-        /// <param name="max">The max vec.</param>
-        /// <returns>The component-wise wrapped vec.</returns>
-        public Vec3D Wrap(Vec3D min, Vec3D max)
-        {
-        	Vec3D vec = this;
-        	
-        	vec.X -= min.X;
-			vec.X %= max.X - min.X;
-        	if(vec.X < 0) vec.X += max.X - min.X;
-        	vec.X += min.X;
-        	
-        	vec.Y -= min.Y;
-			vec.Y %= max.Y - min.Y;
-        	if(vec.Y < 0) vec.Y += max.Y - min.Y;
-        	vec.Y += min.Y;
-        	
-        	vec.Z -= min.Z;
-			vec.Z %= max.Z - min.Z;
-        	if(vec.Z < 0) vec.Z += max.Z - min.Z;
-        	vec.Z += min.Z;
-        	
-        	return vec;
-        }
-        
-        /// <summary>
         /// Returns the squared length of this <see cref="Vec3D"/>.
         /// </summary>
         /// <returns>The squared length.</returns>
