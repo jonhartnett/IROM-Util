@@ -179,31 +179,9 @@
         /// <param name="point">The point.</param>
         /// <param name="value">The value.</param>
         /// <returns>The product point.</returns>
-        public static Point3D operator *(Vec3D value, Point3D point)
-        {
-        	return new Point3D((int)(point.X * value.X), (int)(point.Y * value.Y), (int)(point.Z * value.Z));
-        }
-        
-        /// <summary>
-        /// Multiplies the given point by the given value.
-        /// </summary>
-        /// <param name="point">The point.</param>
-        /// <param name="value">The value.</param>
-        /// <returns>The product point.</returns>
         public static Point3D operator *(Point3D point, Vec3D value)
         {
         	return new Point3D((int)(point.X * value.Y), (int)(point.Y * value.Y), (int)(point.Z * value.Z));
-        }
-        
-        /// <summary>
-        /// Divides the given point by the given value.
-        /// </summary>
-        /// <param name="point">The point.</param>
-        /// <param name="value">The value.</param>
-        /// <returns>The quotient point.</returns>
-        public static Point3D operator /(Point3D point, Vec3D value)
-        {
-        	return new Point3D((int)(point.X / value.X), (int)(point.Y / value.Y), (int)(point.Z / value.Z));
         }
         
         /// <summary>
@@ -215,6 +193,17 @@
         public static Point3D operator /(Point3D point, Point3D point2)
         {
             return new Point3D(point.X / point2.X, point.Y / point2.Y, point.Z / point2.Z);
+        }
+        
+        /// <summary>
+        /// Divides the given point by the given value.
+        /// </summary>
+        /// <param name="point">The point.</param>
+        /// <param name="value">The value.</param>
+        /// <returns>The quotient point.</returns>
+        public static Point3D operator /(Point3D point, Vec3D value)
+        {
+        	return new Point3D((int)(point.X / value.X), (int)(point.Y / value.Y), (int)(point.Z / value.Z));
         }
         
         /// <summary>

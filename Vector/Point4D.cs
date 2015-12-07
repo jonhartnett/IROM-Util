@@ -178,17 +178,6 @@
         /// <param name="point">The point.</param>
         /// <param name="value">The value.</param>
         /// <returns>The product point.</returns>
-        public static Point4D operator *(Vec4D value, Point4D point)
-        {
-        	return new Point4D((int)(point.X * value.X), (int)(point.Y * value.Y), (int)(point.Z * value.Z), (int)(point.W * value.W));
-        }
-        
-        /// <summary>
-        /// Multiplies the given point by the given value.
-        /// </summary>
-        /// <param name="point">The point.</param>
-        /// <param name="value">The value.</param>
-        /// <returns>The product point.</returns>
         public static Point4D operator *(Point4D point, Vec4D value)
         {
         	return new Point4D((int)(point.X * value.X), (int)(point.Y * value.Y), (int)(point.Z * value.Z), (int)(point.W * value.W));

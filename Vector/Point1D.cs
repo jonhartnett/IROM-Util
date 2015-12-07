@@ -153,6 +153,17 @@
         {
             return new Point1D(point.X * point2.X);
         }
+        
+        /// <summary>
+        /// Multiplies the given point by the given value.
+        /// </summary>
+        /// <param name="point">The point.</param>
+        /// <param name="value">The value.</param>
+        /// <returns>The product point.</returns>
+        public static Point1D operator *(Point1D point, Vec1D value)
+        {
+        	return new Point1D((int)(point.X * value.X));
+        }
 
         /// <summary>
         /// Divides the given points.
@@ -163,6 +174,17 @@
         public static Point1D operator /(Point1D point, Point1D point2)
         {
             return new Point1D(point.X / point2.X);
+        }
+        
+        /// <summary>
+        /// Divides the given point by the given value.
+        /// </summary>
+        /// <param name="point">The point.</param>
+        /// <param name="value">The value.</param>
+        /// <returns>The quotient point.</returns>
+        public static Point1D operator /(Point1D point, Vec1D value)
+        {
+        	return new Point1D((int)(point.X / value.X));
         }
         
         /// <summary>

@@ -170,17 +170,6 @@
         /// <param name="point">The point.</param>
         /// <param name="value">The value.</param>
         /// <returns>The product point.</returns>
-        public static Point2D operator *(Vec2D value, Point2D point)
-        {
-        	return new Point2D((int)(point.X * value.X), (int)(point.Y * value.Y));
-        }
-        
-        /// <summary>
-        /// Multiplies the given point by the given value.
-        /// </summary>
-        /// <param name="point">The point.</param>
-        /// <param name="value">The value.</param>
-        /// <returns>The product point.</returns>
         public static Point2D operator *(Point2D point, Vec2D value)
         {
         	return new Point2D((int)(point.X * value.X), (int)(point.Y * value.Y));
