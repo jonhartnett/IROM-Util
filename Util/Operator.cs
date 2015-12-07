@@ -1,8 +1,233 @@
 ﻿namespace IROM.Util
 {
 	using System;
+	using System.Reflection;
 	using System.Linq;
 	using System.Linq.Expressions;
+	
+	/// <summary>
+	/// Performs operator functions on objects.
+	/// </summary>
+	public static class Operator
+	{
+		private const BindingFlags opFlags = BindingFlags.Static | BindingFlags.Public;
+		
+		public static object Plus(object obj)
+		{
+			MethodInfo info = obj.GetType().GetMethod("op_UnaryPlus", opFlags);
+			if(info != null) return info.Invoke(null, new []{obj});
+			throw new MissingMethodException();
+		}
+		
+		public static object Negate(object obj)
+		{
+			MethodInfo info = obj.GetType().GetMethod("op_UnaryNegation", opFlags);
+			if(info != null) return info.Invoke(null, new []{obj});
+			throw new MissingMethodException();
+		}
+		
+		public static object Not(object obj)
+		{
+			MethodInfo info = obj.GetType().GetMethod("op_LogicalNot", opFlags);
+			if(info != null) return info.Invoke(null, new []{obj});
+			throw new MissingMethodException();
+		}
+		
+		public static object Complement(object obj)
+		{
+			MethodInfo info = obj.GetType().GetMethod("op_OnesComplement", opFlags);
+			if(info != null) return info.Invoke(null, new []{obj});
+			throw new MissingMethodException();
+		}
+		
+		public static object Increment(object obj)
+		{
+			MethodInfo info = obj.GetType().GetMethod("op_Increment", opFlags);
+			if(info != null) return info.Invoke(null, new []{obj});
+			throw new MissingMethodException();
+		}
+		
+		public static object Decrement(object obj)
+		{
+			MethodInfo info = obj.GetType().GetMethod("op_Decrement", opFlags);
+			if(info != null) return info.Invoke(null, new []{obj});
+			throw new MissingMethodException();
+		}
+		
+		public static object IsTrue(object obj)
+		{
+			MethodInfo info = obj.GetType().GetMethod("op_True", opFlags);
+			if(info != null) return info.Invoke(null, new []{obj});
+			throw new MissingMethodException();
+		}
+		
+		public static object IsFalse(object obj)
+		{
+			MethodInfo info = obj.GetType().GetMethod("op_False", opFlags);
+			if(info != null) return info.Invoke(null, new []{obj});
+			throw new MissingMethodException();
+		}
+		
+		public static object Add(object obj, object obj2)
+		{
+			const string opName = "op_Addition";
+			MethodInfo info = obj.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			info = obj2.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			throw new MissingMethodException();
+		}
+		
+		public static object Subtract(object obj, object obj2)
+		{
+			const string opName = "op_Subtraction";
+			MethodInfo info = obj.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			info = obj2.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			throw new MissingMethodException();
+		}
+		
+		public static object Multiply(object obj, object obj2)
+		{
+			const string opName = "op_Multiply";
+			MethodInfo info = obj.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			info = obj2.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			throw new MissingMethodException();
+		}
+		
+		public static object Divide(object obj, object obj2)
+		{
+			const string opName = "op_Division";
+			MethodInfo info = obj.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			info = obj2.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			throw new MissingMethodException();
+		}
+		
+		public static object Modulus(object obj, object obj2)
+		{
+			const string opName = "op_Modulus";
+			MethodInfo info = obj.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			info = obj2.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			throw new MissingMethodException();
+		}
+		
+		public static object And(object obj, object obj2)
+		{
+			const string opName = "op_BitwiseAnd";
+			MethodInfo info = obj.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			info = obj2.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			throw new MissingMethodException();
+		}
+		
+		public static object Or(object obj, object obj2)
+		{
+			const string opName = "op_BitwiseOr";
+			MethodInfo info = obj.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			info = obj2.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			throw new MissingMethodException();
+		}
+		
+		public static object Xor(object obj, object obj2)
+		{
+			const string opName = "op_ExclusiveOr";
+			MethodInfo info = obj.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			info = obj2.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			throw new MissingMethodException();
+		}
+		
+		public static object LeftShift(object obj, object obj2)
+		{
+			const string opName = "op_LeftShift";
+			MethodInfo info = obj.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			info = obj2.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			throw new MissingMethodException();
+		}
+		
+		public static object RightShift(object obj, object obj2)
+		{
+			const string opName = "op_RightShift";
+			MethodInfo info = obj.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			info = obj2.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			throw new MissingMethodException();
+		}
+		
+		public static object Equality(object obj, object obj2)
+		{
+			const string opName = "op_Equality";
+			MethodInfo info = obj.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			info = obj2.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			throw new MissingMethodException();
+		}
+		
+		public static object Inequality(object obj, object obj2)
+		{
+			const string opName = "op_Inequality";
+			MethodInfo info = obj.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			info = obj2.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			throw new MissingMethodException();
+		}
+		
+		public static object Greater(object obj, object obj2)
+		{
+			const string opName = "op_GreaterThan";
+			MethodInfo info = obj.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			info = obj2.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			throw new MissingMethodException();
+		}
+		
+		public static object Less(object obj, object obj2)
+		{
+			const string opName = "op_LessThan";
+			MethodInfo info = obj.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			info = obj2.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			throw new MissingMethodException();
+		}
+		
+		public static object GreaterEquals(object obj, object obj2)
+		{
+			const string opName = "op_GreaterThanOrEqual";
+			MethodInfo info = obj.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			info = obj2.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			throw new MissingMethodException();
+		}
+		
+		public static object LessEquals(object obj, object obj2)
+		{
+			const string opName = "op_LessThanOrEqual";
+			MethodInfo info = obj.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			info = obj2.GetType().GetMethod(opName, new []{obj.GetType(), obj2.GetType()});
+			if(info != null) return info.Invoke(null, new []{obj, obj2});
+			throw new MissingMethodException();
+		}
+	}
 	
     /// <summary>
     /// Performs operator functions on generic types.
