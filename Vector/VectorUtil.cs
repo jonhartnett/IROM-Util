@@ -7,6 +7,36 @@
 	/// </summary>
 	public static class VectorUtil
 	{
+		public static Vec2D Next2D(this Random rand)
+		{
+			return new Vec2D(rand.NextDouble(), rand.NextDouble());
+		}
+		
+		public static Vec3D Next3D(this Random rand)
+		{
+			return new Vec3D(rand.NextDouble(), rand.NextDouble(), rand.NextDouble());
+		}
+		
+		public static Vec4D Next4D(this Random rand)
+		{
+			return new Vec4D(rand.NextDouble(), rand.NextDouble(), rand.NextDouble(), rand.NextDouble());
+		}
+		
+		public static Point2D GetDimensions<T>(this T[,] array)
+		{
+			return new Point2D(array.GetLength(0), array.GetLength(1));
+		}
+		
+		public static Point3D GetDimensions<T>(this T[,,] array)
+		{
+			return new Point3D(array.GetLength(0), array.GetLength(1), array.GetLength(2));
+		}
+		
+		public static Point4D GetDimensions<T>(this T[,,,] array)
+		{
+			return new Point4D(array.GetLength(0), array.GetLength(1), array.GetLength(2), array.GetLength(4));
+		}
+		
 		/// <summary>
         /// Component-wise clips the given <see cref="Vec1D"/> to between min and max.
         /// </summary>
