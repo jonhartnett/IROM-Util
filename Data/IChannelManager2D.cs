@@ -5,8 +5,8 @@
 	/// <summary>
 	/// A manager for the data channels of a <see cref="DataMap2D{T}">DataMap2D</see>. Data channels must be named by arbitrary unique string types.
 	/// Data channels are simply <see cref="DataMap2D{T}">DataMap2D</see>s themselves and may even have channels of their own.
-	/// Strongly-supported data channels are the primary (data-storage) channels of a Map (e.g. RED for a <see cref="IROM.Render.Images.Image"/>).
-    /// Weakly-supported data channels are the secondary (logical) channels of a Map (e.g. GREY for a <see cref="IROM.Render.Images.Image"/>).
+	/// Strongly-supported data channels are the primary (data-storage) channels of a Map (e.g. RED for a <see cref="IROM.Util.Image"/>).
+    /// Weakly-supported data channels are the secondary (logical) channels of a Map (e.g. GREY for a <see cref="IROM.Util.Image"/>).
     /// Types are by convention completely capitalized and have underscores for spaces. 
     /// Multiple types may refer to one channel (e.g. VALUE or LIGHTNESS) but one type may not refer to multiple channels.
 	/// See a specific DataMap for its list of supported channels.
