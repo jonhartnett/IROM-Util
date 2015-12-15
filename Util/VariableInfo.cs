@@ -60,27 +60,27 @@
 			Info = info; 
 		}
 		
-		public string GetName()
+		public override string GetName()
 		{
 			return Info.Name;
 		}
 		
-		public Type GetDataType()
+		public override Type GetDataType()
 		{
 			return Info.FieldType;
 		}
 		
-		public bool IsStatic()
+		public override bool IsStatic()
 		{
 			return Info.IsStatic;
 		}
 		
-		public object GetValue(object obj)
+		public override object GetValue(object obj)
 		{
 			return Info.GetValue(obj);
 		}
 		
-		public void SetValue(object obj, object value)
+		public override void SetValue(object obj, object value)
 		{
 			Info.SetValue(obj, value);
 		}
@@ -95,27 +95,27 @@
 			Info = info; 
 		}
 		
-		public string GetName()
+		public override string GetName()
 		{
 			return Info.Name;
 		}
 		
-		public Type GetDataType()
+		public override Type GetDataType()
 		{
 			return Info.PropertyType;
 		}
 		
-		public bool IsStatic()
+		public override bool IsStatic()
 		{
 			return Info.GetGetMethod(true).IsStatic;
 		}
 		
-		public object GetValue(object obj)
+		public override object GetValue(object obj)
 		{
 			return Info.GetValue(obj);
 		}
 		
-		public void SetValue(object obj, object value)
+		public override void SetValue(object obj, object value)
 		{
 			Info.SetValue(obj, value);
 		}

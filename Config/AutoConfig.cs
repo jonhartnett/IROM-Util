@@ -100,7 +100,7 @@
 					{
 						if(fields.ContainsKey(attr.Tag))
 						{
-							throw new Exception("Duplicate Config tag " + attr.Tag + " on members " + type.Name + "." + info.Name + " and " + type.Name + "." + fields[attr.Tag].GetName());
+							throw new Exception("Duplicate Config tag " + attr.Tag + " on members " + type.Name + "." + info.Name + " and " + type.Name + "." + fields[attr.Tag].Info.GetName());
 						}
 						fields[attr.Tag] = new Access(info, attr.FileID);
 					}
@@ -112,7 +112,7 @@
 					{
 						if(fields.ContainsKey(attr.Tag))
 						{
-							throw new Exception("Duplicate Config tag " + attr.Tag + " on members " + type.Name + "." + info.Name + " and " + type.Name + "." + fields[attr.Tag].GetName());
+							throw new Exception("Duplicate Config tag " + attr.Tag + " on members " + type.Name + "." + info.Name + " and " + type.Name + "." + fields[attr.Tag].Info.GetName());
 						}
 						fields[attr.Tag] = new Access(info, attr.FileID);
 					}
