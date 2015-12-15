@@ -10,6 +10,21 @@
     [StructLayout(LayoutKind.Explicit, Size = 4)]
     public struct ARGB
     {
+    	public static readonly ARGB Clear = new ARGB(0, 0, 0, 0);
+    	public static readonly ARGB White = new ARGB(255, 255, 255, 255);
+    	public static readonly ARGB Grey = new ARGB(255, 127, 127, 127);
+    	public static readonly ARGB Black = new ARGB(255, 0, 0, 0);
+    	public static readonly ARGB Red = new ARGB(255, 255, 0, 0);
+    	public static readonly ARGB Orange = new ARGB(255, 255, 127, 0);
+    	public static readonly ARGB Yellow = new ARGB(255, 255, 255, 0);
+    	public static readonly ARGB Green = new ARGB(255, 0, 255, 0);
+    	public static readonly ARGB Teal = new ARGB(255, 0, 255, 255);
+    	public static readonly ARGB LightBlue = new ARGB(255, 0, 127, 255);
+    	public static readonly ARGB Blue = new ARGB(255, 0, 0, 255);
+    	public static readonly ARGB Purple = new ARGB(255, 127, 0, 255);
+    	public static readonly ARGB Magenta = new ARGB(255, 255, 0, 255);
+    	public static readonly ARGB Pink = new ARGB(255, 255, 0, 127);
+    	
         /// <summary>
         /// The alpha component.
         /// </summary>

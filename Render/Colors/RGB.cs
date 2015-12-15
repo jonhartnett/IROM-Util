@@ -126,7 +126,7 @@
         /// <returns>The int value.</returns>
         public static explicit operator int(RGB color)
         {
-			return (int)(color.IntValue & 0x00FFFFFF);
+			return (int)(color.IntValue & MASK);
         }
 
         /// <summary>
@@ -136,7 +136,7 @@
         /// <returns>The result.</returns>
         public static implicit operator RGB(int color)
         {
-        	return new RGB(){IntValue = ((uint)color & 0x00FFFFFF)};
+        	return new RGB(){IntValue = ((uint)color & MASK)};
         }
         
         /// <summary>
@@ -146,7 +146,7 @@
         /// <returns>The uint value.</returns>
         public static explicit operator uint(RGB color)
         {
-			return color.IntValue & 0x00FFFFFF;
+			return color.IntValue & MASK;
         }
 
         /// <summary>
@@ -156,7 +156,7 @@
         /// <returns>The result.</returns>
         public static implicit operator RGB(uint color)
         {
-        	return new RGB(){IntValue = (color & 0x00FFFFFF)};
+        	return new RGB(){IntValue = (color & MASK)};
         }
         
         /// <summary>
