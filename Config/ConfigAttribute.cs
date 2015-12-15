@@ -18,6 +18,10 @@
 		/// <param name="id">The file id, useful for multiple configs in one file.</param>
 		public ConfigAttribute(string tag, uint id = 0)
 		{
+			if(tag.Contains(":") || tag.Contains("\n"))
+			{
+				throw new Exception("Config tags cannot contain colons or new lines.");
+			}
 			Tag = tag;
 			FileID = id;
 		}

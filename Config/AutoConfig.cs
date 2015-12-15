@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Reflection;
 	using System.IO;
+	using IROM.Dynamix;
 	
 	/// <summary>
 	/// Helper class that handles automatic configuration management.
@@ -30,7 +31,7 @@
 		/// <summary>
 		/// Group of configurable values for each type.
 		/// </summary>
-		private static Dictionary<Type, Dictionary<string, IConfig>> fieldLookup = new Dictionary<Type, Dictionary<string, IConfig>>();
+		private static Dictionary<Type, Dictionary<string, Access>> fieldLookup = new Dictionary<Type, Dictionary<string, Access>>();
 		//parsers and serializers for each type
 		private static Dictionary<Type, Parser<object>> parsers = new Dictionary<Type, Parser<object>>();
 		private static Dictionary<Type, Serializer<object>> serializers = new Dictionary<Type, Serializer<object>>();
@@ -91,7 +92,7 @@
 		{
 			if(!fieldLookup.ContainsKey(type))
 			{
-				Dictionary<string, IConfig> fields = new Dictionary<string, IConfig>();
+				Dictionary<string, Access> fields = new Dictionary<string, Access>();
 				foreach(FieldInfo info in type.GetFields(EVERYTHING))
 				{
 					ConfigAttribute attr = info.GetCustomAttribute(typeof(ConfigAttribute)) as ConfigAttribute;
@@ -101,7 +102,7 @@
 						{
 							throw new Exception("Duplicate Config tag " + attr.Tag + " on members " + type.Name + "." + info.Name + " and " + type.Name + "." + fields[attr.Tag].GetName());
 						}
-						fields[attr.Tag] = new FieldConfig(info, attr.FileID);
+						fields[attr.Tag] = new Access(info, attr.FileID);
 					}
 				}
 				foreach(PropertyInfo info in type.GetProperties(EVERYTHING))
@@ -113,7 +114,7 @@
 						{
 							throw new Exception("Duplicate Config tag " + attr.Tag + " on members " + type.Name + "." + info.Name + " and " + type.Name + "." + fields[attr.Tag].GetName());
 						}
-						fields[attr.Tag] = new PropertyConfig(info, attr.FileID);
+						fields[attr.Tag] = new Access(info, attr.FileID);
 					}
 				}
 			}
@@ -125,7 +126,7 @@
 			Discover(type);
 			if(File.Exists(path))
 			{
-				Dictionary<string, IConfig> fields = fieldLookup[type];
+				Dictionary<string, Access> fields = fieldLookup[type];
 				using(StreamReader input = new StreamReader(path))
 				{
 					//for every line
@@ -136,12 +137,14 @@
 						//trim parts
 						for(int i = 0; i < parts.Length; i++) parts[i] = parts[i].Trim();
 						
-						IConfig config;
+						Access config;
 						//if exists and right scope (static or instance) and right file
-						if(fields.TryGetValue(parts[0], out config) && ((instance == null) == config.IsStatic()) && (fileID == config.GetFileID()))
+						if(fields.TryGetValue(parts[0], out config) && 
+						   ((instance == null) == config.Info.IsStatic()) && 
+						   (fileID == config.FileID))
 						{
 							Parser<object> parser;
-							if(parsers.TryGetValue(config.GetFieldType(), out parser))
+							if(parsers.TryGetValue(config.GetDataType(), out parser))
 							{
 								//parse string
 								object result;
@@ -150,7 +153,7 @@
 								config.Set(result, instance);
 							}else
 							{
-								throw new Exception("Type " + config.GetFieldType() + " missing a configuration parser. Please see AutoConfig.SetParser.");
+								throw new Exception("Type " + config.GetDataType() + " missing a configuration parser. Please see AutoConfig.SetParser.");
 							}
 						}
 					}
@@ -161,17 +164,19 @@
 		
 		public static void Save(Type type, object instance, string path, uint fileID)
 		{
+			//init
 			Discover(type);
-			Dictionary<string, IConfig> fields = fieldLookup[type];
+			Dictionary<string, Access> fields = fieldLookup[type];
 			using(StreamWriter output = new StreamWriter(path))
 			{
 				foreach(var field in fields)
 				{
 					//if right scope (static or instance) and right file
-					if((instance == null) == field.Value.IsStatic() && (fileID == field.Value.GetFileID()))
+					if((instance == null) == field.Value.Info.IsStatic() && 
+					   (fileID == field.Value.FileID))
 					{
 						Serializer<object> serializer;
-						serializers.TryGetValue(field.Value.GetFieldType(), out serializer);
+						serializers.TryGetValue(field.Value.GetDataType(), out serializer);
 						if(serializer == null)
 						{
 							serializer = (o => o.ToString());
@@ -218,40 +223,54 @@
 			}
 		}
 		
-		private interface IConfig
+		private class Access
 		{
-			bool IsStatic();
-			void Set(object obj, object instance = null);
-			object Get(object instance = null);
-			Type GetFieldType();
-			string GetName();
-			uint GetFileID();
-		}
-		
-		private class FieldConfig : IConfig
-		{
-			public FieldInfo Info;
-			public uint fileID;
-			public FieldConfig(FieldInfo info, uint id){Info = info; fileID = id;}
-			public bool IsStatic(){return Info.IsStatic;}
-			public void Set(object obj, object instance = null){Info.SetValue(instance, obj);}
-			public object Get(object instance = null){return Info.GetValue(instance);}
-			public Type GetFieldType(){return Info.FieldType;}
-			public string GetName(){return Info.Name;}
-			public uint GetFileID(){return fileID;}
-		}
-		
-		private class PropertyConfig : IConfig
-		{
-			public PropertyInfo Info;
-			public uint fileID;
-			public PropertyConfig(PropertyInfo info, uint id){Info = info; fileID = id;}
-			public bool IsStatic(){return Info.GetGetMethod(true).IsStatic;}
-			public void Set(object obj, object instance = null){Info.SetValue(instance, obj);}
-			public object Get(object instance = null){return Info.GetValue(instance);}
-			public Type GetFieldType(){return Info.PropertyType;}
-			public string GetName(){return Info.Name;}
-			public uint GetFileID(){return fileID;}
+			public DataInfo Info;
+			public DataInfo SubInfo;
+			public uint FileID;
+			
+			public Access(DataInfo info, uint id)
+			{
+				Info = info;
+				if(typeof(Dynx<>).IsAssignableFrom(info.GetDataType()))
+				{
+					SubInfo = info.GetDataType().GetProperty("Value");
+				}
+				FileID = id;
+			}
+			
+			public Type GetDataType()
+			{
+				if(SubInfo != null)
+				{
+					return SubInfo.GetDataType();
+				}else
+				{
+					return Info.GetDataType();
+				}
+			}
+			
+			public object Get(object obj)
+			{
+				if(SubInfo != null)
+				{
+					return SubInfo.GetValue(Info.GetValue(obj));
+				}else
+				{
+					return Info.GetValue(obj);
+				}
+			}
+			
+			public void Set(object obj, object value)
+			{
+				if(SubInfo != null)
+				{
+					SubInfo.SetValue(Info.GetValue(obj), value);
+				}else
+				{
+					Info.SetValue(obj, value);
+				}
+			}
 		}
 	}
 }
