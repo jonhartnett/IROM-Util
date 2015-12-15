@@ -29,11 +29,11 @@
         /// <returns>The clipped value.</returns>
         public static T Clip<T>(T value, T min, T max) where T : struct
         {
-            if(Operator<T>.LessThanOrEquals(value, min))
+            if(Binary<T, T, bool>.LessEqual(value, min))
             {
                 return min;
             }else
-            if(Operator<T>.GreaterThanOrEquals(value, max))
+            if(Binary<T, T, bool>.GreaterEqual(value, max))
             {
                 return max;
             }else
@@ -52,7 +52,7 @@
         public static T Wrap<T>(T value, T min, T max) where T: struct
         {
             //dif = max - min;
-            T dif = Operator<T>.Subtract(max, min);
+            T dif = Binary<T, T, T>.Subtract(max, min);
 
             //naive implementation
             /*
@@ -62,17 +62,17 @@
 
             //fast implementation
             //value -= min;
-            value = Operator<T>.Subtract(value, min);
+            value = Binary<T, T, T>.Subtract(value, min);
             //value %= dif;
-            value = Operator<T>.Modulo(value, dif);
+            value = Binary<T, T, T>.Modulo(value, dif);
             //if(value < 0)
-            if(Operator<T>.LessThan(value, Cast<int, T>.CastVal(0)))
+            if(Binary<T, T, bool>.Less(value, default(T)))
             {
                 //value += dif;
-                value = Operator<T>.Add(value, dif);
+                value = Binary<T, T, T>.Add(value, dif);
             }
             //value += min;
-            value = Operator<T>.Add(value, min);
+            value = Binary<T, T, T>.Add(value, min);
             return value;
         }
 
@@ -87,7 +87,7 @@
         	T max = values[0];
         	for(int i = 1; i < values.Length; i++)
         	{
-        		if(Operator<T>.GreaterThan(values[i], max))
+        		if(Binary<T, T, bool>.Greater(values[i], max))
         		{
         			max = values[i];
         		}
@@ -106,7 +106,7 @@
             T min = values[0];
         	for(int i = 1; i < values.Length; i++)
         	{
-        		if(Operator<T>.LessThan(values[i], min))
+        		if(Binary<T, T, bool>.Less(values[i], min))
         		{
         			min = values[i];
         		}
