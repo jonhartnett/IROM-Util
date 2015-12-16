@@ -141,7 +141,7 @@
 			
 			string specificCode = DefaultCode.Replace("#NAME#", typeof(T).Name).Replace("#NAMESPACE#", space);
 			
-			Assembly assembly = RuntimeCompiler.Compile(specificCode, new string[]{typeof(T).Assembly.GetName().Name + ".dll", "UtilLib.dll"});
+			Assembly assembly = RuntimeCompiler.Compile(specificCode, new string[]{typeof(T).Assembly.GetName().Name + ".dll", typeof(UnsafeDataMapOperations2D<>).AssemblyQualifiedName});
 			
 			Type clazz = assembly.GetType(string.Format("IROM.Util.Unsafe{0}Class", typeof(T).Name));
 			
