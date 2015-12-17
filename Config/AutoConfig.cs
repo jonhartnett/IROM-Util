@@ -102,7 +102,7 @@
 						{
 							throw new Exception("Duplicate Config tag " + attr.Tag + " on members " + type.Name + "." + info.Name + " and " + type.Name + "." + fields[attr.Tag].Info.GetName());
 						}
-						fields[attr.Tag] = new Access(info, attr.FileID);
+						fields[attr.Tag] = new Access(info, attr.FileTag);
 					}
 				}
 				foreach(PropertyInfo info in type.GetProperties(EVERYTHING))
@@ -114,14 +114,16 @@
 						{
 							throw new Exception("Duplicate Config tag " + attr.Tag + " on members " + type.Name + "." + info.Name + " and " + type.Name + "." + fields[attr.Tag].Info.GetName());
 						}
-						fields[attr.Tag] = new Access(info, attr.FileID);
+						fields[attr.Tag] = new Access(info, attr.FileTag);
 					}
 				}
 			}
 		}
 		
-		public static void Load(Type type, object instance, string path, uint fileID, bool isReadonly)
+		public static bool Load(Type type, object instance, string path, string prefix, string fileTag, bool isReadonly)
 		{
+			//assume no fields loaded
+			bool fieldModified = false;
 			//init
 			Discover(type);
 			if(File.Exists(path))
@@ -136,12 +138,22 @@
 						string[] parts = line.Split(new []{':'}, 2);
 						//trim parts
 						for(int i = 0; i < parts.Length; i++) parts[i] = parts[i].Trim();
+						if(prefix != null)
+						{
+							if(parts[0].StartsWith(prefix, StringComparison.Ordinal))
+							{
+								parts[0] = parts[0].Substring(prefix.Length);
+							}else
+							{
+								continue;
+							}
+						}
 						
 						Access config;
 						//if exists and right scope (static or instance) and right file
 						if(fields.TryGetValue(parts[0], out config) && 
 						   ((instance == null) == config.Info.IsStatic()) && 
-						   (fileID == config.FileID))
+						   (fileTag == config.FileID))
 						{
 							Parser<object> parser;
 							if(parsers.TryGetValue(config.GetDataType(), out parser))
@@ -151,6 +163,8 @@
 								parser(parts[1], out result);
 								//set value
 								config.Set(result, instance);
+								//success
+								fieldModified = true;
 							}else
 							{
 								throw new Exception("Type " + config.GetDataType() + " missing a configuration parser. Please see AutoConfig.SetParser.");
@@ -159,10 +173,11 @@
 					}
 				}
 			}
-			if(!isReadonly) Save(type, instance, path, fileID);
+			if(!isReadonly) Save(type, instance, path, prefix, fileTag);
+			return fieldModified;
 		}
 		
-		public static void Save(Type type, object instance, string path, uint fileID)
+		public static void Save(Type type, object instance, string path, string prefix, string fileTag)
 		{
 			//init
 			Discover(type);
@@ -173,7 +188,7 @@
 				{
 					//if right scope (static or instance) and right file
 					if((instance == null) == field.Value.Info.IsStatic() && 
-					   (fileID == field.Value.FileID))
+					   (fileTag == field.Value.FileID))
 					{
 						Serializer<object> serializer;
 						serializers.TryGetValue(field.Value.GetDataType(), out serializer);
@@ -181,8 +196,13 @@
 						{
 							serializer = (o => o.ToString());
 						}
+						string key = field.Key;
+						if(prefix != null)
+						{
+							key = prefix + key;
+						}
 						string result = serializer(field.Value.Get(instance));
-						output.WriteLine(field.Key + ": " + result);
+						output.WriteLine(key + ": " + result);
 					}
 				}
 			}
@@ -193,16 +213,22 @@
 		/// </summary>
 		/// <param name="obj">The obj.</param>
 		/// <param name="path">The path.</param>
-		/// <param name="fileID">The id for this configuration.</param>
+		/// <param name="prefix">The prefix for all fields.</param>
+		/// <param name="fileTag">The file tag for this configuration, limits which fields are configured.</param>
 		/// <param name="isReadonly">True if the file should not be created or updated.</param>
-		public static void LoadConfig(this object obj, string path, uint fileID = 0, bool isReadonly = false)
+		/// <returns>True if at least one field was loaded.</returns>
+		public static bool LoadConfig(this object obj, string path, string prefix = null, string fileTag = null, bool isReadonly = false)
 		{
+			if(prefix.Contains(":") || prefix.Contains("\n"))
+			{
+				throw new Exception("Config prefixes cannot contain colons or new lines.");
+			}
 			if(obj is Type)
 			{
-				Load((Type)obj, null, path, fileID, isReadonly);
+				return Load((Type)obj, null, path, prefix, fileTag, isReadonly);
 			}else
 			{
-				Load(obj.GetType(), obj, path, fileID, isReadonly);
+				return Load(obj.GetType(), obj, path, prefix, fileTag, isReadonly);
 			}
 		}
 		
@@ -211,15 +237,20 @@
 		/// </summary>
 		/// <param name="obj">The obj.</param>
 		/// <param name="path">The path.</param>
-		/// <param name="fileID">The id for this configuration.</param>
-		public static void SaveConfig(this object obj, string path, uint fileID = 0)
+		/// <param name="prefix">The prefix for all fields, limits which fields are configured.</param>
+		/// <param name="fileTag">The file tag for this configuration.</param>
+		public static void SaveConfig(this object obj, string path, string prefix = null, string fileTag = null)
 		{
+			if(prefix.Contains(":") || prefix.Contains("\n"))
+			{
+				throw new Exception("Config prefixes cannot contain colons or new lines.");
+			}
 			if(obj is Type)
 			{
-				Save((Type)obj, null, path, fileID);
+				Save((Type)obj, null, path, prefix, fileTag);
 			}else
 			{
-				Save(obj.GetType(), obj, path, fileID);
+				Save(obj.GetType(), obj, path, prefix, fileTag);
 			}
 		}
 		
@@ -227,9 +258,9 @@
 		{
 			public DataInfo Info;
 			public DataInfo SubInfo;
-			public uint FileID;
+			public string FileID;
 			
-			public Access(DataInfo info, uint id)
+			public Access(DataInfo info, string id)
 			{
 				Info = info;
 				if(typeof(Dynx<>).IsAssignableFrom(info.GetDataType()))
