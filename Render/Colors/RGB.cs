@@ -275,8 +275,14 @@
         
         static RGB()
 		{
+        	AutoConfig.SetSerializer<RGB>(Serialize);
 			AutoConfig.SetParser<RGB>(TryParse);
 		}
+        
+        public static string Serialize(RGB value)
+        {
+        	return string.Format("({0},{1},{2})", value.R, value.G, value.B);
+        }
         
         public static bool TryParse(string str, out RGB result)
         {

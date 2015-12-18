@@ -308,8 +308,14 @@
         
         static ARGB()
 		{
+        	AutoConfig.SetSerializer<ARGB>(Serialize);
 			AutoConfig.SetParser<ARGB>(TryParse);
 		}
+        
+        public static string Serialize(ARGB value)
+        {
+        	return string.Format("({0},{1},{2},{3})", value.A, value.R, value.G, value.B);
+        }
         
         public static bool TryParse(string str, out ARGB result)
         {
@@ -320,10 +326,10 @@
         	str = str.Substring(1, str.Length - 2);
         	string[] parts = str.Split(',');
         	if(parts.Length != 4) return false;
-        	if(!byte.TryParse(parts[0], out result.A) || 
-        	   !byte.TryParse(parts[1], out result.R) || 
-        	   !byte.TryParse(parts[2], out result.G) || 
-        	   !byte.TryParse(parts[3], out result.B)) return false;
+        	if(!byte.TryParse(parts[0].Trim(), out result.A) ||
+        	   !byte.TryParse(parts[1].Trim(), out result.R) || 
+        	   !byte.TryParse(parts[2].Trim(), out result.G) || 
+        	   !byte.TryParse(parts[3].Trim(), out result.B)) return false;
         	return true;
         }
     }
