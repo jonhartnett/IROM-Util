@@ -8,6 +8,8 @@
 	/// </summary>
 	public static class DataMapExtensions2D
 	{
+		private const bool DisableUnsafe = false;
+		
 		/// <summary>
 		/// The infinite clipping rectangle.
 		/// </summary>
@@ -35,13 +37,12 @@
 		/// <returns>The clip bounds.</returns>
 		public static Rectangle GetClip<T>(this DataMap2D<T> map) where T : struct
 		{
-			if(ClippingInstances.ContainsKey(map))
+			Rectangle result;
+			if(!ClippingInstances.TryGetValue(map, out result))
 			{
-				return ClippingInstances[map];
-			}else
-			{
-				return NoClip;
+				result = NoClip;
 			}
+			return result;
 		}
 		
 		/// <summary>
@@ -56,46 +57,46 @@
 		/// <summary>
 		/// Copys the source <see cref="DataMap2D{T}">DataMap2D</see> to this <see cref="DataMap2D{T}">DataMap2D</see>.
 		/// </summary>
-		/// <param name="map">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
+		/// <param name="dest">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
 		/// <param name="src">The source <see cref="DataMap2D{T}">DataMap2D</see>.</param>
-		public static void Copy<T>(this DataMap2D<T> map, DataMap2D<T> src) where T : struct
+		public static void Copy<T>(this DataMap2D<T> dest, DataMap2D<T> src) where T : struct
 		{
-			map.Blit(src, 0, 0);
+			dest.Blit(src, 0);
 		}
 		
 		/// <summary>
 		/// Blits the source <see cref="DataMap2D{T}">DataMap2D</see> to this <see cref="DataMap2D{T}">DataMap2D</see> in the given position.
 		/// </summary>
-		/// <param name="map">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
+		/// <param name="dest">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
 		/// <param name="src">The source <see cref="DataMap2D{T}">DataMap2D</see>.</param>
 		/// <param name="x">The x coord to blit to.</param>
 		/// <param name="y">The y coord to blit to.</param>
-		public static void Blit<T>(this DataMap2D<T> map, DataMap2D<T> src, int x, int y) where T : struct
+		public static void Blit<T>(this DataMap2D<T> dest, DataMap2D<T> src, int x, int y) where T : struct
 		{
-			map.Blit(src, new Point2D(x, y));
+			dest.Blit(src, new Point2D(x, y));
 		}
 		
 		/// <summary>
 		/// Blits the source <see cref="DataMap2D{T}">DataMap2D</see> to this <see cref="DataMap2D{T}">DataMap2D</see> in the given position.
 		/// </summary>
-		/// <param name="map">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
+		/// <param name="dest">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
 		/// <param name="src">The source <see cref="DataMap2D{T}">DataMap2D</see>.</param>
 		/// <param name="position">The position to blit to.</param>
-		public static void Blit<T>(this DataMap2D<T> map, DataMap2D<T> src, Point2D position) where T : struct
+		public static void Blit<T>(this DataMap2D<T> dest, DataMap2D<T> src, Point2D position) where T : struct
 		{
-			Rectangle view = VectorUtil.Overlap((Rectangle)map.Size, ((Rectangle)src.Size) + position, map.GetClip());
-			if(view.IsValid())
+			Rectangle clip = VectorUtil.Overlap((Rectangle)dest.Size, ((Rectangle)src.Size) + position, dest.GetClip());
+			if(clip.IsValid())
 			{
-				if(map.UnsafeOperationsSupported() && src.UnsafeOperationsSupported())
+				if(!DisableUnsafe && dest.UnsafeOperationsSupported() && src.UnsafeOperationsSupported())
 				{
-					UnsafeDataMapOperations2D<T>.Blit(map, src, position, view);
+					UnsafeDataMapOperations2D<T>.Blit(clip, dest, src, position);
 				}else
 				{
-					for(int i = view.Min.X; i <= view.Max.X; i++)
+					for(int i = clip.Min.X; i <= clip.Max.X; i++)
 					{
-						for(int j = view.Min.Y; j <= view.Max.Y; j++)
+						for(int j = clip.Min.Y; j <= clip.Max.Y; j++)
 						{
-							map[i, j] = src[i - position.X, j - position.Y];
+							dest[i, j] = src[i - position.X, j - position.Y];
 						}
 					}
 				}
@@ -105,23 +106,23 @@
 		/// <summary>
 		/// Fills this <see cref="DataMap2D{T}">DataMap2D</see> with the given value.
 		/// </summary>
-		/// <param name="map">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
+		/// <param name="dest">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
 		/// <param name="value">The value.</param>
-		public static void Fill<T>(this DataMap2D<T> map, T value) where T : struct
+		public static void Fill<T>(this DataMap2D<T> dest, T value) where T : struct
 		{
-			Rectangle view = VectorUtil.Overlap((Rectangle)map.Size, map.GetClip());
-			if(view.IsValid())
+			Rectangle clip = VectorUtil.Overlap((Rectangle)dest.Size, dest.GetClip());
+			if(clip.IsValid())
 			{
-				if(map.UnsafeOperationsSupported())
+				if(!DisableUnsafe && dest.UnsafeOperationsSupported())
 				{
-					UnsafeDataMapOperations2D<T>.Fill(map, value, view);
+					UnsafeDataMapOperations2D<T>.Fill(clip, dest, value);
 				}else
 				{
-					for(int i = view.Min.X; i <= view.Max.X; i++)
+					for(int i = clip.Min.X; i <= clip.Max.X; i++)
 					{
-						for(int j = view.Min.Y; j <= view.Max.Y; j++)
+						for(int j = clip.Min.Y; j <= clip.Max.Y; j++)
 						{
-							map[i, j] = value;
+							dest[i, j] = value;
 						}
 					}
 				}
@@ -131,29 +132,40 @@
 		/// <summary>
 		/// Fills a x scan in this <see cref="DataMap2D{T}">DataMap2D</see> with the given value.
 		/// </summary>
-		/// <param name="map">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
+		/// <param name="dest">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
 		/// <param name="xmin">The min x value for the scan.</param>
 		/// <param name="xmax">The max x value for the scan.</param>
 		/// <param name="y">The y value for the scan.</param>
 		/// <param name="value">The value.</param>
-		public static void FillXScan<T>(this DataMap2D<T> map, int xmin, int xmax, int y, T value) where T : struct
+		public static void FillXScan<T>(this DataMap2D<T> dest, int xmin, int xmax, int y, T value) where T : struct
 		{
-			Rectangle view = VectorUtil.Overlap((Rectangle)map.Size, map.GetClip());
-			if(view.IsValid())
+			Rectangle clip = VectorUtil.Overlap((Rectangle)dest.Size, dest.GetClip());
+			if(clip.IsValid()) dest.FillXScan(clip, xmin, xmax, y, value);
+		}
+		
+		/// <summary>
+		/// Fills a x scan in this <see cref="DataMap2D{T}">DataMap2D</see> with the given value in the given clip.
+		/// </summary>
+		/// <param name="dest">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
+		/// <param name="clip">The pre-calculated clip.</param>
+		/// <param name="xmin">The min x value for the scan.</param>
+		/// <param name="xmax">The max x value for the scan.</param>
+		/// <param name="y">The y value for the scan.</param>
+		/// <param name="value">The value.</param>
+		internal static void FillXScan<T>(this DataMap2D<T> dest, Rectangle clip, int xmin, int xmax, int y, T value) where T : struct
+		{
+			if(!DisableUnsafe && dest.UnsafeOperationsSupported())
 			{
-				if(map.UnsafeOperationsSupported())
+				UnsafeDataMapOperations2D<T>.FillXScan(clip, dest, xmin, xmax, y, value);
+			}else
+			{
+				if(y >= clip.Min.Y && y <= clip.Max.Y)
 				{
-					UnsafeDataMapOperations2D<T>.FillXScan(map, xmin, xmax, y, value, view);
-				}else
-				{
-					if(y >= view.Min.Y && y <= view.Max.Y)
+					xmin = Math.Max(xmin, clip.Min.X);
+					xmax = Math.Min(xmax, clip.Max.X);
+					for(int i = xmin; i <= xmax; i++)
 					{
-						xmin = Math.Max(xmin, view.Min.X);
-						xmax = Math.Min(xmax, view.Max.X);
-						for(int i = xmin; i <= xmax; i++)
-						{
-							map[i, y] = value;
-						}
+						dest[i, y] = value;
 					}
 				}
 			}
@@ -162,28 +174,84 @@
 		/// <summary>
 		/// Fills a y scan in this <see cref="DataMap2D{T}">DataMap2D</see> with the given value.
 		/// </summary>
-		/// <param name="map">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
+		/// <param name="dest">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
 		/// <param name="x">The x value for the scan.</param>
 		/// <param name="ymin">The min y value for the scan.</param>
 		/// <param name="ymax">The max y value for the scan.</param>
 		/// <param name="value">The value.</param>
-		public static void FillYScan<T>(this DataMap2D<T> map, int x, int ymin, int ymax, T value) where T : struct
+		public static void FillYScan<T>(this DataMap2D<T> dest, int x, int ymin, int ymax, T value) where T : struct
 		{
-			Rectangle view = VectorUtil.Overlap((Rectangle)map.Size, map.GetClip());
-			if(view.IsValid())
+			Rectangle clip = VectorUtil.Overlap((Rectangle)dest.Size, dest.GetClip());
+			if(clip.IsValid()) dest.FillYScan(clip, x, ymin, ymax, value);
+		}
+		
+		/// <summary>
+		/// Fills a y scan in this <see cref="DataMap2D{T}">DataMap2D</see> with the given value in the given clip.
+		/// </summary>
+		/// <param name="dest">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
+		/// <param name="clip">The pre-calculated clip.</param>
+		/// <param name="x">The x value for the scan.</param>
+		/// <param name="ymin">The min y value for the scan.</param>
+		/// <param name="ymax">The max y value for the scan.</param>
+		/// <param name="value">The value.</param>
+		internal static void FillYScan<T>(this DataMap2D<T> dest, Rectangle clip, int x, int ymin, int ymax, T value) where T : struct
+		{
+			if(!DisableUnsafe && dest.UnsafeOperationsSupported())
 			{
-				if(map.UnsafeOperationsSupported())
+				UnsafeDataMapOperations2D<T>.FillYScan(clip, dest, x, ymin, ymax, value);
+			}else
+			{
+				if(x >= clip.Min.X && x <= clip.Max.X)
 				{
-					UnsafeDataMapOperations2D<T>.FillYScan(map, x, ymin, ymax, value, view);
+					ymin = Math.Max(ymin, clip.Min.Y);
+					ymax = Math.Min(ymax, clip.Max.Y);
+					for(int j = ymin; j <= ymax; j++)
+					{
+						dest[x, j] = value;
+					}
+				}
+			}
+		}
+		
+		/// <summary>
+		/// Draws the outline of a <see cref="Rectangle"/> in this <see cref="DataMap2D{T}">DataMap2D</see> with the given value.
+		/// </summary>
+		/// <param name="dest">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
+		/// <param name="rect">The <see cref="Rectangle"/> to fill.</param>
+		/// <param name="value">The value.</param>
+		public static void DrawRectangle<T>(this DataMap2D<T> dest, Rectangle rect, T value) where T : struct
+		{
+			Rectangle clip = VectorUtil.Overlap((Rectangle)dest.Size, dest.GetClip(), rect);
+			if(clip.IsValid())
+			{
+				dest.FillYScan(clip, rect.Min.X, rect.Min.Y, rect.Max.Y, value);
+				dest.FillYScan(clip, rect.Max.X, rect.Min.Y, rect.Max.Y, value);
+				dest.FillXScan(clip, rect.Min.X, rect.Max.X, rect.Min.Y, value);
+				dest.FillXScan(clip, rect.Min.X, rect.Max.X, rect.Max.Y, value);
+			}
+		}
+		
+		/// <summary>
+		/// Fills a <see cref="Rectangle"/> in this <see cref="DataMap2D{T}">DataMap2D</see> with the given value.
+		/// </summary>
+		/// <param name="dest">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
+		/// <param name="rect">The <see cref="Rectangle"/> to fill.</param>
+		/// <param name="value">The value.</param>
+		public static void FillRectangle<T>(this DataMap2D<T> dest, Rectangle rect, T value) where T : struct
+		{
+			Rectangle clip = VectorUtil.Overlap((Rectangle)dest.Size, dest.GetClip(), rect);
+			if(clip.IsValid())
+			{
+				if(!DisableUnsafe && dest.UnsafeOperationsSupported())
+				{
+					UnsafeDataMapOperations2D<T>.Fill(clip, dest, value);
 				}else
 				{
-					if(x >= view.Min.X && x <= view.Max.X)
+					for(int i = clip.Min.X; i <= clip.Max.X; i++)
 					{
-						ymin = Math.Max(ymin, view.Min.Y);
-						ymax = Math.Min(ymax, view.Max.Y);
-						for(int j = ymin; j <= ymax; j++)
+						for(int j = clip.Min.Y; j <= clip.Max.Y; j++)
 						{
-							map[x, j] = value;
+							dest[i, j] = value;
 						}
 					}
 				}
@@ -191,27 +259,86 @@
 		}
 		
 		/// <summary>
-		/// Fills a <see cref="Rectangle"/> in this <see cref="DataMap2D{T}">DataMap2D</see> with the given value.
+		/// Draws the outline of a circle in this <see cref="DataMap2D{T}">DataMap2D</see> with the given value.
 		/// </summary>
-		/// <param name="map">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
-		/// <param name="rect">The <see cref="Rectangle"/> to fill.</param>
+		/// <param name="dest">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
+		/// <param name="c">The center of the circle.</param>
+		/// <param name="r">The radius of the circle.</param>
 		/// <param name="value">The value.</param>
-		public static void FillRectangle<T>(this DataMap2D<T> map, Rectangle rect, T value) where T : struct
+		public static void DrawCircle<T>(this DataMap2D<T> dest, Point2D c, int r, T value) where T : struct
 		{
-			Rectangle view = VectorUtil.Overlap((Rectangle)map.Size, map.GetClip(), rect);
-			if(view.IsValid())
+			dest.DrawEllipse(c, r, r, value);
+		}
+		
+		/// <summary>
+		/// Draws the outline of an ellipse in this <see cref="DataMap2D{T}">DataMap2D</see> with the given value.
+		/// </summary>
+		/// <param name="dest">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
+		/// <param name="c">The center of the ellipse.</param>
+		/// <param name="rx">The x radius of the ellipse.</param>
+		/// <param name="ry">The y radius of the ellipse.</param>
+		/// <param name="value">The value.</param>
+		public static void DrawEllipse<T>(this DataMap2D<T> dest, Point2D c, int rx, int ry, T value) where T : struct
+		{
+			Rectangle clip = new Rectangle(new Point2D(c.X - rx, c.Y - ry), new Point2D(c.X + rx, c.Y + ry));
+			clip = VectorUtil.Overlap((Rectangle)dest.Size, dest.GetClip(), clip);
+			if(clip.IsValid())
 			{
-				if(map.UnsafeOperationsSupported())
+				if(!DisableUnsafe && dest.UnsafeOperationsSupported())
 				{
-					UnsafeDataMapOperations2D<T>.Fill(map, value, view);
+					UnsafeDataMapOperations2D<T>.DrawEllipse(clip, dest, c, rx, ry, value);
 				}else
 				{
-					for(int i = view.Min.X; i <= view.Max.X; i++)
+					double rySq = ry * ry;
+					int dx;
+					int y;
+					int left;
+					int right;
+					int prevLeft = c.X - rx;
+					int prevRight = c.X + rx;
+					
+					//fill edge dots
+					if(c.Y >= clip.Min.Y && c.Y <= clip.Max.Y)
 					{
-						for(int j = view.Min.Y; j <= view.Max.Y; j++)
+						if(prevLeft >= clip.Min.X && prevLeft <= clip.Max.X)
 						{
-							map[i, j] = value;
+							dest[prevLeft, c.Y] = value;
 						}
+						if(prevRight >= clip.Min.X && prevRight <= clip.Max.X)
+						{
+							dest[prevRight, c.Y] = value;
+						}
+					}
+					
+					if(c.X >= clip.Min.X && c.X <= clip.Max.X)
+					{
+						y = c.Y - ry;
+						if(y >= clip.Min.Y && y <= clip.Max.Y)
+						{
+							dest[c.X, y] = value;
+						}
+						y = c.Y + ry;
+						if(y >= clip.Min.Y && y <= clip.Max.Y)
+						{
+							dest[c.X, y] = value;
+						}
+					}
+					
+					for(int dy = 0; dy < ry; dy++, prevLeft = left, prevRight = right)
+					{
+						//find edges
+						dx = (int)(Math.Sqrt(1 - (((dy + 1) * (dy + 1)) / rySq)) * rx);
+						
+						left = c.X - dx;
+						right = c.X + dx;
+						
+						//fill scans
+						y = c.Y - dy;
+						dest.FillXScan(clip, prevLeft, left, y, value);
+						dest.FillXScan(clip, right, prevRight, y, value);
+						y = c.Y + dy;
+						dest.FillXScan(clip, prevLeft, left, y, value);
+						dest.FillXScan(clip, right, prevRight, y, value);
 					}
 				}
 			}
@@ -220,32 +347,32 @@
 		/// <summary>
 		/// Fills a circle in this <see cref="DataMap2D{T}">DataMap2D</see> with the given value.
 		/// </summary>
-		/// <param name="map">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
+		/// <param name="dest">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
 		/// <param name="c">The center of the circle.</param>
 		/// <param name="r">The radius of the circle.</param>
 		/// <param name="value">The value.</param>
-		public static void FillCircle<T>(this DataMap2D<T> map, Point2D c, int r, T value) where T : struct
+		public static void FillCircle<T>(this DataMap2D<T> dest, Point2D c, int r, T value) where T : struct
 		{
-			map.FillEllipse(c, r, r, value);
+			dest.FillEllipse(c, r, r, value);
 		}
 		
 		/// <summary>
 		/// Fills an ellipse in this <see cref="DataMap2D{T}">DataMap2D</see> with the given value.
 		/// </summary>
-		/// <param name="map">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
+		/// <param name="dest">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
 		/// <param name="c">The center of the ellipse.</param>
 		/// <param name="rx">The x radius of the ellipse.</param>
 		/// <param name="ry">The y radius of the ellipse.</param>
 		/// <param name="value">The value.</param>
-		public static void FillEllipse<T>(this DataMap2D<T> map, Point2D c, int rx, int ry, T value) where T : struct
+		public static void FillEllipse<T>(this DataMap2D<T> dest, Point2D c, int rx, int ry, T value) where T : struct
 		{
-			Rectangle view = new Rectangle(new Point2D(c.X - rx, c.Y - ry), new Point2D(c.X + rx, c.Y + ry));
-			view = VectorUtil.Overlap((Rectangle)map.Size, map.GetClip(), view);
-			if(view.IsValid())
+			Rectangle clip = new Rectangle(new Point2D(c.X - rx, c.Y - ry), new Point2D(c.X + rx, c.Y + ry));
+			clip = VectorUtil.Overlap((Rectangle)dest.Size, dest.GetClip(), clip);
+			if(clip.IsValid())
 			{
-				if(map.UnsafeOperationsSupported())
+				if(!DisableUnsafe && dest.UnsafeOperationsSupported())
 				{
-					UnsafeDataMapOperations2D<T>.FillEllipse(map, c, rx, ry, value, view);
+					UnsafeDataMapOperations2D<T>.FillEllipse(clip, dest, c, rx, ry, value);
 				}else
 				{
 					double rySq = ry * ry;
@@ -257,26 +384,82 @@
 						int left = c.X - dx;
 						int right = c.X + dx;
 							
-						left = Math.Max(left, view.Min.X);
-						right = Math.Min(right, view.Max.X);
+						left = Math.Max(left, clip.Min.X);
+						right = Math.Min(right, clip.Max.X);
 						
-						//fill scan
+						//fill scans
 						int y = c.Y - dy;
-						if(y >= view.Min.Y && y <= view.Max.Y)
-						{
-							for(int i = left; i <= right; i++)
-							{
-								map[i, y] = value;
-							}
-						}
+						dest.FillXScan(clip, left, right, y, value);
+						
+						if(dy != 0) continue;
+						
 						y = c.Y + dy;
-						if(y >= view.Min.Y && y <= view.Max.Y)
-						{
-							for(int i = left; i <= right; i++)
-							{
-								map[i, y] = value;
-							}
-						}
+						dest.FillXScan(clip, left, right, y, value);
+					}
+				}
+			}
+		}
+		
+		/// <summary>
+		/// Draws the outline of a rounded <see cref="Rectangle"/> in this <see cref="DataMap2D{T}">DataMap2D</see> with the given value.
+		/// </summary>
+		/// <param name="dest">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
+		/// <param name="rect">The <see cref="Rectangle"/> to fill.</param>
+		/// <param name = "r">The radius.</param>
+		/// <param name="value">The value.</param>
+		public static void DrawRoundedRectangle<T>(this DataMap2D<T> dest, Rectangle rect, int r, T value) where T : struct
+		{
+			dest.DrawRoundedRectangle(rect, r, r, value);
+		}
+		
+		/// <summary>
+		/// Draws the outline of a rounded <see cref="Rectangle"/> in this <see cref="DataMap2D{T}">DataMap2D</see> with the given value.
+		/// </summary>
+		/// <param name="dest">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
+		/// <param name="rect">The <see cref="Rectangle"/> to fill.</param>
+		/// <param name = "rx">The x radius.</param>
+		/// <param name = "ry">The y radius.</param>
+		/// <param name="value">The value.</param>
+		public static void DrawRoundedRectangle<T>(this DataMap2D<T> dest, Rectangle rect, int rx, int ry, T value) where T : struct
+		{
+			Rectangle clip = VectorUtil.Overlap((Rectangle)dest.Size, dest.GetClip(), rect);
+			if(clip.IsValid())
+			{
+				if(!DisableUnsafe && dest.UnsafeOperationsSupported())
+				{
+					UnsafeDataMapOperations2D<T>.DrawRoundedRectangle(clip, dest, rect, rx, ry, value);
+				}else
+				{
+					//draw top and bottom
+					dest.FillXScan(clip, rect.Min.X + rx, rect.Max.X - rx, rect.Min.Y, value);
+					dest.FillXScan(clip, rect.Min.X + rx, rect.Max.X - rx, rect.Max.Y, value);
+					//draw left and right
+					dest.FillYScan(clip, rect.Min.X, rect.Min.Y + ry, rect.Max.Y - ry, value);
+					dest.FillYScan(clip, rect.Max.X, rect.Min.Y + ry, rect.Max.Y - ry, value);
+					
+					double rySq = ry * ry;
+					int dx = (int)(Math.Sqrt(1 - (1 / rySq)) * rx);
+					int y;
+					int left;
+					int right;
+					int prevLeft = rect.Min.X + (rx - dx);
+					int prevRight = rect.Max.X - (rx - dx);
+					
+					for(int dy = 0; dy < ry; dy++, prevLeft = left, prevRight = right)
+					{
+						//find edges
+						dx = (int)(Math.Sqrt(1 - (((dy + 1) * (dy + 1)) / rySq)) * rx);
+						
+						left = rect.Min.X + (rx - dx);
+						right = rect.Max.X - (rx - dx);
+						
+						//fill scans
+						y = rect.Min.Y + (ry - dy);
+						dest.FillXScan(clip, prevLeft, left, y, value);
+						dest.FillXScan(clip, right, prevRight, y, value);
+						y = rect.Max.Y - (ry - dy);
+						dest.FillXScan(clip, prevLeft, left, y, value);
+						dest.FillXScan(clip, right, prevRight, y, value);
 					}
 				}
 			}
@@ -285,106 +468,60 @@
 		/// <summary>
 		/// Fills a rounded <see cref="Rectangle"/> in this <see cref="DataMap2D{T}">DataMap2D</see> with the given value.
 		/// </summary>
-		/// <param name="map">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
+		/// <param name="dest">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
 		/// <param name="rect">The <see cref="Rectangle"/> to fill.</param>
 		/// <param name = "r">The radius.</param>
 		/// <param name="value">The value.</param>
-		public static void FillRoundedRectangle<T>(this DataMap2D<T> map, Rectangle rect, int r, T value) where T : struct
+		public static void FillRoundedRectangle<T>(this DataMap2D<T> dest, Rectangle rect, int r, T value) where T : struct
 		{
-			map.FillRoundedRectangle(rect, r, r, value);
+			dest.FillRoundedRectangle(rect, r, r, value);
 		}
 		
 		/// <summary>
 		/// Fills a rounded <see cref="Rectangle"/> in this <see cref="DataMap2D{T}">DataMap2D</see> with the given value.
 		/// </summary>
-		/// <param name="map">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
+		/// <param name="dest">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
 		/// <param name="rect">The <see cref="Rectangle"/> to fill.</param>
 		/// <param name = "rx">The x radius.</param>
 		/// <param name = "ry">The y radius.</param>
 		/// <param name="value">The value.</param>
-		public static void FillRoundedRectangle<T>(this DataMap2D<T> map, Rectangle rect, int rx, int ry, T value) where T : struct
+		public static void FillRoundedRectangle<T>(this DataMap2D<T> dest, Rectangle rect, int rx, int ry, T value) where T : struct
 		{
-			Rectangle view = VectorUtil.Overlap((Rectangle)map.Size, map.GetClip(), rect);
-			if(view.IsValid())
+			Rectangle clip = VectorUtil.Overlap((Rectangle)dest.Size, dest.GetClip(), rect);
+			if(clip.IsValid())
 			{
-				if(map.UnsafeOperationsSupported())
+				if(!DisableUnsafe && dest.UnsafeOperationsSupported())
 				{
-					UnsafeDataMapOperations2D<T>.FillRoundedRectangle(map, rect, rx, ry, value, view);
+					UnsafeDataMapOperations2D<T>.FillRoundedRectangle(clip, dest, rect, rx, ry, value);
 				}else
 				{
-					//fill center, top, and bottom
-					for(int i = Math.Max(rect.Min.X + rx, view.Min.X); i <= Math.Min(rect.Max.X - rx, view.Max.X); i++)
+					//fill center, left and right
+					for(int j = Math.Max(rect.Min.Y + ry, clip.Min.Y); j <= Math.Min(rect.Max.Y - ry, clip.Max.Y); j++)
 					{
-						for(int j = Math.Max(rect.Min.Y, view.Min.Y); j <= Math.Min(rect.Max.Y, view.Max.Y); j++)
+						for(int i = clip.Min.X; i <= clip.Max.X; i++)
 						{
-							map[i, j] = value;
-						}
-					}
-					
-					//fill left and right
-					for(int j = Math.Max(rect.Min.Y + ry, view.Min.Y); j <= Math.Min(rect.Max.Y - ry, view.Max.Y); j++)
-					{
-						//fill left
-						for(int i = Math.Max(rect.Min.X, view.Min.X); i <= Math.Min(rect.Min.X + rx, view.Max.X); i++)
-						{
-							map[i, j] = value;
-						}
-						//fill right
-						for(int i = Math.Max(rect.Max.X - rx, view.Min.X); i <= Math.Min(rect.Max.X, view.Max.X); i++)
-						{
-							map[i, j] = value;
+							dest[i, j] = value;
 						}
 					}
 					
 					double rySq = ry * ry;
+					int dx;
+					int y;
+					int left;
+					int right;
+					
 					for(int dy = 1; dy <= ry; dy++)
 					{
 						//find edges
-						int dx = (int)(Math.Sqrt(1 - ((dy * dy) / rySq)) * rx);
+						dx = (int)(Math.Sqrt(1 - ((dy * dy) / rySq)) * rx);
+						left = rect.Min.X + (rx - dx);
+						right = rect.Max.X - (rx - dx);
 						
-						//fill scan
-						int left;
-						int right;
-						int y = rect.Min.Y + ry - dy;
-						if(y >= view.Min.Y && y <= view.Max.Y)
-						{
-							right = rect.Min.X + rx;
-							left = right - dx;
-							right = Math.Min(right, view.Max.X);
-							left = Math.Max(left, view.Min.X);
-							for(int i = left; i <= right; i++)
-							{
-								map[i, y] = value;
-							}
-							left = rect.Max.X - rx;
-							right = left + dx;
-							right = Math.Min(right, view.Max.X);
-							left = Math.Max(left, view.Min.X);
-							for(int i = left; i <= right; i++)
-							{
-								map[i, y] = value;
-							}
-						}
-						y = rect.Max.Y - ry + dy;
-						if(y >= view.Min.Y && y < view.Max.Y)
-						{
-							right = rect.Min.X + rx;
-							left = right - dx;
-							right = Math.Min(right, view.Max.X);
-							left = Math.Max(left, view.Min.X);
-							for(int i = left; i <= right; i++)
-							{
-								map[i, y] = value;
-							}
-							left = rect.Max.X - rx;
-							right = left + dx;
-							right = Math.Min(right, view.Max.X);
-							left = Math.Max(left, view.Min.X);
-							for(int i = left; i <= right; i++)
-							{
-								map[i, y] = value;
-							}
-						}
+						//fill scans
+						y = rect.Min.Y + (ry - dy);
+						dest.FillXScan(clip, left, right, y, value);
+						y = rect.Max.Y - (ry - dy);
+						dest.FillXScan(clip, left, right, y, value);
 					}
 				}
 			}
@@ -393,29 +530,29 @@
 		/// <summary>
 		/// Fills a triangle in this <see cref="DataMap2D{T}">DataMap2D</see> with the given value.
 		/// </summary>
-		/// <param name="map">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
+		/// <param name="dest">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
 		/// <param name = "scans">The scan storage. Generally should by exclusive to one image.</param>
 		/// <param name="v1">The first vertex.</param>
 		/// <param name="v2">The second vertex.</param>
 		/// <param name="v3">The third vertex.</param>
 		/// <param name="value">The value.</param>
-		public static void FillTriangle<T>(this DataMap2D<T> map, ref int[,] scans, T value, Point2D v1, Point2D v2, Point2D v3) where T : struct
+		public static void FillTriangle<T>(this DataMap2D<T> dest, ref int[,] scans, T value, Point2D v1, Point2D v2, Point2D v3) where T : struct
 		{
-			map.FillPolygon(ref scans, value, v1, v2, v3);
+			dest.FillPolygon(ref scans, value, v1, v2, v3);
 		}
 		
 		/// <summary>
 		/// Fills a polygon in this <see cref="DataMap2D{T}">DataMap2D</see> with the given value.
 		/// </summary>
-		/// <param name="map">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
+		/// <param name="dest">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
 		/// <param name = "scans">The scan storage. Generally should by exclusive to one image.</param>
 		/// <param name="value">The value.</param>
 		/// <param name="verts">The verticies of the polygon.</param>
-		public static void FillPolygon<T>(this DataMap2D<T> map, ref int[,] scans, T value, params Point2D[] verts) where T : struct
+		public static void FillPolygon<T>(this DataMap2D<T> dest, ref int[,] scans, T value, params Point2D[] verts) where T : struct
 		{
-			if(scans == null || scans.GetLength(0) != map.Height)
+			if(scans == null || scans.GetLength(0) != dest.Height)
 			{
-				scans = new int[map.Height, 2];
+				scans = new int[dest.Height, 2];
 			}
 			for(int i = 0; i < scans.GetLength(0); i++)
 			{
@@ -428,33 +565,33 @@
 			{
 				minY = Math.Min(minY, verts[i].Y);
 				maxY = Math.Max(maxY, verts[i].Y);
-				ScanLine<T>(map, scans, verts[i], verts[(i + 1) % verts.Length]);
+				ScanLine<T>(dest, scans, verts[i], verts[(i + 1) % verts.Length]);
 			}
 			
-			Rectangle view = VectorUtil.Overlap((Rectangle)map.Size, map.GetClip());
-			if(view.IsValid())
+			Rectangle clip = VectorUtil.Overlap((Rectangle)dest.Size, dest.GetClip());
+			if(clip.IsValid())
 			{
-				if(map.UnsafeOperationsSupported())
+				if(!DisableUnsafe && dest.UnsafeOperationsSupported())
 				{
-					UnsafeDataMapOperations2D<T>.FillScannedPolygon(map, scans, minY, maxY, value, view);
+					UnsafeDataMapOperations2D<T>.FillScannedPolygon(clip, dest, scans, minY, maxY, value);
 				}else
 				{
-					for(int y = Math.Max(minY, view.Min.Y); y <= Math.Min(maxY, view.Max.Y); y++)
+					for(int y = Math.Max(minY, clip.Min.Y); y <= Math.Min(maxY, clip.Max.Y); y++)
 					{
-						for(int x = Math.Max(scans[y, 0], view.Min.X); x <= Math.Min(scans[y, 1], view.Max.X); x++)
+						for(int x = Math.Max(scans[y, 0], clip.Min.X); x <= Math.Min(scans[y, 1], clip.Max.X); x++)
 						{
-							map[x, y] = value;
+							dest[x, y] = value;
 						}
 					}
 				}
 			}
 		}
 		
-		private static void ScanLine<T>(DataMap2D<T> map, int[,] scans, Point2D p1, Point2D p2) where T : struct
+		private static void ScanLine<T>(DataMap2D<T> dest, int[,] scans, Point2D p1, Point2D p2) where T : struct
 		{
 			if(p1.Y == p2.Y)
 			{
-				if(p1.Y >= 0 && p1.Y < map.Height)
+				if(p1.Y >= 0 && p1.Y < dest.Height)
 				{
 					scans[p1.Y, 0] = Math.Min(scans[p1.Y, 0], Math.Min(p1.X, p2.X));
 					scans[p1.Y, 1] = Math.Max(scans[p1.Y, 1], Math.Max(p1.X, p2.X));
@@ -473,7 +610,7 @@
 				x += dx * -y;
 				y = 0;
 			}
-			for(; y <= Math.Min(p2.Y, map.Height - 1); y++, x += dx)
+			for(; y <= Math.Min(p2.Y, dest.Height - 1); y++, x += dx)
 			{
 				scans[y, 0] = Math.Min(scans[y, 0], (int)x);
 				scans[y, 1] = Math.Max(scans[y, 1], (int)x);
