@@ -1007,5 +1007,227 @@
 				image[x, iy1] &= value;
 			}
 		}
+		
+		/// <summary>
+		/// Fills a triangle in this <see cref="Image"/> with the given value with the given render mode.
+		/// </summary>
+		/// <param name="image">The <see cref="Image"/>.</param>
+		/// <param name = "scans">The scan storage. Generally should by exclusive to one image.</param>
+		/// <param name="v1">The first vertex.</param>
+		/// <param name="v2">The second vertex.</param>
+		/// <param name="v3">The third vertex.</param>
+		/// <param name="value">The value.</param>
+		/// <param name="mode">The render mode.</param>
+		/// <param name="aa">True if the triangle is anti-aliased.</param>
+		public static void FillTriangle(this Image image, ref double[,] scans, ARGB value, RenderMode mode, bool aa, Point2D v1, Point2D v2, Point2D v3)
+		{
+			image.FillPolygon(ref scans, value, mode, aa, v1, v2, v3);
+		}
+		
+		/// <summary>
+		/// Fills a polygon in this <see cref="Image"/> with the given value with the given render mode.
+		/// </summary>
+		/// <param name="image">The <see cref="Image"/>.</param>
+		/// <param name = "scans">The scan storage. Generally should by exclusive to one image.</param>
+		/// <param name="verts">The verticies of the polygon.</param>
+		/// <param name="value">The value.</param>
+		/// <param name="mode">The render mode.</param>
+		/// <param name="aa">True if the polygon is anti-aliased.</param>
+		public static void FillPolygon(this Image image, ref double[,] scans, ARGB value, RenderMode mode, bool aa, params Point2D[] verts)
+		{
+			if(mode != RenderMode.NORMAL && value.A == 0) return;
+			if(!aa)
+			{
+				if(mode == RenderMode.NORMAL || mode == RenderMode.MASK)
+				{
+					image.FillPolygon(ref scans, value, verts);
+				}
+				if(mode == RenderMode.BLEND)
+				{
+					image.FillBlendPolygon(ref scans, value, verts);
+				}
+			}else
+			{
+				image.FillAAPolygon(ref scans, value, mode, verts);
+			}
+		}
+		
+		/// <summary>
+		/// Fills a blended polygon in this <see cref="Image"/> with the given value.
+		/// </summary>
+		/// <param name="dest">The <see cref="Image"/>.</param>
+		/// <param name = "scans">The scan storage. Generally should by exclusive to one image.</param>
+		/// <param name="value">The value.</param>
+		/// <param name="verts">The verticies of the polygon.</param>
+		public unsafe static void FillBlendPolygon(this Image dest, ref double[,] scans, ARGB value, params Point2D[] verts)
+		{
+			Rectangle clip = VectorUtil.Overlap((Rectangle)dest.Size, dest.GetClip());
+			if(clip.IsValid())
+			{
+				int minY, maxY;
+				dest.ScanPolygon(clip, ref scans, out minY, out maxY, verts);
+				
+				ARGB* destData = (ARGB*)dest.BeginUnsafeOperation();
+				destData += dest.GetRawDataOffset();
+				int destStride = dest.GetRawDataStride();
+				int destWidth = dest.Width;
+				
+				ARGB* destIndex;
+				ARGB* endIndex;
+				
+				int left;
+				int right;
+				
+				minY = Math.Max(minY, clip.Min.Y);
+				maxY = Math.Min(maxY, clip.Max.Y);
+				for(int j = minY; j <= maxY; j++)
+				{
+					left = Math.Max((int)Math.Floor(scans[j , 0]), clip.Min.X);
+					right = Math.Min((int)Math.Ceiling(scans[j, 1]), clip.Max.X);
+					
+					if(left <= right)
+					{
+						destIndex = destData + ((left + (j * destWidth)) * destStride);
+						endIndex = destIndex + (destStride * (right - left + 1));
+					
+						while(destIndex != endIndex)
+						{
+							*destIndex &= value;
+							destIndex += destStride;
+						}
+					}
+				}
+					
+				dest.EndUnsafeOperation();
+			}
+		}
+		
+		/// <summary>
+		/// Fills an anti-aliased polygon in this <see cref="Image"/> with the given value with the given render mode.
+		/// </summary>
+		/// <param name="image">The <see cref="Image"/>.</param>
+		/// <param name = "scans">The scan storage. Generally should by exclusive to one image.</param>
+		/// <param name="value">The value.</param>
+		/// <param name="verts">The verticies of the polygon.</param>
+		/// <param name="mode">The render mode.</param>
+		public unsafe static void FillAAPolygon(this Image image, ref double[,] scans, ARGB value, RenderMode mode, params Point2D[] verts)
+		{
+			Rectangle clip = VectorUtil.Overlap((Rectangle)image.Size, image.GetClip());
+			if(clip.IsValid())
+			{
+				int minY, maxY;
+				image.ScanPolygon(clip, ref scans, out minY, out maxY, verts);
+				
+				ARGB* destData = (ARGB*)image.BeginUnsafeOperation();
+				destData += image.GetRawDataOffset();
+				int destStride = image.GetRawDataStride();
+				int destWidth = image.Width;
+				
+				ARGB* destIndex;
+				ARGB* endIndex;
+				int left;
+				int right;
+			
+				minY = Math.Max(minY, clip.Min.Y);
+				maxY = Math.Min(maxY, clip.Max.Y);
+				for(int y = minY; y <= maxY; y++)
+				{
+					//x1 vars are x bottom side
+					//x2 vars are x top side
+					//xb vars are y bottom side
+					//xa vars are y top side
+					double x1 = Math.Max(scans[y, 0], clip.Min.X);
+					double x2 = Math.Min(scans[y, 1], clip.Max.X);
+					double x1b;
+					double x2b;
+					if(y > minY)
+					{
+						x1b = Math.Max(scans[y - 1, 0], clip.Min.X);
+						x2b = Math.Min(scans[y - 1, 1], clip.Max.X);
+						x1b = (x1b + x1) / 2;
+						x2b = (x2b + x2) / 2;
+					}else
+					{
+						x1b = x2b = x2;
+					}
+					double x1a;
+					double x2a;
+					if(y < maxY)
+					{
+						x1a = Math.Max(scans[y + 1, 0], clip.Min.X);
+						x2a = Math.Min(scans[y + 1, 1], clip.Max.X);
+						x1a = (x1a + x1) / 2;
+						x2a = (x2a + x2) / 2;
+					}else
+					{
+						x1a = x2a = x2;
+					}
+					//fix local extreme values
+					if(Math.Sign(x1 - x1b) != Math.Sign(x1a - x1))
+					{
+						x1b = x1a = x1;
+					}
+					if(Math.Sign(x2 - x2b) != Math.Sign(x2a - x2))
+					{
+						x2b = x2a = x2;
+					}
+					//fill scan
+					left = (int)Math.Ceiling(Math.Max(x1b, x1a));
+					right = (int)Math.Floor(Math.Min(x2b, x2a));
+					if(left <= right)
+					{
+						destIndex = destData + ((left + (y * destWidth)) * destStride);
+						endIndex = destIndex + (destStride * (right - left + 1));
+					
+						switch(mode)
+						{
+							case RenderMode.NORMAL:
+							case RenderMode.MASK:
+								while(destIndex != endIndex)
+								{
+									*destIndex = value;
+									destIndex += destStride;
+								}
+								break;
+							case RenderMode.BLEND:
+								while(destIndex != endIndex)
+								{
+									*destIndex &= value;
+									destIndex += destStride;
+								}
+								break;
+						}
+					}
+					
+					if(Math.Min(x1b, x1a) != left)
+						FillAAEdge(image, x1b, x1a, y, value, false);
+					if(Math.Max(x2b, x2a) != right)
+						FillAAEdge(image, x2b + 1, x2a + 1, y, value, true);
+				}
+			}
+		}
+		
+		private static void FillAAEdge(Image dest, double x1, double x2, int y, ARGB value, bool side)
+		{
+			if(x1 > x2) Util.Swap(ref x1, ref x2);
+			
+			double xmin;
+			double xmax = x1;
+			double ymin;
+			double ymax = 1;
+			double dydx = -1 / (x2 - x1);
+			if(x2 == x1) dydx = 0;
+			double alpha;
+			do
+			{
+				xmin = xmax;
+				xmax = Math.Min((int)xmin + 1, x2);
+				ymin = ymax;
+				ymax = ymin + (xmax - xmin) * dydx;
+				alpha = (xmin - (int)xmin) * ymin;
+				alpha += (ymax + ymin) * (xmax - xmin) / 2;
+				dest[(int)xmin, y] &= new ARGB((byte)(value.A * (side ? alpha : (1 - alpha))), value.RGB);
+			}while(xmax != x2);
+		}
 	}
 }
