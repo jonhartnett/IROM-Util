@@ -87,7 +87,7 @@
 		{
 			for(Entry entry = Header.Next; entry != Header; entry = entry.Next)
 			{
-				if(entry.Equals(value))
+				if(entry.Value.Equals(value))
 				{
 					Remove(entry);
 					return true;
