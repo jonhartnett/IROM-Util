@@ -82,7 +82,7 @@
 		/// <param name = "ymin">The min y scan.</param>
 		/// <param name = "ymax">The max y scan.</param>
 		/// <param name="value">The fill value.</param>
-		public delegate void UnsafeScannedPolygonDelegate(Rectangle clip, DataMap2D<T> dest, int[,] scans, int ymin, int ymax, T value);
+		public delegate void UnsafeScannedPolygonDelegate(Rectangle clip, DataMap2D<T> dest, double[,] scans, int ymin, int ymax, T value);
 		
 		/// <summary>
 		/// Delegate for unsafe blitting.
@@ -363,7 +363,7 @@
 		/// <param name = "ymin">The min y scan.</param>
 		/// <param name = "ymax">The max y scan.</param>
 		/// <param name="value">The fill value.</param>
-		internal static void FillScannedPolygon(Rectangle clip, DataMap2D<T> dest, int[,] scans, int ymin, int ymax, T value)
+		internal static void FillScannedPolygon(Rectangle clip, DataMap2D<T> dest, double[,] scans, int ymin, int ymax, T value)
 		{
 			FillScannedPolygonDelegate(clip, dest, scans, ymin, ymax, value);
 		}
@@ -873,7 +873,7 @@
 					dest.EndUnsafeOperation();
 				}
 				
-				public unsafe static void FillScannedPolygon(Rectangle clip, DataMap2D<#NAME#> dest, int[,] scans, int ymin, int ymax, #NAME# value)
+				public unsafe static void FillScannedPolygon(Rectangle clip, DataMap2D<#NAME#> dest, double[,] scans, int ymin, int ymax, #NAME# value)
 				{
 					#NAME#* destData = (#NAME#*)dest.BeginUnsafeOperation();
 					destData += dest.GetRawDataOffset();
@@ -890,8 +890,8 @@
 					ymax = Math.Min(ymax, clip.Max.Y);
 					for(int j = ymin; j <= ymax; j++)
 					{
-						left = Math.Max(scans[j, 0], clip.Min.X);
-						right = Math.Min(scans[j, 1], clip.Max.X);
+						left = Math.Max((int)Math.Floor(scans[j , 0]), clip.Min.X);
+						right = Math.Min((int)Math.Ceiling(scans[j, 1]), clip.Max.X);
 						
 						if(left <= right)
 						{

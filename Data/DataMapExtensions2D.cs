@@ -536,7 +536,7 @@
 		/// <param name="v2">The second vertex.</param>
 		/// <param name="v3">The third vertex.</param>
 		/// <param name="value">The value.</param>
-		public static void FillTriangle<T>(this DataMap2D<T> dest, ref int[,] scans, T value, Point2D v1, Point2D v2, Point2D v3) where T : struct
+		public static void FillTriangle<T>(this DataMap2D<T> dest, ref double[,] scans, T value, Point2D v1, Point2D v2, Point2D v3) where T : struct
 		{
 			dest.FillPolygon(ref scans, value, v1, v2, v3);
 		}
@@ -548,29 +548,13 @@
 		/// <param name = "scans">The scan storage. Generally should by exclusive to one image.</param>
 		/// <param name="value">The value.</param>
 		/// <param name="verts">The verticies of the polygon.</param>
-		public static void FillPolygon<T>(this DataMap2D<T> dest, ref int[,] scans, T value, params Point2D[] verts) where T : struct
+		public static void FillPolygon<T>(this DataMap2D<T> dest, ref double[,] scans, T value, params Point2D[] verts) where T : struct
 		{
-			if(scans == null || scans.GetLength(0) != dest.Height)
-			{
-				scans = new int[dest.Height, 2];
-			}
-			for(int i = 0; i < scans.GetLength(0); i++)
-			{
-				scans[i, 0] = int.MaxValue;
-				scans[i, 1] = int.MinValue;
-			}
-			int minY = int.MaxValue;
-			int maxY = int.MinValue;
-			for(int i = 0; i < verts.Length; i++)
-			{
-				minY = Math.Min(minY, verts[i].Y);
-				maxY = Math.Max(maxY, verts[i].Y);
-				ScanLine<T>(dest, scans, verts[i], verts[(i + 1) % verts.Length]);
-			}
-			
 			Rectangle clip = VectorUtil.Overlap((Rectangle)dest.Size, dest.GetClip());
 			if(clip.IsValid())
 			{
+				int minY, maxY;
+				dest.ScanPolygon(clip, ref scans, out minY, out maxY, verts);
 				if(!DisableUnsafe && dest.UnsafeOperationsSupported())
 				{
 					UnsafeDataMapOperations2D<T>.FillScannedPolygon(clip, dest, scans, minY, maxY, value);
@@ -578,7 +562,7 @@
 				{
 					for(int y = Math.Max(minY, clip.Min.Y); y <= Math.Min(maxY, clip.Max.Y); y++)
 					{
-						for(int x = Math.Max(scans[y, 0], clip.Min.X); x <= Math.Min(scans[y, 1], clip.Max.X); x++)
+						for(int x = Math.Max((int)Math.Floor(scans[y, 0]), clip.Min.X); x <= Math.Min((int)Math.Ceiling(scans[y, 1]), clip.Max.X); x++)
 						{
 							dest[x, y] = value;
 						}
@@ -587,33 +571,72 @@
 			}
 		}
 		
-		private static void ScanLine<T>(DataMap2D<T> dest, int[,] scans, Point2D p1, Point2D p2) where T : struct
+		/// <summary>
+		/// Scans the given polygon into the given scan buffer in the given clip.
+		/// Stores top and bottom scan indicies in minY and maxY.
+		/// </summary>
+		/// <param name="dest">The <see cref="DataMap2D{T}">DataMap2D</see> target.</param>
+		/// <param name="clip">The clip.</param>
+		/// <param name="scans">The scan buffer.</param>
+		/// <param name="minY">The y coord of the min scan.</param>
+		/// <param name="maxY">The y coord of the max scan.</param>
+		/// <param name="verts">The polygon.</param>
+		internal static void ScanPolygon<T>(this DataMap2D<T> dest, Rectangle clip, ref double[,] scans, out int minY, out int maxY, params Point2D[] verts) where T : struct
 		{
-			if(p1.Y == p2.Y)
+			if(scans == null || scans.GetLength(0) != dest.Height)
 			{
-				if(p1.Y >= 0 && p1.Y < dest.Height)
-				{
-					scans[p1.Y, 0] = Math.Min(scans[p1.Y, 0], Math.Min(p1.X, p2.X));
-					scans[p1.Y, 1] = Math.Max(scans[p1.Y, 1], Math.Max(p1.X, p2.X));
-				}
+				scans = new double[dest.Height, 2];
+			}
+			for(int i = 0; i < scans.GetLength(0); i++)
+			{
+				scans[i, 0] = double.PositiveInfinity;
+				scans[i, 1] = double.NegativeInfinity;
+			}
+			minY = int.MaxValue;
+			maxY = int.MinValue;
+			for(int i = 0; i < verts.Length; i++)
+			{
+				minY = Math.Min(minY, verts[i].Y);
+				maxY = Math.Max(maxY, verts[i].Y);
+				ScanLine(clip, scans, verts[i], verts[(i + 1) % verts.Length]);
+			}
+		}
+		
+		private static void ScanLine(Rectangle clip, double[,] scans, Point2D p1, Point2D p2)
+		{
+			if((p1.X < clip.Min.X && p2.X < clip.Min.X) ||
+			   (p1.X > clip.Max.X && p2.X > clip.Max.X) ||
+			   (p1.Y < clip.Min.Y && p2.Y < clip.Min.Y) ||
+			   (p1.Y > clip.Max.Y && p2.Y > clip.Max.Y))
+			{
 				return;
 			}
-			if(p2.Y < p1.Y)
+			if(p1.Y == p2.Y)
+			{
+				scans[p1.Y, 0] = Math.Min(scans[p1.Y, 0], Math.Min(p1.X, p2.X));
+				scans[p1.Y, 1] = Math.Max(scans[p1.Y, 1], Math.Max(p1.X, p2.X));
+				return;
+			}
+			
+			//p1.Y always less than p2.Y
+			if(p1.Y > p2.Y)
 			{
 				Util.Swap(ref p1, ref p2);
 			}
+			
 			double x = p1.X;
-			double dx = (p2.X - p1.X + 1) / (double)(p2.Y - p1.Y + 1);
+			double dx = (p2.X - p1.X) / (double)(p2.Y - p1.Y);
 			int y = p1.Y;
-			if(y < 0)
+			//start at beginning
+			if(y < clip.Min.Y)
 			{
-				x += dx * -y;
-				y = 0;
+				x += dx * (clip.Min.Y - y);
+				y = clip.Min.Y;
 			}
-			for(; y <= Math.Min(p2.Y, dest.Height - 1); y++, x += dx)
+			for(; y <= Math.Min(p2.Y, clip.Max.Y); y++, x += dx)
 			{
-				scans[y, 0] = Math.Min(scans[y, 0], (int)x);
-				scans[y, 1] = Math.Max(scans[y, 1], (int)x);
+				scans[y, 0] = Math.Min(scans[y, 0], x);
+				scans[y, 1] = Math.Max(scans[y, 1], x);
 			}
 		}
 	}
