@@ -117,6 +117,7 @@
 						fields[attr.Tag] = new Access(info, attr.FileTag);
 					}
 				}
+				fieldLookup[type] = fields;
 			}
 		}
 		
@@ -162,7 +163,7 @@
 								object result;
 								parser(parts[1], out result);
 								//set value
-								config.Set(result, instance);
+								config.Set(instance, result);
 								//success
 								fieldModified = true;
 							}else
@@ -194,7 +195,7 @@
 						serializers.TryGetValue(field.Value.GetDataType(), out serializer);
 						if(serializer == null)
 						{
-							serializer = (o => o.ToString());
+							serializer = (o => o == null ? "null" : o.ToString());
 						}
 						string key = field.Key;
 						if(prefix != null)
@@ -219,7 +220,7 @@
 		/// <returns>True if at least one field was loaded.</returns>
 		public static bool LoadConfig(this object obj, string path, string prefix = null, string fileTag = null, bool isReadonly = false)
 		{
-			if(prefix.Contains(":") || prefix.Contains("\n"))
+			if(prefix != null && (prefix.Contains(":") || prefix.Contains("\n")))
 			{
 				throw new Exception("Config prefixes cannot contain colons or new lines.");
 			}
@@ -241,7 +242,7 @@
 		/// <param name="fileTag">The file tag for this configuration.</param>
 		public static void SaveConfig(this object obj, string path, string prefix = null, string fileTag = null)
 		{
-			if(prefix.Contains(":") || prefix.Contains("\n"))
+			if(prefix != null && (prefix.Contains(":") || prefix.Contains("\n")))
 			{
 				throw new Exception("Config prefixes cannot contain colons or new lines.");
 			}
@@ -263,7 +264,7 @@
 			public Access(DataInfo info, string id)
 			{
 				Info = info;
-				if(typeof(Dynx<>).IsAssignableFrom(info.GetDataType()))
+				if(info.GetDataType().IsGenericType && (typeof(Dynx<>) == info.GetDataType().GetGenericTypeDefinition()))
 				{
 					SubInfo = info.GetDataType().GetProperty("Value");
 				}
