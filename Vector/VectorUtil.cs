@@ -7,16 +7,28 @@
 	/// </summary>
 	public static class VectorUtil
 	{
+		/// <summary>
+		/// Returns a random Vec2D with each component between 0.0 and 1.0.
+		/// </summary>
+		/// <returns>A Vec2D with each component greater than or equal to 0.0, and less than 1.0.</returns>
 		public static Vec2D Next2D(this Random rand)
 		{
 			return new Vec2D(rand.NextDouble(), rand.NextDouble());
 		}
 		
+		/// <summary>
+		/// Returns a random Vec3D with each component between 0.0 and 1.0.
+		/// </summary>
+		/// <returns>A Vec3D with each component greater than or equal to 0.0, and less than 1.0.</returns>
 		public static Vec3D Next3D(this Random rand)
 		{
 			return new Vec3D(rand.NextDouble(), rand.NextDouble(), rand.NextDouble());
 		}
 		
+		/// <summary>
+		/// Returns a random Vec4D with each component between 0.0 and 1.0.
+		/// </summary>
+		/// <returns>A Vec4D with each component greater than or equal to 0.0, and less than 1.0.</returns>
 		public static Vec4D Next4D(this Random rand)
 		{
 			return new Vec4D(rand.NextDouble(), rand.NextDouble(), rand.NextDouble(), rand.NextDouble());

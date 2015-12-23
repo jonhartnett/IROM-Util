@@ -7,6 +7,28 @@
 	/// </summary>
 	public static class ColorUtil
 	{
+		/// <summary>
+		/// Returns a random RGB color.
+		/// </summary>
+		/// <returns>A random RGB color from entire RGB range.</returns>
+		public static RGB NextRGB(this Random rand)
+		{
+			byte[] buffer = new byte[3];
+			rand.NextBytes(buffer);
+			return new RGB(buffer[0], buffer[1], buffer[2]);
+		}
+		
+		/// <summary>
+		/// Returns a random ARGB color.
+		/// </summary>
+		/// <returns>A random ARGB color from entire ARGB range.</returns>
+		public static ARGB NextARGB(this Random rand)
+		{
+			byte[] buffer = new byte[4];
+			rand.NextBytes(buffer);
+			return new ARGB(buffer[0], buffer[1], buffer[2], buffer[3]);
+		}
+		
         /// <summary>
         /// Returns the component-wise max of the given colors.
         /// </summary>
@@ -127,9 +149,9 @@
         /// <param name="mu">The mu value.</param>
         /// <param name="func">The interpolation function.</param>
         /// <returns>The interpolated byte.</returns>
-        private static byte InterpByte(byte bottom, byte top, double mu, Interpolation.InterpFunction interpFunc)
+        private static byte InterpByte(byte bottom, byte top, double mu, Interpolation.InterpFunction func)
         {
-        	return (byte)Util.Clip(interpFunc(bottom, top, mu), 0, 255);
+        	return (byte)Util.Clip(func(bottom, top, mu), 0, 255);
         }
         
         /// <summary>
