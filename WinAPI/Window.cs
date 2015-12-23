@@ -108,6 +108,16 @@
 		private Rectangle SavedStateBounds;
 		
 		/// <summary>
+		/// The old cursor to restore.
+		/// </summary>
+		private IntPtr OldCursor;
+		
+		/// <summary>
+		/// The states of inputs.
+		/// </summary>
+		public readonly InputState InputStates;
+		
+		/// <summary>
 		/// True if this <see cref="Window"/> is the current input target.
 		/// </summary>
 		public bool IsFocused
@@ -337,8 +347,6 @@
 			}
 		}
 		
-		private IntPtr OldCursor;
-		
 		/// <summary>
 		/// Creates a new <see cref="Window"/> with a size of 100x100.
 		/// </summary>
@@ -365,6 +373,7 @@
 		/// <param name="frameBufferType">The frame buffer type class.</param>
 		public Window(int width, int height, Type frameBufferType)
 		{
+			InputStates = new InputState(this);
 			Width = width;
 			Height = height;
 			if(!frameBufferType.IsSubclassOf(typeof(FrameBufferStrategy)) || frameBufferType.GetConstructor(Type.EmptyTypes) == null)
