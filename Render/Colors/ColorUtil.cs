@@ -149,7 +149,7 @@
         /// <param name="mu">The mu value.</param>
         /// <param name="func">The interpolation function.</param>
         /// <returns>The interpolated byte.</returns>
-        private static byte InterpByte(byte bottom, byte top, double mu, Interpolation.InterpFunction func)
+        private static byte InterpByte(byte bottom, byte top, double mu, InterpFunction func)
         {
         	return (byte)Util.Clip(func(bottom, top, mu), 0, 255);
         }
@@ -162,7 +162,7 @@
         /// <param name="mu">The mu value.</param>
         /// <param name="func">The interpolation function to use.</param>
         /// <returns>The resulting color.</returns>
-        public static RGB Interpolate(RGB bottom, RGB top, double mu, Interpolation.InterpFunction func)
+        public static RGB Interpolate(RGB bottom, RGB top, double mu, InterpFunction func)
         {
         	return new RGB(InterpByte(bottom.R, top.R, mu, func), InterpByte(bottom.G, top.G, mu, func), InterpByte(bottom.B, top.B, mu, func));
         }
@@ -175,7 +175,7 @@
         /// <param name="mu">The mu value.</param>
         /// <param name="func">The interpolation function to use.</param>
         /// <returns>The resulting color.</returns>
-        public static ARGB Interpolate(ARGB bottom, ARGB top, double mu, Interpolation.InterpFunction func)
+        public static ARGB Interpolate(ARGB bottom, ARGB top, double mu, InterpFunction func)
         {
         	return new ARGB(InterpByte(bottom.A, top.A, mu, func), InterpByte(bottom.R, top.R, mu, func), InterpByte(bottom.G, top.G, mu, func), InterpByte(bottom.B, top.B, mu, func));
         }
@@ -190,7 +190,7 @@
         /// <param name="mu">The mu value.</param>
         /// <param name="interpFunc">The extended interpolation function.</param>
         /// <returns>The interpolated byte.</returns>
-        private static byte InterpByte(byte past, byte bottom, byte top, byte future, double mu, Interpolation.ExtendedInterpFunction interpFunc)
+        private static byte InterpByte(byte past, byte bottom, byte top, byte future, double mu, ExtendedInterpFunction interpFunc)
         {
         	return (byte)Util.Clip(interpFunc(past, bottom, top, future, mu), 0, 255);
         }
@@ -205,7 +205,7 @@
         /// <param name="mu">The mu value.</param>
         /// <param name="func">The extended interpolation function to use.</param>
         /// <returns>The resulting color.</returns>
-        public static RGB Interpolate(RGB past, RGB bottom, RGB top, RGB future, double mu, Interpolation.ExtendedInterpFunction func)
+        public static RGB Interpolate(RGB past, RGB bottom, RGB top, RGB future, double mu, ExtendedInterpFunction func)
         {
         	return new RGB(InterpByte(past.R, bottom.R, top.R, future.R, mu, func), 
         	               InterpByte(past.G, bottom.G, top.G, future.G, mu, func), 
@@ -222,7 +222,7 @@
         /// <param name="mu">The mu value.</param>
         /// <param name="func">The extended interpolation function to use.</param>
         /// <returns>The resulting color.</returns>
-        public static ARGB Interpolate(ARGB past, ARGB bottom, ARGB top, ARGB future, double mu, Interpolation.ExtendedInterpFunction func)
+        public static ARGB Interpolate(ARGB past, ARGB bottom, ARGB top, ARGB future, double mu, ExtendedInterpFunction func)
         {
         	return new ARGB(InterpByte(past.A, bottom.A, top.A, future.A, mu, func), 
         	                InterpByte(past.R, bottom.R, top.R, future.R, mu, func),
