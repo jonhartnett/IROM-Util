@@ -4,30 +4,30 @@
 	using System.Linq;
 	
 	/// <summary>
+    /// Interpolates between the given values.
+    /// </summary>
+    /// <param name="bottom">The value at 0.</param>
+    /// <param name="top">The value at 1.</param>
+    /// <param name="mu">The distance.</param>
+    /// <returns>The interpolated value.</returns>
+    public delegate double InterpFunction(double bottom, double top, double mu);
+    
+    /// <summary>
+    /// Interpolates between the given values.
+    /// </summary>
+    /// <param name="past">The value at -1.</param>
+    /// <param name="bottom">The value at 0.</param>
+    /// <param name="top">The value at 1.</param>
+    /// <param name="future">The value at 2.</param>
+    /// <param name="mu">The distance.</param>
+    /// <returns>The interpolated value.</returns>
+    public delegate double ExtendedInterpFunction(double past, double bottom, double top, double future, double mu);
+	
+	/// <summary>
 	/// Stores methods for interpolating (or lerping) between values.
 	/// </summary>
     public static class Interpolation
     {
-        /// <summary>
-        /// Interpolates between the given values.
-        /// </summary>
-        /// <param name="bottom">The value at 0.</param>
-        /// <param name="top">The value at 1.</param>
-        /// <param name="mu">The distance.</param>
-        /// <returns>The interpolated value.</returns>
-        public delegate double InterpFunction(double bottom, double top, double mu);
-        
-        /// <summary>
-        /// Interpolates between the given values.
-        /// </summary>
-        /// <param name="past">The value at -1.</param>
-        /// <param name="bottom">The value at 0.</param>
-        /// <param name="top">The value at 1.</param>
-        /// <param name="future">The value at 2.</param>
-        /// <param name="mu">The distance.</param>
-        /// <returns>The interpolated value.</returns>
-        public delegate double ExtendedInterpFunction(double past, double bottom, double top, double future, double mu);
-    
         /// <summary>
         /// Linear interpolation function.
         /// Neither first nor second derivative is continuous.
