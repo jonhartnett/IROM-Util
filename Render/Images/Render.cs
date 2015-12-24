@@ -1059,7 +1059,7 @@
 		/// <param name = "scans">The scan storage. Generally should by exclusive to one image.</param>
 		/// <param name="value">The value.</param>
 		/// <param name="verts">The verticies of the polygon.</param>
-		public unsafe static void FillBlendPolygon(this Image dest, ref double[,] scans, ARGB value, params Point2D[] verts)
+		private unsafe static void FillBlendPolygon(this Image dest, ref double[,] scans, ARGB value, params Point2D[] verts)
 		{
 			Rectangle clip = VectorUtil.Overlap((Rectangle)dest.Size, dest.GetClip());
 			if(clip.IsValid())
@@ -1110,7 +1110,7 @@
 		/// <param name="value">The value.</param>
 		/// <param name="verts">The verticies of the polygon.</param>
 		/// <param name="mode">The render mode.</param>
-		public unsafe static void FillAAPolygon(this Image image, ref double[,] scans, ARGB value, RenderMode mode, params Point2D[] verts)
+		private unsafe static void FillAAPolygon(this Image image, ref double[,] scans, ARGB value, RenderMode mode, params Point2D[] verts)
 		{
 			Rectangle clip = VectorUtil.Overlap((Rectangle)image.Size, image.GetClip());
 			if(clip.IsValid())
@@ -1148,7 +1148,8 @@
 						x2b = (x2b + x2) / 2;
 					}else
 					{
-						x1b = x2b = x2;
+						x1b = x1;
+						x2b = x2;
 					}
 					double x1a;
 					double x2a;
@@ -1160,7 +1161,8 @@
 						x2a = (x2a + x2) / 2;
 					}else
 					{
-						x1a = x2a = x2;
+						x1a = x1;
+						x2a = x2;
 					}
 					//fix local extreme values
 					if(Math.Sign(x1 - x1b) != Math.Sign(x1a - x1))
@@ -1200,14 +1202,14 @@
 					}
 					
 					if(Math.Min(x1b, x1a) != left)
-						FillAAEdge(image, x1b, x1a, y, value, false);
+						FillLeftAAEdge(image, x1b, x1a, y, value);
 					if(Math.Max(x2b, x2a) != right)
-						FillAAEdge(image, x2b + 1, x2a + 1, y, value, true);
+						FillRightAAEdge(image, x2b + 1, x2a + 1, y, value);
 				}
 			}
 		}
 		
-		private static void FillAAEdge(Image dest, double x1, double x2, int y, ARGB value, bool side)
+		private static void FillLeftAAEdge(Image dest, double x1, double x2, int y, ARGB value)
 		{
 			if(x1 > x2) Util.Swap(ref x1, ref x2);
 			
@@ -1226,7 +1228,30 @@
 				ymax = ymin + (xmax - xmin) * dydx;
 				alpha = (xmin - (int)xmin) * ymin;
 				alpha += (ymax + ymin) * (xmax - xmin) / 2;
-				dest[(int)xmin, y] &= new ARGB((byte)(value.A * (side ? alpha : (1 - alpha))), value.RGB);
+				dest[(int)xmin, y] &= new ARGB((byte)(value.A * (1 - alpha)), value.RGB);
+			}while(xmax != x2);
+		}
+		
+		private static void FillRightAAEdge(Image dest, double x1, double x2, int y, ARGB value)
+		{
+			if(x1 > x2) Util.Swap(ref x1, ref x2);
+			
+			double xmin;
+			double xmax = x1;
+			double ymin;
+			double ymax = 1;
+			double dydx = -1 / (x2 - x1);
+			if(x2 == x1) dydx = 0;
+			double alpha;
+			do
+			{
+				xmin = xmax;
+				xmax = Math.Min((int)xmin + 1, x2);
+				ymin = ymax;
+				ymax = ymin + (xmax - xmin) * dydx;
+				alpha = (xmin - (int)xmin) * ymin;
+				alpha += (ymax + ymin) * (xmax - xmin) / 2;
+				dest[(int)xmin, y] &= new ARGB((byte)(value.A * alpha), value.RGB);
 			}while(xmax != x2);
 		}
 	}
