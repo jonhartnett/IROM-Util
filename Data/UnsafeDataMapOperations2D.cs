@@ -57,10 +57,9 @@
 		/// <param name="clip">The clip.</param>
 		/// <param name="dest">The dest dest.</param>
 		/// <param name="c">The center of the circle.</param>
-		/// <param name="rx">The x radius of the circle.</param>
-		/// <param name="ry">The x radius of the circle.</param>
+		/// <param name="r">The radii of the circle.</param>
 		/// <param name="value">The fill value.</param>
-		public delegate void UnsafeEllipseDelegate(Rectangle clip, DataMap2D<T> dest, Point2D c, int rx, int ry, T value);
+		public delegate void UnsafeEllipseDelegate(Rectangle clip, DataMap2D<T> dest, Point2D c, Point2D r, T value);
 		
 		/// <summary>
 		/// A delegate that performs unsafe rounded rectangle operations for a <see cref="DataMap2D{T}">DataMap2D</see>.
@@ -68,10 +67,9 @@
 		/// <param name="clip">The clip.</param>
 		/// <param name="dest">The dest dest.</param>
 		/// <param name="rect">The outer bounds of the rectangle.</param>
-		/// <param name="rx">The x radius of the curvature.</param>
-		/// <param name="ry">The x radius of the curvature.</param>
+		/// <param name="r">The radii of the curvature.</param>
 		/// <param name="value">The fill value.</param>
-		public delegate void UnsafeRoundedRectangleDelegate(Rectangle clip, DataMap2D<T> dest, Rectangle rect, int rx, int ry, T value);
+		public delegate void UnsafeRoundedRectangleDelegate(Rectangle clip, DataMap2D<T> dest, Rectangle rect, Point2D r, T value);
 		
 		/// <summary>
 		/// A delegate that performs unsafe pre-scanned polygon filling for a <see cref="DataMap2D{T}">DataMap2D</see>.
@@ -303,13 +301,12 @@
 		/// </summary>
 		/// <param name="clip">The clip.</param>
 		/// <param name="dest">The dest dest.</param>
-		/// <param name="c">The center of the circle.</param>
-		/// <param name="rx">The x radius of the circle.</param>
-		/// <param name="ry">The x radius of the circle.</param>
+		/// <param name="c">The center of the ellipse.</param>
+		/// <param name="r">The radii of the ellipse.</param>
 		/// <param name="value">The fill value.</param>
-		internal static void DrawEllipse(Rectangle clip, DataMap2D<T> dest, Point2D c, int rx, int ry, T value)
+		internal static void DrawEllipse(Rectangle clip, DataMap2D<T> dest, Point2D c, Point2D r, T value)
 		{
-			DrawEllipseDelegate(clip, dest, c, rx, ry, value);
+			DrawEllipseDelegate(clip, dest, c, r, value);
 		}
 		
 		/// <summary>
@@ -317,13 +314,12 @@
 		/// </summary>
 		/// <param name="clip">The clip.</param>
 		/// <param name="dest">The dest dest.</param>
-		/// <param name="c">The center of the circle.</param>
-		/// <param name="rx">The x radius of the circle.</param>
-		/// <param name="ry">The x radius of the circle.</param>
+		/// <param name="c">The center of the ellipse.</param>
+		/// <param name="r">The radii of the ellipse.</param>
 		/// <param name="value">The fill value.</param>
-		internal static void FillEllipse(Rectangle clip, DataMap2D<T> dest, Point2D c, int rx, int ry, T value)
+		internal static void FillEllipse(Rectangle clip, DataMap2D<T> dest, Point2D c, Point2D r, T value)
 		{
-			FillEllipseDelegate(clip, dest, c, rx, ry, value);
+			FillEllipseDelegate(clip, dest, c, r, value);
 		}
 		
 		/// <summary>
@@ -332,12 +328,11 @@
 		/// <param name="clip">The clip.</param>
 		/// <param name="dest">The dest dest.</param>
 		/// <param name="rect">The outer bounds of the rectangle.</param>
-		/// <param name="rx">The x radius of the curvature.</param>
-		/// <param name="ry">The x radius of the curvature.</param>
+		/// <param name="r">The radii of the curvature.</param>
 		/// <param name="value">The fill value.</param>
-		internal static void DrawRoundedRectangle(Rectangle clip, DataMap2D<T> dest, Rectangle rect, int rx, int ry, T value)
+		internal static void DrawRoundedRectangle(Rectangle clip, DataMap2D<T> dest, Rectangle rect, Point2D r, T value)
 		{
-			DrawRoundedRectangleDelegate(clip, dest, rect, rx, ry, value);
+			DrawRoundedRectangleDelegate(clip, dest, rect, r, value);
 		}
 		
 		/// <summary>
@@ -346,12 +341,11 @@
 		/// <param name="clip">The clip.</param>
 		/// <param name="dest">The dest dest.</param>
 		/// <param name="rect">The outer bounds of the rectangle.</param>
-		/// <param name="rx">The x radius of the curvature.</param>
-		/// <param name="ry">The x radius of the curvature.</param>
+		/// <param name="r">The x radii of the curvature.</param>
 		/// <param name="value">The fill value.</param>
-		internal static void FillRoundedRectangle(Rectangle clip, DataMap2D<T> dest, Rectangle rect, int rx, int ry, T value)
+		internal static void FillRoundedRectangle(Rectangle clip, DataMap2D<T> dest, Rectangle rect, Point2D r, T value)
 		{
-			FillRoundedRectangleDelegate(clip, dest, rect, rx, ry, value);
+			FillRoundedRectangleDelegate(clip, dest, rect, r, value);
 		}
 		
 		/// <summary>
@@ -487,7 +481,7 @@
 					dest.EndUnsafeOperation();
 				}
 				
-				public unsafe static void DrawEllipse(Rectangle clip, DataMap2D<#NAME#> dest, Point2D c, int rx, int ry, #NAME# value)
+				public unsafe static void DrawEllipse(Rectangle clip, DataMap2D<#NAME#> dest, Point2D c, Point2D r, #NAME# value)
 				{
 					#NAME#* destData = (#NAME#*)dest.BeginUnsafeOperation();
 					destData += dest.GetRawDataOffset();
@@ -497,13 +491,13 @@
 					#NAME#* destIndex;
 					#NAME#* endIndex;
 					
-					double rySq = ry * ry;
+					double rySq = r.Y * r.Y;
 					int dx;
 					int y;
 					int left;
 					int right;
-					int prevLeft = c.X - rx;
-					int prevRight = c.X + rx;
+					int prevLeft = c.X - r.X;
+					int prevRight = c.X + r.X;
 					
 					//fill edge dots
 					if(c.Y >= clip.Min.Y && c.Y <= clip.Max.Y)
@@ -520,12 +514,12 @@
 					
 					if(c.X >= clip.Min.X && c.X <= clip.Max.X)
 					{
-						y = c.Y - ry;
+						y = c.Y - r.Y;
 						if(y >= clip.Min.Y && y <= clip.Max.Y)
 						{
 							dest[c.X, y] = value;
 						}
-						y = c.Y + ry;
+						y = c.Y + r.Y;
 						if(y >= clip.Min.Y && y <= clip.Max.Y)
 						{
 							dest[c.X, y] = value;
@@ -534,10 +528,10 @@
 					
 					int scanLeft;
 					int scanRight;
-					for(int dy = 0; dy < ry; dy++, prevLeft = left, prevRight = right)
+					for(int dy = 0; dy < r.Y; dy++, prevLeft = left, prevRight = right)
 					{
 						//find edges
-						dx = (int)(Math.Sqrt(1 - (((dy + 1) * (dy + 1)) / rySq)) * rx);
+						dx = (int)(Math.Sqrt(1 - (((dy + 1) * (dy + 1)) / rySq)) * r.Y);
 						
 						left = c.X - dx;
 						right = c.X + dx;
@@ -595,7 +589,7 @@
 					dest.EndUnsafeOperation();
 				}
 				
-				public unsafe static void FillEllipse(Rectangle clip, DataMap2D<#NAME#> dest, Point2D c, int rx, int ry, #NAME# value)
+				public unsafe static void FillEllipse(Rectangle clip, DataMap2D<#NAME#> dest, Point2D c, Point2D r, #NAME# value)
 				{
 					#NAME#* destData = (#NAME#*)dest.BeginUnsafeOperation();
 					destData += dest.GetRawDataOffset();
@@ -605,11 +599,11 @@
 					#NAME#* destIndex;
 					#NAME#* endIndex;
 					
-					double rySq = ry * ry;
-					for(int dy = 0; dy <= ry; dy++)
+					double rySq = r.Y * r.Y;
+					for(int dy = 0; dy <= r.Y; dy++)
 					{
 						//find edges
-						int dx = (int)(Math.Sqrt(1 - ((dy * dy) / rySq)) * rx);
+						int dx = (int)(Math.Sqrt(1 - ((dy * dy) / rySq)) * r.X);
 						
 						int left = c.X - dx;
 						int right = c.X + dx;
@@ -649,7 +643,7 @@
 					dest.EndUnsafeOperation();
 				}
 				
-				public unsafe static void DrawRoundedRectangle(Rectangle clip, DataMap2D<#NAME#> dest, Rectangle rect, int rx, int ry, #NAME# value)
+				public unsafe static void DrawRoundedRectangle(Rectangle clip, DataMap2D<#NAME#> dest, Rectangle rect, Point2D r, #NAME# value)
 				{
 					#NAME#* destData = (#NAME#*)dest.BeginUnsafeOperation();
 					destData += dest.GetRawDataOffset();
@@ -659,17 +653,17 @@
 					#NAME#* destIndex;
 					#NAME#* endIndex;
 					
-					double rySq = ry * ry;
-					int dx = (int)(Math.Sqrt(1 - (1 / rySq)) * rx);
+					double rySq = r.Y * r.Y;
+					int dx = (int)(Math.Sqrt(1 - (1 / rySq)) * r.X);
 					int y;
 					int left;
 					int right;
-					int prevLeft = rect.Min.X + (rx - dx);
-					int prevRight = rect.Max.X - (rx - dx);
+					int prevLeft = rect.Min.X + (r.X - dx);
+					int prevRight = rect.Max.X - (r.X - dx);
 					
 					//draw top and bottom
-					left = Math.Max(rect.Min.X + rx, clip.Min.X);
-					right = Math.Min(rect.Max.X - rx + 1, clip.Max.X);
+					left = Math.Max(rect.Min.X + r.X, clip.Min.X);
+					right = Math.Min(rect.Max.X - r.X + 1, clip.Max.X);
 					if(left <= right)
 					{
 						if(rect.Min.Y >= clip.Min.Y)
@@ -696,8 +690,8 @@
 						}
 					}
 					//draw left and right
-					int bottom = Math.Max(rect.Min.Y + ry + 1, clip.Min.Y);
-					int top = Math.Min(rect.Max.Y - ry, clip.Max.Y);
+					int bottom = Math.Max(rect.Min.Y + r.Y + 1, clip.Min.Y);
+					int top = Math.Min(rect.Max.Y - r.Y, clip.Max.Y);
 					if(bottom <= top)
 					{
 						if(rect.Min.X >= clip.Min.X)
@@ -726,15 +720,15 @@
 					
 					int scanLeft;
 					int scanRight;
-					for(int dy = 0; dy <= ry; dy++, prevLeft = left, prevRight = right)
+					for(int dy = 0; dy <= r.Y; dy++, prevLeft = left, prevRight = right)
 					{
 						//find edges
-						dx = (int)(Math.Sqrt(1 - ((dy * dy) / rySq)) * rx);
-						left = rect.Min.X + (rx - dx);
-						right = rect.Max.X - (rx - dx);
+						dx = (int)(Math.Sqrt(1 - ((dy * dy) / rySq)) * r.X);
+						left = rect.Min.X + (r.X - dx);
+						right = rect.Max.X - (r.X - dx);
 						
 						//fill scans
-						y = rect.Min.Y + (ry - dy) + 1;
+						y = rect.Min.Y + (r.Y - dy) + 1;
 						if(y >= clip.Min.Y && y <= clip.Max.Y)
 						{
 							scanLeft = Math.Max(prevLeft, clip.Min.X);
@@ -765,7 +759,7 @@
 								}
 							}
 						}
-						y = rect.Max.Y - (ry - dy) - 1;
+						y = rect.Max.Y - (r.Y - dy) - 1;
 						if(y >= clip.Min.Y && y <= clip.Max.Y)
 						{
 							scanLeft = Math.Max(prevLeft, clip.Min.X);
@@ -801,7 +795,7 @@
 					dest.EndUnsafeOperation();
 				}
 				
-				public unsafe static void FillRoundedRectangle(Rectangle clip, DataMap2D<#NAME#> dest, Rectangle rect, int rx, int ry, #NAME# value)
+				public unsafe static void FillRoundedRectangle(Rectangle clip, DataMap2D<#NAME#> dest, Rectangle rect, Point2D r, #NAME# value)
 				{
 					#NAME#* destData = (#NAME#*)dest.BeginUnsafeOperation();
 					destData += dest.GetRawDataOffset();
@@ -811,14 +805,14 @@
 					#NAME#* destIndex;
 					#NAME#* endIndex;
 					
-					double rySq = ry * ry;
+					double rySq = r.Y * r.Y;
 					int dx;
 					int y;
 					int left;
 					int right;
 					
 					//fill center, left and right
-					for(int j = Math.Max(rect.Min.Y + ry, clip.Min.Y); j <= Math.Min(rect.Max.Y - ry, clip.Max.Y); j++)
+					for(int j = Math.Max(rect.Min.Y + r.Y, clip.Min.Y); j <= Math.Min(rect.Max.Y - r.Y, clip.Max.Y); j++)
 					{
 						left = clip.Min.X;
 						right = clip.Max.X;
@@ -836,15 +830,15 @@
 						}
 					}
 					
-					for(int dy = 1; dy <= ry; dy++)
+					for(int dy = 1; dy <= r.Y; dy++)
 					{
 						//find edges
-						dx = (int)(Math.Sqrt(1 - ((dy * dy) / rySq)) * rx);
-						left = rect.Min.X + (rx - dx);
-						right = rect.Max.X - (rx - dx);
+						dx = (int)(Math.Sqrt(1 - ((dy * dy) / rySq)) * r.X);
+						left = rect.Min.X + (r.X - dx);
+						right = rect.Max.X - (r.X - dx);
 						
 						//fill scans
-						y = rect.Min.Y + (ry - dy);
+						y = rect.Min.Y + (r.Y - dy);
 						if(left <= right)
 						{
 							destIndex = destData + ((left + (y * destWidth)) * destStride);
@@ -856,7 +850,7 @@
 								destIndex += destStride;
 							}
 						}
-						y = rect.Max.Y - (ry - dy);
+						y = rect.Max.Y - (r.Y - dy);
 						if(left <= right)
 						{
 							destIndex = destData + ((left + (y * destWidth)) * destStride);

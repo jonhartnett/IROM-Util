@@ -11,12 +11,12 @@
     {
     	private Point2D BaseSize;
     	
-    	/// <summary>
-    	/// Gets the size of this map. For resizing, see <see cref="Resize"/>.
-    	/// </summary>
-    	public Point2D Size
-    	{
-    		get
+		/// <summary>
+		/// Gets the size of this map. For resizing, see <see cref="Resize"/>.
+		/// </summary>
+		public Point2D Size 
+		{
+			get
     		{
     			return BaseSize;
     		}
@@ -24,7 +24,7 @@
     		{
     			BaseSize = value;
     		}
-    	}
+		}
     	
     	/// <summary>
     	/// Gets the width (x-size) of this map. For resizing, see <see cref="Resize"/>.
@@ -144,6 +144,7 @@
         
         /// <summary>
         /// Resizes the underlying data structure of this <see cref="DataMap2D{T}">DataMap2D</see>.
+        /// Width and Height still contain the old size at the time of the call.
         /// </summary>
         /// <param name="width">The new width.</param>
         /// <param name="height">The new height.</param>
@@ -165,9 +166,9 @@
             {
             	return;
             }
+            BaseResize(width, height);
             Width = width;
             Height = height;
-            BaseResize(width, height);
         }
         
         /// <summary>

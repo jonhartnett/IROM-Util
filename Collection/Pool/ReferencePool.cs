@@ -11,7 +11,7 @@
     /// <typeparam name="T">The type of object in the pool.</typeparam>
     public static class ReferencePool<T> where T: class, new()
     {
-        private static List<T> ObjPool = new List<T>();
+        private static readonly List<T> ObjPool = new List<T>();
         // disable once StaticFieldInGenericType
         private static int Index = 0;
 

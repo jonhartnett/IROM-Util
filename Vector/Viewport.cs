@@ -85,29 +85,6 @@
 			get{return Max.Y - Min.Y;}
 			set{Max.Y = Min.Y + value;}
 		}
-		
-		/// <summary>
-        /// Creates a new <see cref="Viewport"/> with the given values.
-        /// </summary>
-        /// <param name="x">The x value.</param>
-        /// <param name="y">The y value.</param>
-        /// <param name="w">The width.</param>
-        /// <param name="h">The height.</param>
-        public Viewport(double x, double y, double w, double h) : this(new Vec2D(x, y), new Vec2D(x + w, y + h))
-        {
-        	
-        }
-        
-        /// <summary>
-        /// Creates a new <see cref="Viewport"/> with the given values.
-        /// </summary>
-        /// <param name="min">The minimum coordinates.</param>
-        /// <param name="max">The maximum coordinates.</param>
-        public Viewport(Vec2D min, Vec2D max)
-        {
-        	Min = min;
-        	Max = max;
-        }
         
         public override string ToString()
 		{
@@ -160,14 +137,44 @@
         	Size = VectorUtil.Max(Size, size);
         }
         
+         /// <summary>
+        /// Returns true if the given x coordinate is within this <see cref="Viewport"/>'s bounds.
+        /// </summary>
+        /// <param name="xcoord">The coordinate.</param>
+        /// <returns>True if within, else false.</returns>
+        public bool ContainsX(double xcoord)
+        {
+        	return xcoord >= Min.X && xcoord <= Max.X;
+        }
+        
         /// <summary>
-        /// Returns true if the given <see cref="Point2D"/> is within this <see cref="Viewport"/>'s bounds.
+        /// Returns true if the given y coordinate is within this <see cref="Viewport"/>'s bounds.
+        /// </summary>
+        /// <param name="ycoord">The coordinate.</param>
+        /// <returns>True if within, else false.</returns>
+        public bool ContainsY(double ycoord)
+        {
+        	return ycoord >= Min.Y && ycoord <= Max.Y;
+        }
+        
+        /// <summary>
+        /// Returns true if the given <see cref="Vec2D"/> is within this <see cref="Viewport"/>'s bounds.
         /// </summary>
         /// <param name="vec">The vec.</param>
         /// <returns>True if within, else false.</returns>
         public bool Contains(Vec2D vec)
         {
-        	return vec.X >= Min.X && vec.Y >= Min.Y && vec.X <= Max.X && vec.Y <= Max.Y;
+        	return ContainsX(vec.X) && ContainsY(vec.Y);
+        }
+        
+        /// <summary>
+        /// Returns true if the given <see cref="Viewport"/> is entirely within this <see cref="Viewport"/>'s bounds.
+        /// </summary>
+        /// <param name="view">The rectangle.</param>
+        /// <returns>True if within, else false.</returns>
+        public bool Contains(Viewport view)
+        {
+        	return view.Min.X >= Min.X && view.Min.Y >= Min.Y && view.Max.X <= Max.X && view.Max.Y <= Max.Y;
         }
         
 		/// <summary>
@@ -178,7 +185,7 @@
         /// <returns>The resulting view.</returns>
         public static explicit operator Viewport(Vec2D vec)
         {
-        	return new Viewport(0, 0, vec.X, vec.Y);
+        	return new Viewport{Position = 0, Size = vec};
         }
         
         /// <summary>

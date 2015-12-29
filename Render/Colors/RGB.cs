@@ -193,9 +193,9 @@
         /// <returns>The product <see cref="RGB"/>.</returns>
         public static RGB operator *(RGB color, double val)
         {
-        	return new RGB((byte)Util.Clip((int)(color.R * val), 0, 255), 
-        	               (byte)Util.Clip((int)(color.G * val), 0, 255), 
-        	               (byte)Util.Clip((int)(color.B * val), 0, 255));
+        	return new RGB((byte)Math.Min(Math.Max(color.R * val, 0), 255),
+        	               (byte)Math.Min(Math.Max(color.G * val, 0), 255), 
+        	               (byte)Math.Min(Math.Max(color.B * val, 0), 255));
         }
         
         /// <summary>
@@ -206,9 +206,9 @@
         /// <returns>The product <see cref="RGB"/>.</returns>
         public static RGB operator *(RGB color, Vec3D vec)
         {
-        	return new RGB((byte)Util.Clip((int)(color.R * vec.X), 0, 255), 
-        	               (byte)Util.Clip((int)(color.G * vec.Y), 0, 255), 
-        	               (byte)Util.Clip((int)(color.B * vec.Z), 0, 255));
+        	return new RGB((byte)Math.Min(Math.Max(color.R * vec.X, 0), 255),
+        	               (byte)Math.Min(Math.Max(color.G * vec.Y, 0), 255), 
+        	               (byte)Math.Min(Math.Max(color.B * vec.Z, 0), 255));
         }
 
         /// <summary>
@@ -219,9 +219,9 @@
         /// <returns>The quotient <see cref="RGB"/>.</returns>
         public static RGB operator /(RGB color, double val)
         {
-            return new RGB((byte)Util.Clip((int)(color.R / val), 0, 255), 
-        	               (byte)Util.Clip((int)(color.G / val), 0, 255), 
-        	               (byte)Util.Clip((int)(color.B / val), 0, 255));
+            return new RGB((byte)Math.Min(Math.Max(color.R / val, 0), 255),
+        	               (byte)Math.Min(Math.Max(color.G / val, 0), 255), 
+        	               (byte)Math.Min(Math.Max(color.B / val, 0), 255));
         }
         
         /// <summary>
@@ -232,9 +232,9 @@
         /// <returns>The quotient <see cref="RGB"/>.</returns>
         public static RGB operator /(RGB color, Vec3D vec)
         {
-        	return new RGB((byte)Util.Clip((int)(color.R / vec.X), 0, 255), 
-        	               (byte)Util.Clip((int)(color.G / vec.Y), 0, 255), 
-        	               (byte)Util.Clip((int)(color.B / vec.Z), 0, 255));
+        	return new RGB((byte)Math.Min(Math.Max(color.R / vec.X, 0), 255),
+        	               (byte)Math.Min(Math.Max(color.G / vec.Y, 0), 255), 
+        	               (byte)Math.Min(Math.Max(color.B / vec.Z, 0), 255));
         }
         
         /// <summary>

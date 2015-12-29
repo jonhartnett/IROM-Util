@@ -1,6 +1,7 @@
 ﻿namespace IROM.Util
 {
 	using System;
+	using System.Collections.Generic;
 	
 	/// <summary>
 	/// A render buffer for a Frame.
@@ -14,7 +15,7 @@
 		
 		public FrameBuffer()
 		{
-			Image = new Image(1, 1);
+			Image = new Image(1, 1, true);
 			LastFrameId = 0;
 		}
 	}
@@ -40,12 +41,17 @@
 		/// Gets the current frame to be displayed.
 		/// </summary>
 		/// <returns>The display frame.</returns>
-		public abstract DIBImage GetDisplayFrame();
+		public abstract FrameBuffer GetDisplayFrame();
 		
 		/// <summary>
 		/// Gets the current frame for rendering.
 		/// </summary>
 		/// <returns>The render frame.</returns>
 		public abstract FrameBuffer GetRenderFrame();
+		
+		/// <summary>
+		/// Returns the buffers used by this strategy.
+		/// </summary>
+		public abstract FrameBuffer[] GetBuffers();
 	}
 }

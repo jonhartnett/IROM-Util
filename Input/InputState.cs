@@ -64,11 +64,11 @@
 		public InputState(Window window)
 		{
 			//register with window
-			window.OnMouseMove += (sender, e) => this.MousePosition = e.Coords;
-			window.OnMousePress += (sender, e) => this[e.Button] = e.Pressed;
-			window.OnMouseRelease += (sender, e) => this[e.Button] = e.Pressed;
-			window.OnKeyPress += (sender, e) => this[e.Button] = e.Pressed;
-			window.OnKeyRelease += (sender, e) => this[e.Button] = e.Pressed;
+			window.OnMouseMove += (coords, delta) => this.MousePosition = coords;
+			window.OnMousePress += button => this[button] = true;
+			window.OnMouseRelease += button => this[button] = false;
+			window.OnKeyPress += button => this[button] = true;
+			window.OnKeyRelease += button => this[button] = false;
 		}
 	}
 }

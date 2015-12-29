@@ -7,7 +7,6 @@
 	/// </summary>
 	public class DoubleBufferStrategy : FrameBufferStrategy
 	{
-		private readonly DIBImage Screen;
 		private FrameBuffer FrontBuffer;
 		private FrameBuffer BackBuffer;
 		
@@ -16,33 +15,26 @@
 		/// </summary>
 		public DoubleBufferStrategy()
 		{
-			Screen = new DIBImage(1, 1);
 			FrontBuffer = new FrameBuffer();
 			BackBuffer = new FrameBuffer();
 		}
 		
-		/// <summary>
-		/// Gets the current frame to be displayed.
-		/// </summary>
-		/// <returns>The display frame.</returns>
-		public override DIBImage GetDisplayFrame()
+		public override FrameBuffer GetDisplayFrame()
 		{
-			//always match screen bounds to current window bounds
-			Screen.Resize(Width, Height);
-			lock(this) Screen.Copy(FrontBuffer.Image);
-			return Screen;
+			//always match buffer bounds to current window bounds
+			Util.Swap(ref BackBuffer, ref FrontBuffer);
+			FrontBuffer.Image.Resize(Width, Height);
+			return FrontBuffer;
 		}
 		
-		/// <summary>
-		/// Gets the current frame for rendering.
-		/// </summary>
-		/// <returns>The render frame.</returns>
 		public override FrameBuffer GetRenderFrame()
 		{
-			lock(this) Util.Swap(ref BackBuffer, ref FrontBuffer);
-			//always match buffer bounds to current window bounds
-			BackBuffer.Image.Resize(Width, Height);
 			return BackBuffer;
+		}
+		
+		public override FrameBuffer[] GetBuffers()
+		{
+			return new []{FrontBuffer, BackBuffer};
 		}
 	}
 }

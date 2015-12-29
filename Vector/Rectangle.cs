@@ -85,29 +85,6 @@
 			get{return Max.Y - Min.Y + 1;}
 			set{Max.Y = Min.Y + value - 1;}
 		}
-		
-		/// <summary>
-        /// Creates a new <see cref="Rectangle"/> with the given values.
-        /// </summary>
-        /// <param name="x">The x value.</param>
-        /// <param name="y">The y value.</param>
-        /// <param name="w">The width.</param>
-        /// <param name="h">The height.</param>
-        public Rectangle(int x, int y, int w, int h) : this(new Point2D(x, y), new Point2D(x + (w - 1), y + (h - 1)))
-        {
-        	
-        }
-        
-        /// <summary>
-        /// Creates a new <see cref="Rectangle"/> with the given values.
-        /// </summary>
-        /// <param name="min">The minimum coordinates.</param>
-        /// <param name="max">The maximum coordinates.</param>
-        public Rectangle(Point2D min, Point2D max)
-        {
-        	Min = min;
-        	Max = max;
-        }
         
         public override string ToString()
 		{
@@ -161,13 +138,43 @@
         }
         
         /// <summary>
+        /// Returns true if the given x coordinate is within this <see cref="Rectangle"/>'s bounds.
+        /// </summary>
+        /// <param name="xcoord">The coordinate.</param>
+        /// <returns>True if within, else false.</returns>
+        public bool ContainsX(int xcoord)
+        {
+        	return xcoord >= Min.X && xcoord <= Max.X;
+        }
+        
+        /// <summary>
+        /// Returns true if the given y coordinate is within this <see cref="Rectangle"/>'s bounds.
+        /// </summary>
+        /// <param name="ycoord">The coordinate.</param>
+        /// <returns>True if within, else false.</returns>
+        public bool ContainsY(int ycoord)
+        {
+        	return ycoord >= Min.Y && ycoord <= Max.Y;
+        }
+        
+        /// <summary>
         /// Returns true if the given <see cref="Point2D"/> is within this <see cref="Rectangle"/>'s bounds.
         /// </summary>
         /// <param name="vec">The vec.</param>
         /// <returns>True if within, else false.</returns>
         public bool Contains(Point2D vec)
         {
-        	return vec.X >= Min.X && vec.Y >= Min.Y && vec.X <= Max.X && vec.Y <= Max.Y;
+        	return ContainsX(vec.X) && ContainsY(vec.Y);
+        }
+        
+        /// <summary>
+        /// Returns true if the given <see cref="Rectangle"/> is entirely within this <see cref="Rectangle"/>'s bounds.
+        /// </summary>
+        /// <param name="rect">The rectangle.</param>
+        /// <returns>True if within, else false.</returns>
+        public bool Contains(Rectangle rect)
+        {
+        	return rect.Min.X >= Min.X && rect.Min.Y >= Min.Y && rect.Max.X <= Max.X && rect.Max.Y <= Max.Y;
         }
         
         /// <summary>
@@ -187,7 +194,7 @@
         /// <returns>The resulting rect.</returns>
         public static implicit operator Rectangle(System.Drawing.Rectangle rect)
         {
-        	return new Rectangle(rect.X, rect.Y, rect.Width, rect.Height);
+        	return new Rectangle{X = rect.X, Y = rect.Y, Width = rect.Width, Height = rect.Height};
         }
         
 		/// <summary>
@@ -198,7 +205,7 @@
         /// <returns>The resulting rect.</returns>
         public static explicit operator Rectangle(Point2D vec)
         {
-        	return new Rectangle(0, 0, vec.X, vec.Y);
+        	return new Rectangle{Position = 0, Size = vec};
         }
         
         /// <summary>

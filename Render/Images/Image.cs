@@ -10,24 +10,29 @@
 	/// <summary>
 	/// A color image with <see cref="ARGB"/> storage. Channel data is in bytes.
 	/// </summary>
-	public class Image : DataMap2D<ARGB>
+	public unsafe sealed class Image : DataMap2D<ARGB>, IDisposable
     {
+		/// <summary>
+		/// True if this Image is backed by a DIBSection.
+		/// </summary>
+		private bool isDIBSection;
+		
 		/// <summary>
 		/// The internal data array.
 		/// </summary>
-        private ARGB[,] Data;
-        
-        /// <summary>
-        /// The <see cref="GCHandle"/> for fixing <see cref="Data"/>.
-        /// </summary>
-        private GCHandle DataHandle;
-
+		private ARGB* data;
+		
+		/// <summary>
+		/// The native buffer.	
+		/// </summary>
+		private NativeBuffer buffer;
+		
         /// <summary>
         /// Creates a new <see cref="Image"/> with the given initial size. Images with dimensions of 0 are discouraged.
         /// </summary>
         /// <param name="w">The initial width.</param>
         /// <param name="h">The initial height.</param>
-        public Image(int w, int h) : base(w, h)
+        public Image(int w, int h) : this(w, h, false)
         {
         	
         }
@@ -35,47 +40,41 @@
         /// <summary>
         /// Creates a new <see cref="Image"/> with the given initial size. Images with dimensions of 0 are discouraged.
         /// </summary>
-        /// <param name="size">The initial size.</param>
-        public Image(Point2D size) : base(size)
-        {
-        	
-        }
-        
+        /// <param name="w">The initial width.</param>
+        /// <param name="h">The initial height.</param>
+        /// <param name="isDIB">True if the image is backed by a DIBSection.</param>
+        public Image(int w, int h, bool isDIB)
+		{
+        	isDIBSection = isDIB;
+        	Resize(w, h);
+		}
+
+		public void Dispose()
+		{
+			buffer.Dispose();
+		}
+		
         public new ARGB this[int x, int y]
         {
         	[MethodImpl(MethodImplOptions.AggressiveInlining)]
         	get
 			{
-        		return Data[y, x];
+        		return *(data + x + y * Width);
 			}
         	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
-				Data[y, x] = value;
-			}
-        }
-        
-        public new ARGB this[Point2D coords]
-        {
-        	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        	get
-			{
-        		return Data[coords.Y, coords.X];
-			}
-        	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			set
-			{
-				Data[coords.Y, coords.X] = value;
+				*(data + x + y * Width) = value;
 			}
         }
         
         /// <summary>
-        /// Returns the raw <see cref="RGB"/> data array.
+        /// Returns the raw pointer to the <see cref="ARGB"/> data array.
         /// </summary>
-        /// <returns>The data array.</returns>
-        public ARGB[,] GetRawData()
+        /// <returns>The array pointer.</returns>
+        public ARGB* GetRawData()
         {
-            return Data;
+            return data;
         }
 
         /// <summary>
@@ -89,28 +88,17 @@
         
         protected override ARGB BaseGet(int x, int y)
         {
-        	return Data[y, x];
+        	return *(data + x + y * Width);
         }
         
         protected override void BaseSet(int x, int y, ARGB value)
         {
-        	Data[y, x] = value;
+        	*(data + x + y * Width) = value;
         }
         
         protected override void BaseResize(int width, int height)
         {
-            ARGB[,] newData = new ARGB[height, width];
-            if(Data != null)
-            {
-                for (int y = 0; y < Data.GetLength(0) && y < newData.GetLength(0); y++)
-                {
-                    for (int x = 0; x < Data.GetLength(1) && x < newData.GetLength(1); x++)
-                    {
-                        newData[y, x] = Data[y, x];
-                    }
-                }
-            }
-            Data = newData;
+        	data = NativeBuffer.CreateBuffer(out buffer, width, height, isDIBSection);
         }
         
         public override bool UnsafeOperationsSupported()
@@ -120,12 +108,18 @@
         
         public unsafe override void* BeginUnsafeOperation()
         {
-        	return Data.Fix(ref DataHandle);
+        	return (void*)data;
         }
         
-        public override void EndUnsafeOperation()
+        public override void EndUnsafeOperation(){}
+        
+        /// <summary>
+        /// Returns the <see cref="DeviceContext"/> for this DIB-backed <see cref="Image"/>.
+        /// </summary>
+        /// <returns>The <see cref="DeviceContext"/>.</returns>
+        internal IntPtr GetContext()
         {
-        	Data.Free(ref DataHandle);
+        	return buffer.Context.Handle;
         }
         
         public unsafe static Image LoadImage(string path)
@@ -146,14 +140,14 @@
         		{
 			        using (Graphics gr = Graphics.FromImage(clone))
 			        {
-			            gr.DrawImage(bitmap, new Rectangle(0, 0, clone.Width, clone.Height));
+			        	gr.DrawImage(bitmap, new Rectangle{Size = clone.Size});
 			        }
 			        return FromBitmap(clone);
         		}
 	        }
 	        
         	Image image = new Image(bitmap.Width, bitmap.Height);
-        	BitmapData data = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, bitmap.PixelFormat);
+        	BitmapData data = bitmap.LockBits(new Rectangle{Size = bitmap.Size}, ImageLockMode.ReadOnly, bitmap.PixelFormat);
     
         	if(bitmap.PixelFormat == PixelFormat.Format24bppRgb)
         	{
@@ -194,7 +188,7 @@
         public unsafe static Bitmap ToBitmap(Image image)
         {
         	Bitmap bitmap = new Bitmap(image.Width, image.Height, PixelFormat.Format32bppRgb);
-        	BitmapData data = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, bitmap.PixelFormat);
+        	BitmapData data = bitmap.LockBits(new Rectangle{Size = bitmap.Size}, ImageLockMode.ReadOnly, bitmap.PixelFormat);
 	    
     		int* p1 = (int*)image.BeginUnsafeOperation();
     		int* p2 = (int*)data.Scan0;
@@ -287,7 +281,6 @@
         public abstract class ImageChannel : DataMap2D<byte>
         {
             internal readonly Image Parent;
-            private GCHandle DataHandle;
 
             internal ImageChannel(Image img)
             {
@@ -313,13 +306,10 @@
 	        
 	        public unsafe override void* BeginUnsafeOperation()
 	        {
-	        	return Parent.Data.Fix(ref DataHandle);
+	        	return (void*)Parent.data;
 	        }
 	        
-	        public override void EndUnsafeOperation()
-	        {
-	        	Parent.Data.Free(ref DataHandle);
-	        }
+	        public override void EndUnsafeOperation(){}
 	        
 	        public override int GetRawDataStride()
 	        {
@@ -341,12 +331,12 @@
 	    		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	        	get
 				{
-	        		return Parent.Data[y, x].A;
+	        		return (*(Parent.data + x + y * Width)).A;
 				}
 	        	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 				set
 				{
-					Parent.Data[y, x].A = value;
+					(*(Parent.data + x + y * Width)).A = value;
 				}
 	    	}
 	    	
@@ -362,7 +352,7 @@
 	        
 	        public override int GetRawDataOffset()
 	        {
-	        	return 2;
+	        	return 3;
 	        }
         }
         
@@ -380,12 +370,12 @@
 	    		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	        	get
 				{
-	        		return Parent.Data[y, x].R;
+	        		return (*(Parent.data + x + y * Width)).R;
 				}
 	        	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 				set
 				{
-					Parent.Data[y, x].R = value;
+					(*(Parent.data + x + y * Width)).R = value;
 				}
 	    	}
 	    	
@@ -419,12 +409,12 @@
 	    		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	    		get
 	    		{
-	    			return Parent.Data[y, x].G;
+	    			return (*(Parent.data + x + y * Width)).G;
 	    		}
 	    		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	    		set
 	    		{
-	    			Parent.Data[y, x].G = value;
+	    			(*(Parent.data + x + y * Width)).G = value;
 	    		}
 	    	}
 	    	
@@ -447,7 +437,7 @@
         /// <summary>
         /// The BLUE channel for <see cref="Image"/>s.
         /// </summary>
-        private class ImageBlueChannel : ImageChannel
+        public class ImageBlueChannel : ImageChannel
         {
             internal ImageBlueChannel(Image img) : base(img)
             {
@@ -458,12 +448,12 @@
 	    		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	    		get
 	    		{
-	    			return Parent.Data[y, x].B;
+	    			return (*(Parent.data + x + y * Width)).B;
 	    		}
 	    		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	    		set
 	    		{
-	    			Parent.Data[y, x].B = value;
+	    			(*(Parent.data + x + y * Width)).B = value;
 	    		}
 	    	}
 	    	
@@ -486,7 +476,7 @@
         /// <summary>
         /// The GREY channel for <see cref="Image"/>s.
         /// </summary>
-        private class ImageGreyChannel : ImageChannel
+        public class ImageGreyChannel : ImageChannel
         {
             internal ImageGreyChannel(Image img) : base(img)
             {
@@ -497,12 +487,14 @@
 	    		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	    		get
 	    		{
-	    			return (byte)((Parent.Data[y, x].R + Parent.Data[y, x].G + Parent.Data[y, x].B) / 3);
+	    			return (byte)Parent[x, y].RGB.Greyscale.R;
 	    		}
 	    		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	    		set
 	    		{
-	    			Parent.Data[y, x].R = Parent.Data[y, x].G = Parent.Data[y, x].B = value;
+	    			ARGB color = Parent[x, y];
+	    			color.RGB = new RGB(value, value, value);
+	    			Parent[x, y] = color;
 	    		}
 	    	}
 	    	

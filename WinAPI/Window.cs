@@ -6,25 +6,6 @@
 	using System.ComponentModel;
 	
 	/// <summary>
-	/// Arguments for a <see cref="Window"/> resize event.
-	/// </summary>
-	public class ResizeEventArgs : EventArgs
-	{
-		/// <summary>
-		/// The new window content area size.
-		/// </summary>
-		public Point2D Size;
-		
-		public ResizeEventArgs(Point2D size)
-		{
-			Size = size;
-		}
-	}
-	
-	//handler for resize events
-	public delegate void ResizeEventHandler(object sender, ResizeEventArgs args);
-	
-	/// <summary>
 	/// A managed wrapper for an unmanaged WinAPI Window.
 	/// </summary>
 	public unsafe class Window : NativeWindow, IDisposable
@@ -53,19 +34,9 @@
 		private Rectangle BaseBounds;
 		
 		/// <summary>
-		/// The frame buffer type.
-		/// </summary>
-		private Type BufferType;
-		
-		/// <summary>
 		/// The frame buffer instance.
 		/// </summary>
-		private FrameBufferStrategy Buffer;
-		
-		/// <summary>
-		/// True if this object has already been disposed.
-		/// </summary>
-		private bool Disposed = false;
+		public readonly FrameBufferStrategy BufferStrategy;
 		
 		/// <summary>
 		/// The driving <see cref="MessageLoop"/>
@@ -217,58 +188,68 @@
 		
 		/// <summary>
 		/// Called when this <see cref="Window"/> is resized.
+		/// Argument is new size.
 		/// </summary>
-		public event ResizeEventHandler OnResize;
+		public event Action<Point2D> OnResize;
 		
 		/// <summary>
 		/// Called when this <see cref="Window"/> is X'ed. Does not actually close unless Exit() is called.
 		/// </summary>
-		public event EventHandler OnClose;
+		public event Action OnClose;
 		
 		/// <summary>
 		/// Invoked whenever the mouse enters the window.
 		/// </summary>
-		public event EventHandler OnMouseEnter;
+		public event Action OnMouseEnter;
 		
 		/// <summary>
 		/// Invoked whenever the mouse exits the window.
 		/// </summary>
-		public event EventHandler OnMouseExit;
+		public event Action OnMouseExit;
 		
 		/// <summary>
 		/// Invoked whenever a <see cref="MouseButton"/> is pressed.
+		/// Argument is button that was pressed.
 		/// </summary>
-		public event EventHandler<MouseButtonEventArgs> OnMousePress;
+		public event Action<MouseButton> OnMousePress;
 		
 		/// <summary>
 		/// Invoked whenever a <see cref="MouseButton"/> is released.
+		/// Argument is button that was released.
 		/// </summary>
-		public event EventHandler<MouseButtonEventArgs> OnMouseRelease;
+		public event Action<MouseButton> OnMouseRelease;
 		
 		/// <summary>
 		/// Invoked whenever the mouse is moved.
+		/// First Argument is mouse location.
+		/// Second Argument is mouse delta.
 		/// </summary>
-		public event EventHandler<MouseMoveEventArgs> OnMouseMove;
+		public event Action<Point2D, Point2D> OnMouseMove;
 		
 		/// <summary>
 		/// Invoked whenever the mouse wheel is moved.
+		/// Argument is mouse location.
 		/// </summary>
-		public event EventHandler<MouseWheelEventArgs> OnMouseWheel;
+		public event Action<int> OnMouseWheel;
 		
 		/// <summary>
 		/// Invoked whenever a <see cref="KeyboardButton"/> is pressed.
+		/// Argument is key pressed.
 		/// </summary>
-		public event EventHandler<KeyEventArgs> OnKeyPress;
+		public event Action<KeyboardButton> OnKeyPress;
 		
 		/// <summary>
 		/// Invoked whenever a <see cref="KeyboardButton"/> is released.
+		/// Argument is key released.
 		/// </summary>
-		public event EventHandler<KeyEventArgs> OnKeyRelease;
+		public event Action<KeyboardButton> OnKeyRelease;
 		
 		/// <summary>
-		/// Invoked whenever a character is typed..
+		/// Invoked whenever a character is typed.
+		/// First Argument is char typed.
+		/// Second Argument is true if a repeat from holding down key.
 		/// </summary>
-		public event EventHandler<CharEventArgs> OnCharTyped;
+		public event Action<char, bool> OnCharTyped;
 		
 		/// <summary>
 		/// True if this window is fullscreen.
@@ -366,6 +347,15 @@
 		}
 		
 		/// <summary>
+		/// Creates a new <see cref="Window"/> with the given frame buffer type.
+		/// </summary>
+		/// <param name="frameBufferType">The frame buffer type class.</param>
+		public Window(Type frameBufferType) : this(100, 100, frameBufferType)
+		{
+			
+		}
+		
+		/// <summary>
 		/// Creates a new <see cref="Window"/> with the given size and frame buffer type.
 		/// </summary>
 		/// <param name="width">The width.</param>
@@ -380,16 +370,26 @@
 			{
 				throw new Exception("[Window] Frame buffer type must be a subclass of FrameBuffer and have a default constructor");
 			}
-			BufferType = frameBufferType;
+			//create buffer
+			BufferStrategy = (FrameBufferStrategy)frameBufferType.GetConstructor(Type.EmptyTypes).Invoke(Type.EmptyTypes);
 			ToCenter();
-			OnResize += ((sender, args) => Buffer.Resize(args.Size.X, args.Size.Y));
-			OnMouseEnter += (sender, e) => OldCursor = SetCursor(STANDARD_CURSOR);
-			OnMouseExit += (sender, e) => SetCursor(OldCursor);
+			OnResize += size => BufferStrategy.Resize(size.X, size.Y);
+			OnMouseEnter += () => OldCursor = SetCursor(STANDARD_CURSOR);
+			OnMouseExit += () => SetCursor(OldCursor);
 		}
 		
 		~Window()
 		{
-			UDispose();
+			Dispose();
+		}
+
+		public void Dispose()
+		{
+			bool started = System.Threading.Interlocked.Exchange(ref Started, false);
+			if(started)
+			{
+				DestroyHandle();
+			}
 		}
 		
 		/// <summary>
@@ -428,31 +428,13 @@
 			return dimension;
 		}
 		
-		public void Dispose()
-		{
-			UDispose();
-			GC.SuppressFinalize(this);
-		}
-		
-		private void UDispose()
-		{
-			if(!Disposed)
-			{
-				if(Started)
-				{
-					DestroyHandle();
-				}
-				Disposed = true;
-			}
-		}
-		
 		/// <summary>
 		/// Returns the <see cref="Image"/> to render to this frame.
 		/// </summary>
 		/// <returns>The render target.</returns>
 		public FrameBuffer GetRenderBuffer()
 		{
-			return Buffer != null ? Buffer.GetRenderFrame() : null;
+			return BufferStrategy != null ? BufferStrategy.GetRenderFrame() : null;
 		}
 		
 		/// <summary>
@@ -476,12 +458,9 @@
 			paras.Width = dimension.Width;
 			paras.Height = dimension.Height;
 			
-			//create buffer if null
-			Buffer = (FrameBufferStrategy)BufferType.GetConstructor(Type.EmptyTypes).Invoke(Type.EmptyTypes);
-			
 			//start message loop
 			MessageLoopObj = new MessageLoop();
-			MessageLoopObj.Start<object>(() => {CreateHandle(paras); return null;});
+			MessageLoopObj.Start<object>(() => CreateHandle(paras));
 			
 			Started = true;
 			
@@ -508,7 +487,7 @@
 		/// </summary>
 		public void ExitOnClose()
 		{
-			OnClose += (sender, args) => Stop();
+			OnClose += Stop;
 		}
 		
 		/// <summary>
@@ -552,13 +531,13 @@
 	            {
 	                case WM_CLOSE:
 	            	{
-	            		if(OnClose != null) OnClose(this, EventArgs.Empty);
+	            		if(OnClose != null) OnClose();
 	            		return;
 	            	}
 	            	case WM_SIZE:
 	            	{
 	            		Size = new Point2D(lParam.LowWord, lParam.HighWord);
-	            		if(OnResize != null) OnResize(this, new ResizeEventArgs(Size));
+	            		if(OnResize != null) OnResize(Size);
 	            		break;
 	            	}
 	            	case WM_PAINT:
@@ -568,8 +547,8 @@
 	            		Assert(screenDC != IntPtr.Zero);
 	            		
 	            		//blit display frame to screen
-	            		DIBImage frame = Buffer.GetDisplayFrame();
-	            		bool success = BitBlt(screenDC, 0, 0, frame.Width, frame.Height, frame.Section.DC.Handle, 0, 0, SRCCOPY);
+	            		Image frame = BufferStrategy.GetDisplayFrame().Image;
+	            		bool success = BitBlt(screenDC, 0, 0, frame.Width, frame.Height, frame.GetContext(), 0, 0, SRCCOPY);
 	            		Assert(success);
 	            		
 	            		EndPaint(Handle, ref data);
@@ -594,7 +573,7 @@
 						if(!IsMouseInWindow)
 						{
 							IsMouseInWindow = true;
-							if(OnMouseEnter != null) OnMouseEnter(this, EventArgs.Empty);
+							if(OnMouseEnter != null) OnMouseEnter();
 							//suppress inaccurate delta value
 							delta = new Point2D(0, 0);
 							//start tracking mouse so we recieve WM_MOUSELEAVE
@@ -606,11 +585,10 @@
 						//call event
 						if(OnMouseMove != null)
 						{
-							MouseMoveEventArgs args = new MouseMoveEventArgs(mouseCoords, delta);
-							OnMouseMove(this, args);
+							OnMouseMove(mouseCoords, delta);
 							PrevMouseCoords = mouseCoords;
-							//consume if told
-							if(args.Consumed) return;
+							//consume
+							return;
 						}else
 						{
 							PrevMouseCoords = mouseCoords;
@@ -620,17 +598,16 @@
 	            	case WM_MOUSELEAVE:
 	        		{
 	            		IsMouseInWindow = false;
-	            		if(OnMouseExit != null) OnMouseExit(this, EventArgs.Empty);
+	            		if(OnMouseExit != null) OnMouseExit();
 	            		break;
 	        		}
 	            	case WM_LBUTTONDOWN:
 	        		{
 	            		if(OnMousePress != null) 
 	            		{
-		            		MouseButtonEventArgs args = new MouseButtonEventArgs((Point2D)lParam, MouseButton.LEFT, true);
-		            		OnMousePress(this, args);
-		            		//consume if told
-							if(args.Consumed) return;
+		            		OnMousePress(MouseButton.LEFT);
+		            		//consume
+							return;
 	            		}
 	            		break;
 	        		}
@@ -638,10 +615,9 @@
 	        		{
 	            		if(OnMouseRelease != null) 
 	            		{
-		            		MouseButtonEventArgs args = new MouseButtonEventArgs((Point2D)lParam, MouseButton.LEFT, false);
-		            		OnMouseRelease(this, args);
-		            		//consume if told
-							if(args.Consumed) return;
+		            		OnMouseRelease(MouseButton.LEFT);
+		            		//consume
+							return;
 	            		}
 	            		break;
 	        		}
@@ -649,10 +625,9 @@
 	        		{
 	            		if(OnMousePress != null) 
 	            		{
-		            		MouseButtonEventArgs args = new MouseButtonEventArgs((Point2D)lParam, MouseButton.RIGHT, true);
-		            		OnMousePress(this, args);
-		            		//consume if told
-							if(args.Consumed) return;
+		            		OnMousePress(MouseButton.RIGHT);
+		            		//consume
+							return;
 	            		}
 	            		break;
 	        		}
@@ -660,10 +635,9 @@
 	        		{
 	            		if(OnMouseRelease != null) 
 	            		{
-		            		MouseButtonEventArgs args = new MouseButtonEventArgs((Point2D)lParam, MouseButton.RIGHT, false);
-		            		OnMouseRelease(this, args);
-		            		//consume if told
-							if(args.Consumed) return;
+		            		OnMouseRelease(MouseButton.RIGHT);
+		            		//consume
+							return;
 	            		}
 	            		break;
 	        		}
@@ -671,10 +645,9 @@
 	        		{
 	            		if(OnMousePress != null) 
 	            		{
-		            		MouseButtonEventArgs args = new MouseButtonEventArgs((Point2D)lParam, MouseButton.MIDDLE, true);
-		            		OnMousePress(this, args);
-		            		//consume if told
-							if(args.Consumed) return;
+		            		OnMousePress(MouseButton.MIDDLE);
+		            		//consume
+							return;
 	            		}
 	            		break;
 	        		}
@@ -682,10 +655,9 @@
 	        		{
 	            		if(OnMouseRelease != null) 
 	            		{
-		            		MouseButtonEventArgs args = new MouseButtonEventArgs((Point2D)lParam, MouseButton.MIDDLE, false);
-		            		OnMouseRelease(this, args);
-		            		//consume if told
-							if(args.Consumed) return;
+		            		OnMouseRelease(MouseButton.MIDDLE);
+		            		//consume
+							return;
 	            		}
 	            		break;
 	        		}
@@ -694,10 +666,9 @@
 	            		if(OnMousePress != null) 
 	            		{
 		            		MouseButton button = (wParam.HighWord == 0x0001 ? MouseButton.EXTRA_1 : MouseButton.EXTRA_2);
-		            		MouseButtonEventArgs args = new MouseButtonEventArgs((Point2D)lParam, button, true);
-		            		OnMousePress(this, args);
-		            		//consume if told
-							if(args.Consumed) return;
+		            		OnMousePress(button);
+		            		//consume
+							return;
 	            		}
 	            		break;
 	        		}
@@ -706,10 +677,9 @@
 	            		if(OnMouseRelease != null) 
 	            		{
 		            		MouseButton button = (wParam.HighWord == 0x0001 ? MouseButton.EXTRA_1 : MouseButton.EXTRA_2);
-		            		MouseButtonEventArgs args = new MouseButtonEventArgs((Point2D)lParam, button, false);
-		            		OnMouseRelease(this, args);
-		            		//consume if told
-							if(args.Consumed) return;
+		            		OnMouseRelease(button);
+		            		//consume
+							return;
 	            		}
 	            		break;
 	        		}
@@ -717,16 +687,10 @@
 	        		{
 	            		if(OnMouseWheel != null) 
 	            		{
-		            		MouseWheelEventArgs args = new MouseWheelEventArgs((Point2D)lParam, (wParam.HighWord / WHEEL_DELTA));
-		            		
-		            		//fix coords because for whatever reason wheel coords are screen coords not window like all the rest of the events
-		            		Point2D windowCoords = new Point2D(0, 0);
-		            		ClientToScreen(Handle, out windowCoords);
-		            		args.Coords -= windowCoords;
-		            		
-		            		OnMouseWheel(this, args);
-		            		//consume if told
-							if(args.Consumed) return;
+	            			int delta = (wParam.HighWord / WHEEL_DELTA);
+		            		OnMouseWheel(delta);
+		            		//consume
+							return;
 	            		}
 	            		break;
 	        		}
@@ -736,12 +700,13 @@
 	            		if(OnKeyPress != null) 
 	            		{
 		            		//only post event if not a repeat
-		            		if(((lParam.Number >> 30) & 1) == 0)
+		            		//aka previous state up
+		            		if((lParam.Number & 0x40000000) == 0)
 		            		{
-		            			KeyEventArgs args = new KeyEventArgs((KeyboardButton)wParam.Number, true);
-		            			OnKeyPress(this, args);
-		            			//consume if told
-								if(args.Consumed) return;
+		            			KeyboardButton button = (KeyboardButton)wParam.Number;
+		            			OnKeyPress(button);
+		            			//consume
+								return;
 		            		}
 	            		}
 	            		break;
@@ -752,12 +717,13 @@
 	            		if(OnKeyRelease != null) 
 	            		{
 		            		//only post event if not a repeat
-		            		if(((lParam.Number >> 30) & 1) == 1)
+		            		//aka previous state down
+		            		if((lParam.Number & 0x40000000) != 0)
 		            		{
-		            			KeyEventArgs args = new KeyEventArgs((KeyboardButton)wParam.Number, false);
-		            			OnKeyRelease(this, args);
-		            			//consume if told
-								if(args.Consumed) return;
+		            			KeyboardButton button = (KeyboardButton)wParam.Number;
+		            			OnKeyRelease(button);
+		            			//consume
+								return;
 		            		}
 	            		}
 	            		break;
@@ -766,11 +732,12 @@
 	        		{
 	            		if(OnCharTyped != null) 
 	            		{
-		            		CharEventArgs args = new CharEventArgs((char)wParam.Number, ((lParam.Number >> 30) & 1) == 1);
+	            			char c = (char)wParam.Number;
+	            			bool repeat = ((lParam.Number & 0x40000000) != 0);
 		            		//ok if char events are repeats
-		            		OnCharTyped(this, args);
-		            		//consume if told
-							if(args.Consumed) return;
+		            		OnCharTyped(c, repeat);
+		            		//consume
+							return;
 	            		}
 	            		break;
 	        		}

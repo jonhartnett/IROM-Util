@@ -19,24 +19,22 @@
         /// <returns>The next object.</returns>
         public static T Get()
         {
-        	T val;
         	lock(ObjPool)
         	{
         		if(ObjPool.Count > 0)
         		{
-        			val = ObjPool.Pop();
+        			return ObjPool.Pop();
         		}else
         		{
-        			val = new T();
+        			return new T();
         		}
         	}
-            return val;
         }
 
         /// <summary>
         /// Releases the given object back into the pool.
         /// </summary>
-        /// <param name="value">The object to release/param>
+        /// <param name="value">The object to release</param>
         public static void Release(T value)
         {
         	lock(ObjPool)

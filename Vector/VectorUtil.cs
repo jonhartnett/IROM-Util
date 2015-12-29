@@ -800,7 +800,7 @@
         		min = Max(min, rects[i].Min);
         		max = Min(max, rects[i].Max);
         	}
-        	return new Rectangle(min, max);
+        	return new Rectangle{Min = min, Max = max};
         }
         
         /// <summary>
@@ -817,7 +817,7 @@
         		min = Min(min, rects[i].Min);
         		max = Max(max, rects[i].Max);
         	}
-        	return new Rectangle(min, max);
+        	return new Rectangle{Min = min, Max = max};
         }
         
         /// <summary>
@@ -834,7 +834,7 @@
         		min = Max(min, views[i].Min);
         		max = Min(max, views[i].Max);
         	}
-        	return new Viewport(min, max);
+        	return new Viewport{Min = min, Max = max};
         }
         
         /// <summary>
@@ -851,7 +851,7 @@
         		min = Min(min, views[i].Min);
         		max = Max(max, views[i].Max);
         	}
-        	return new Viewport(min, max);
+        	return new Viewport{Min = min, Max = max};
         }
 	}
 }

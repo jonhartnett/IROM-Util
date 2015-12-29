@@ -27,15 +27,19 @@
 		public Thread MessageThread;
 		
 		/// <summary>
-		/// A delegate for performing thread-specific initialization.
+		/// Starts this <see cref="MessageLoop"/>, performing the required initialization delegate.
 		/// </summary>
-		public delegate T InitLoop<T>();
+		/// <returns>The result of the initialization.</returns>
+		public void Start<T>(Action initDel)
+		{
+			Start<T>(() => {initDel(); return default(T);});
+		}
 		
 		/// <summary>
 		/// Starts this <see cref="MessageLoop"/>, performing the required initialization delegate.
 		/// </summary>
 		/// <returns>The result of the initialization.</returns>
-		public T Start<T>(InitLoop<T> initDel)
+		public T Start<T>(Func<T> initDel)
 		{
 			//lock to wait for init completion
 			object waitLock = new object();
@@ -62,7 +66,7 @@
 			MessageThread.Abort();
 		}
 		
-		private static void MessageLoopFunc<T>(InitLoop<T> initDel, object waitLock, ref T result)
+		private static void MessageLoopFunc<T>(Func<T> initDel, object waitLock, ref T result)
 		{
 			//wrap entire task in a try-catch to ensure errors are reported
             try

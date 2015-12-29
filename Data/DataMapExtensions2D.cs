@@ -13,45 +13,65 @@
 		/// <summary>
 		/// The infinite clipping rectangle.
 		/// </summary>
-		private static readonly Rectangle NoClip = new Rectangle(new Point2D(int.MinValue, int.MinValue), new Point2D(int.MaxValue, int.MaxValue));
+		private static readonly Rectangle NoClip = new Rectangle{Min = int.MinValue, Max = int.MaxValue};
 		
 		/// <summary>
 		/// The clipping rectangle instances.
 		/// </summary>
-		private static readonly Dictionary<object, Rectangle> ClippingInstances = new Dictionary<object, Rectangle>();
+		private static readonly Dictionary<object, Stack<Rectangle>> ClippingStacks = new Dictionary<object, Stack<Rectangle>>();
 		
 		/// <summary>
-		/// Sets the clipping rectangle for data operations on this <see cref="DataMap2D{T}">DataMap2D</see>. Clear with <see cref="ClearClip"/>.
+		/// Sets the clipping rectangle for data operations on this <see cref="DataMap2D{T}">DataMap2D</see>. Clear with <see cref="PopClip"/>.
 		/// </summary>
 		/// <param name="map">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
 		/// <param name="clip">The clipping rectangle.</param>
-		public static void SetClip<T>(this DataMap2D<T> map, Rectangle clip) where T : struct
+		public static void PushClip<T>(this DataMap2D<T> map, Rectangle clip) where T : struct
 		{
-			ClippingInstances[map] = clip;
+			Stack<Rectangle> stack;
+			if(ClippingStacks.TryGetValue(map, out stack))
+			{
+				clip = VectorUtil.Overlap(stack.Peek(), clip);
+			}else
+			{
+				stack = new Stack<Rectangle>();
+				ClippingStacks.Add(map, stack);
+			}
+			stack.Push(clip);
 		}
 		
 		/// <summary>
-		/// Gets the clipping rectangle for data operations on this <see cref="DataMap2D{T}">DataMap2D</see>. Clear with <see cref="ClearClip"/>.
+		/// Gets the clipping rectangle for data operations on this <see cref="DataMap2D{T}">DataMap2D</see>. Clear with <see cref="PopClip"/>.
 		/// </summary>
 		/// <param name="map">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
 		/// <returns>The clip bounds.</returns>
 		public static Rectangle GetClip<T>(this DataMap2D<T> map) where T : struct
 		{
-			Rectangle result;
-			if(!ClippingInstances.TryGetValue(map, out result))
+			Stack<Rectangle> stack;
+			if(ClippingStacks.TryGetValue(map, out stack))
 			{
-				result = NoClip;
+				return stack.Peek();
+			}else
+			{
+				return NoClip;
 			}
-			return result;
 		}
 		
 		/// <summary>
 		/// Clears the clipping rectangle for data operations on this <see cref="DataMap2D{T}">DataMap2D</see>.
 		/// </summary>
 		/// <param name="map">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
-		public static void ClearClip<T>(this DataMap2D<T> map) where T : struct
+		public static void PopClip<T>(this DataMap2D<T> map) where T : struct
 		{
-			ClippingInstances.Remove(map);
+			Stack<Rectangle> stack;
+			if(ClippingStacks.TryGetValue(map, out stack))
+			{
+				stack.Pop();
+				if(stack.Count == 0) 
+					ClippingStacks.Remove(map);
+			}else
+			{
+				throw new Exception("There are no clips on the stack of " + map.GetType().Name + " " + map);
+			}
 		}
 		
 		/// <summary>
@@ -263,11 +283,11 @@
 		/// </summary>
 		/// <param name="dest">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
 		/// <param name="c">The center of the circle.</param>
-		/// <param name="r">The radius of the circle.</param>
+		/// <param name="r">The radii of the circle.</param>
 		/// <param name="value">The value.</param>
-		public static void DrawCircle<T>(this DataMap2D<T> dest, Point2D c, int r, T value) where T : struct
+		public static void DrawEllipse<T>(this DataMap2D<T> dest, Point2D c, int r, T value) where T : struct
 		{
-			dest.DrawEllipse(c, r, r, value);
+			dest.DrawEllipse(c, (Point2D)r, value);
 		}
 		
 		/// <summary>
@@ -275,27 +295,26 @@
 		/// </summary>
 		/// <param name="dest">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
 		/// <param name="c">The center of the ellipse.</param>
-		/// <param name="rx">The x radius of the ellipse.</param>
-		/// <param name="ry">The y radius of the ellipse.</param>
+		/// <param name="r">The radii of the ellipse.</param>
 		/// <param name="value">The value.</param>
-		public static void DrawEllipse<T>(this DataMap2D<T> dest, Point2D c, int rx, int ry, T value) where T : struct
+		public static void DrawEllipse<T>(this DataMap2D<T> dest, Point2D c, Point2D r, T value) where T : struct
 		{
-			Rectangle clip = new Rectangle(new Point2D(c.X - rx, c.Y - ry), new Point2D(c.X + rx, c.Y + ry));
+			Rectangle clip = new Rectangle{Min = c - r, Max = c + r};
 			clip = VectorUtil.Overlap((Rectangle)dest.Size, dest.GetClip(), clip);
 			if(clip.IsValid())
 			{
 				if(!DisableUnsafe && dest.UnsafeOperationsSupported())
 				{
-					UnsafeDataMapOperations2D<T>.DrawEllipse(clip, dest, c, rx, ry, value);
+					UnsafeDataMapOperations2D<T>.DrawEllipse(clip, dest, c, r, value);
 				}else
 				{
-					double rySq = ry * ry;
+					double rySq = r.Y * r.Y;
 					int dx;
 					int y;
 					int left;
 					int right;
-					int prevLeft = c.X - rx;
-					int prevRight = c.X + rx;
+					int prevLeft = c.X - r.X;
+					int prevRight = c.X + r.X;
 					
 					//fill edge dots
 					if(c.Y >= clip.Min.Y && c.Y <= clip.Max.Y)
@@ -312,22 +331,22 @@
 					
 					if(c.X >= clip.Min.X && c.X <= clip.Max.X)
 					{
-						y = c.Y - ry;
+						y = c.Y - r.Y;
 						if(y >= clip.Min.Y && y <= clip.Max.Y)
 						{
 							dest[c.X, y] = value;
 						}
-						y = c.Y + ry;
+						y = c.Y + r.Y;
 						if(y >= clip.Min.Y && y <= clip.Max.Y)
 						{
 							dest[c.X, y] = value;
 						}
 					}
 					
-					for(int dy = 0; dy < ry; dy++, prevLeft = left, prevRight = right)
+					for(int dy = 0; dy < r.Y; dy++, prevLeft = left, prevRight = right)
 					{
 						//find edges
-						dx = (int)(Math.Sqrt(1 - (((dy + 1) * (dy + 1)) / rySq)) * rx);
+						dx = (int)(Math.Sqrt(1 - (((dy + 1) * (dy + 1)) / rySq)) * r.X);
 						
 						left = c.X - dx;
 						right = c.X + dx;
@@ -353,7 +372,7 @@
 		/// <param name="value">The value.</param>
 		public static void FillCircle<T>(this DataMap2D<T> dest, Point2D c, int r, T value) where T : struct
 		{
-			dest.FillEllipse(c, r, r, value);
+			dest.FillEllipse(c, (Point2D)r, value);
 		}
 		
 		/// <summary>
@@ -361,25 +380,24 @@
 		/// </summary>
 		/// <param name="dest">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
 		/// <param name="c">The center of the ellipse.</param>
-		/// <param name="rx">The x radius of the ellipse.</param>
-		/// <param name="ry">The y radius of the ellipse.</param>
+		/// <param name="r">The radii of the ellipse.</param>
 		/// <param name="value">The value.</param>
-		public static void FillEllipse<T>(this DataMap2D<T> dest, Point2D c, int rx, int ry, T value) where T : struct
+		public static void FillEllipse<T>(this DataMap2D<T> dest, Point2D c, Point2D r, T value) where T : struct
 		{
-			Rectangle clip = new Rectangle(new Point2D(c.X - rx, c.Y - ry), new Point2D(c.X + rx, c.Y + ry));
+			Rectangle clip = new Rectangle{Min = c - r, Max = c + r};
 			clip = VectorUtil.Overlap((Rectangle)dest.Size, dest.GetClip(), clip);
 			if(clip.IsValid())
 			{
 				if(!DisableUnsafe && dest.UnsafeOperationsSupported())
 				{
-					UnsafeDataMapOperations2D<T>.FillEllipse(clip, dest, c, rx, ry, value);
+					UnsafeDataMapOperations2D<T>.FillEllipse(clip, dest, c, r, value);
 				}else
 				{
-					double rySq = ry * ry;
-					for(int dy = 0; dy <= ry; dy++)
+					double rySq = r.Y * r.Y;
+					for(int dy = 0; dy <= r.Y; dy++)
 					{
 						//find edges
-						int dx = (int)(Math.Sqrt(1 - ((dy * dy) / rySq)) * rx);
+						int dx = (int)(Math.Sqrt(1 - ((dy * dy) / rySq)) * r.X);
 						
 						int left = c.X - dx;
 						int right = c.X + dx;
@@ -405,59 +423,46 @@
 		/// </summary>
 		/// <param name="dest">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
 		/// <param name="rect">The <see cref="Rectangle"/> to fill.</param>
-		/// <param name = "r">The radius.</param>
+		/// <param name = "r">The radii.</param>
 		/// <param name="value">The value.</param>
-		public static void DrawRoundedRectangle<T>(this DataMap2D<T> dest, Rectangle rect, int r, T value) where T : struct
-		{
-			dest.DrawRoundedRectangle(rect, r, r, value);
-		}
-		
-		/// <summary>
-		/// Draws the outline of a rounded <see cref="Rectangle"/> in this <see cref="DataMap2D{T}">DataMap2D</see> with the given value.
-		/// </summary>
-		/// <param name="dest">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
-		/// <param name="rect">The <see cref="Rectangle"/> to fill.</param>
-		/// <param name = "rx">The x radius.</param>
-		/// <param name = "ry">The y radius.</param>
-		/// <param name="value">The value.</param>
-		public static void DrawRoundedRectangle<T>(this DataMap2D<T> dest, Rectangle rect, int rx, int ry, T value) where T : struct
+		public static void DrawRoundedRectangle<T>(this DataMap2D<T> dest, Rectangle rect, Point2D r, T value) where T : struct
 		{
 			Rectangle clip = VectorUtil.Overlap((Rectangle)dest.Size, dest.GetClip(), rect);
 			if(clip.IsValid())
 			{
 				if(!DisableUnsafe && dest.UnsafeOperationsSupported())
 				{
-					UnsafeDataMapOperations2D<T>.DrawRoundedRectangle(clip, dest, rect, rx, ry, value);
+					UnsafeDataMapOperations2D<T>.DrawRoundedRectangle(clip, dest, rect, r, value);
 				}else
 				{
 					//draw top and bottom
-					dest.FillXScan(clip, rect.Min.X + rx, rect.Max.X - rx, rect.Min.Y, value);
-					dest.FillXScan(clip, rect.Min.X + rx, rect.Max.X - rx, rect.Max.Y, value);
+					dest.FillXScan(clip, rect.Min.X + r.X, rect.Max.X - r.X, rect.Min.Y, value);
+					dest.FillXScan(clip, rect.Min.X + r.X, rect.Max.X - r.X, rect.Max.Y, value);
 					//draw left and right
-					dest.FillYScan(clip, rect.Min.X, rect.Min.Y + ry, rect.Max.Y - ry, value);
-					dest.FillYScan(clip, rect.Max.X, rect.Min.Y + ry, rect.Max.Y - ry, value);
+					dest.FillYScan(clip, rect.Min.X, rect.Min.Y + r.Y, rect.Max.Y - r.Y, value);
+					dest.FillYScan(clip, rect.Max.X, rect.Min.Y + r.Y, rect.Max.Y - r.Y, value);
 					
-					double rySq = ry * ry;
-					int dx = (int)(Math.Sqrt(1 - (1 / rySq)) * rx);
+					double rySq = r.Y * r.Y;
+					int dx = (int)(Math.Sqrt(1 - (1 / rySq)) * r.X);
 					int y;
 					int left;
 					int right;
-					int prevLeft = rect.Min.X + (rx - dx);
-					int prevRight = rect.Max.X - (rx - dx);
+					int prevLeft = rect.Min.X + (r.X - dx);
+					int prevRight = rect.Max.X - (r.X - dx);
 					
-					for(int dy = 0; dy < ry; dy++, prevLeft = left, prevRight = right)
+					for(int dy = 0; dy < r.Y; dy++, prevLeft = left, prevRight = right)
 					{
 						//find edges
-						dx = (int)(Math.Sqrt(1 - (((dy + 1) * (dy + 1)) / rySq)) * rx);
+						dx = (int)(Math.Sqrt(1 - (((dy + 1) * (dy + 1)) / rySq)) * r.X);
 						
-						left = rect.Min.X + (rx - dx);
-						right = rect.Max.X - (rx - dx);
+						left = rect.Min.X + (r.X - dx);
+						right = rect.Max.X - (r.X - dx);
 						
 						//fill scans
-						y = rect.Min.Y + (ry - dy);
+						y = rect.Min.Y + (r.Y - dy);
 						dest.FillXScan(clip, prevLeft, left, y, value);
 						dest.FillXScan(clip, right, prevRight, y, value);
-						y = rect.Max.Y - (ry - dy);
+						y = rect.Max.Y - (r.Y - dy);
 						dest.FillXScan(clip, prevLeft, left, y, value);
 						dest.FillXScan(clip, right, prevRight, y, value);
 					}
@@ -470,33 +475,20 @@
 		/// </summary>
 		/// <param name="dest">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
 		/// <param name="rect">The <see cref="Rectangle"/> to fill.</param>
-		/// <param name = "r">The radius.</param>
+		/// <param name = "r">The radii.</param>
 		/// <param name="value">The value.</param>
-		public static void FillRoundedRectangle<T>(this DataMap2D<T> dest, Rectangle rect, int r, T value) where T : struct
-		{
-			dest.FillRoundedRectangle(rect, r, r, value);
-		}
-		
-		/// <summary>
-		/// Fills a rounded <see cref="Rectangle"/> in this <see cref="DataMap2D{T}">DataMap2D</see> with the given value.
-		/// </summary>
-		/// <param name="dest">The <see cref="DataMap2D{T}">DataMap2D</see>.</param>
-		/// <param name="rect">The <see cref="Rectangle"/> to fill.</param>
-		/// <param name = "rx">The x radius.</param>
-		/// <param name = "ry">The y radius.</param>
-		/// <param name="value">The value.</param>
-		public static void FillRoundedRectangle<T>(this DataMap2D<T> dest, Rectangle rect, int rx, int ry, T value) where T : struct
+		public static void FillRoundedRectangle<T>(this DataMap2D<T> dest, Rectangle rect, Point2D r, T value) where T : struct
 		{
 			Rectangle clip = VectorUtil.Overlap((Rectangle)dest.Size, dest.GetClip(), rect);
 			if(clip.IsValid())
 			{
 				if(!DisableUnsafe && dest.UnsafeOperationsSupported())
 				{
-					UnsafeDataMapOperations2D<T>.FillRoundedRectangle(clip, dest, rect, rx, ry, value);
+					UnsafeDataMapOperations2D<T>.FillRoundedRectangle(clip, dest, rect, r, value);
 				}else
 				{
 					//fill center, left and right
-					for(int j = Math.Max(rect.Min.Y + ry, clip.Min.Y); j <= Math.Min(rect.Max.Y - ry, clip.Max.Y); j++)
+					for(int j = Math.Max(rect.Min.Y + r.Y, clip.Min.Y); j <= Math.Min(rect.Max.Y - r.Y, clip.Max.Y); j++)
 					{
 						for(int i = clip.Min.X; i <= clip.Max.X; i++)
 						{
@@ -504,23 +496,23 @@
 						}
 					}
 					
-					double rySq = ry * ry;
+					double rySq = r.Y * r.Y;
 					int dx;
 					int y;
 					int left;
 					int right;
 					
-					for(int dy = 1; dy <= ry; dy++)
+					for(int dy = 1; dy <= r.Y; dy++)
 					{
 						//find edges
-						dx = (int)(Math.Sqrt(1 - ((dy * dy) / rySq)) * rx);
-						left = rect.Min.X + (rx - dx);
-						right = rect.Max.X - (rx - dx);
+						dx = (int)(Math.Sqrt(1 - ((dy * dy) / rySq)) * r.X);
+						left = rect.Min.X + (r.X - dx);
+						right = rect.Max.X - (r.X - dx);
 						
 						//fill scans
-						y = rect.Min.Y + (ry - dy);
+						y = rect.Min.Y + (r.Y - dy);
 						dest.FillXScan(clip, left, right, y, value);
-						y = rect.Max.Y - (ry - dy);
+						y = rect.Max.Y - (r.Y - dy);
 						dest.FillXScan(clip, left, right, y, value);
 					}
 				}

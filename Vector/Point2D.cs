@@ -121,6 +121,26 @@
             return new Point3D(point.X, point.Y, 0);
         }
         
+        /// <summary>
+        /// Implicit cast from <see cref="System.Drawing.Size"/>.
+        /// </summary>
+        /// <param name="size">The size to cast.</param>
+        /// <returns>The resulting point.</returns>
+        public static implicit operator Point2D(System.Drawing.Size size)
+        {
+        	return new Point2D(size.Width, size.Height);
+        }
+        
+        /// <summary>
+        /// Implicit cast to <see cref="System.Drawing.Size"/>.
+        /// </summary>
+        /// <param name="point">The point to cast.</param>
+        /// <returns>The resulting size.</returns>
+        public static implicit operator System.Drawing.Size(Point2D point)
+        {
+        	return new System.Drawing.Size(point.X, point.Y);
+        }
+        
 		/// <summary>
         /// Negates this point.
         /// </summary>
