@@ -85,17 +85,8 @@
 					Monitor.Exit(snapshot);
 					continue;
 				}
-				return new Unlocker{obj = snapshot};
+				return (LambdaDisposable)(() => Monitor.Exit(snapshot));
 			}
-		}
-		
-		/// <summary>
-		/// Lock object for a specific array.
-		/// </summary>
-		private struct Unlocker : IDisposable
-		{
-			internal object obj;
-			public void Dispose(){Monitor.Exit(obj);}
 		}
 	}
 }
