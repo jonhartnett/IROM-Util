@@ -3,36 +3,36 @@
 	using System;
 	
 	/// <summary>
-	/// A buffer strategy for a Frame.
+	/// A buffer strategy for rendering with two buffers.
 	/// </summary>
-	public class DoubleBufferStrategy : FrameBufferStrategy
+	public class DoubleBufferStrategy : RenderBufferStrategy
 	{
-		private FrameBuffer FrontBuffer;
-		private FrameBuffer BackBuffer;
+		private RenderBuffer FrontBuffer;
+		private RenderBuffer BackBuffer;
 		
 		/// <summary>
 		/// Creates a new <see cref="DoubleBufferStrategy"/>.
 		/// </summary>
 		public DoubleBufferStrategy()
 		{
-			FrontBuffer = new FrameBuffer();
-			BackBuffer = new FrameBuffer();
+			FrontBuffer = new RenderBuffer();
+			BackBuffer = new RenderBuffer();
 		}
 		
-		public override FrameBuffer GetDisplayFrame()
+		public override RenderBuffer GetDisplayBuffer()
 		{
-			//always match buffer bounds to current window bounds
-			Util.Swap(ref BackBuffer, ref FrontBuffer);
-			FrontBuffer.Image.Resize(Width, Height);
 			return FrontBuffer;
 		}
 		
-		public override FrameBuffer GetRenderFrame()
+		public override RenderBuffer GetRenderBuffer()
 		{
+			BackBuffer = System.Threading.Interlocked.Exchange(ref FrontBuffer, BackBuffer);
+			//always match buffer bounds to current window bounds
+			BackBuffer.Image.Resize(Width, Height);
 			return BackBuffer;
 		}
 		
-		public override FrameBuffer[] GetBuffers()
+		public override RenderBuffer[] GetBuffers()
 		{
 			return new []{FrontBuffer, BackBuffer};
 		}

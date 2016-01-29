@@ -14,11 +14,6 @@
 		private const int DEFAULT_WINDOW_STYLE = 0xCF0000;
 		
 		/// <summary>
-		/// The standard cursor for the OS.
-		/// </summary>
-		private static readonly IntPtr STANDARD_CURSOR = LoadCursor(IntPtr.Zero, 32512);
-		
-		/// <summary>
 		/// The handle of this <see cref="Window"/>.
 		/// </summary>
 		public new IntPtr Handle;
@@ -34,9 +29,9 @@
 		private Rectangle BaseBounds;
 		
 		/// <summary>
-		/// The frame buffer instance.
+		/// The render buffer instance.
 		/// </summary>
-		public readonly FrameBufferStrategy BufferStrategy;
+		public readonly RenderBufferStrategy BufferStrategy;
 		
 		/// <summary>
 		/// The driving <see cref="MessageLoop"/>
@@ -79,9 +74,14 @@
 		private Rectangle SavedStateBounds;
 		
 		/// <summary>
+		/// The current cursor value.
+		/// </summary>
+		private Cursor currentCursor = Cursor.ARROW;
+		
+		/// <summary>
 		/// The old cursor to restore.
 		/// </summary>
-		private IntPtr OldCursor;
+		private IntPtr oldCursor;
 		
 		/// <summary>
 		/// The states of inputs.
@@ -183,6 +183,29 @@
 			{
 				value = Math.Max(value, 1);
 				BaseBounds.Height = value;
+			}
+		}
+		
+		/// <summary>
+		/// The current cursor value.
+		/// </summary>
+		public Cursor CurrentCursor
+		{
+			get
+			{
+				return currentCursor;
+			}
+			set
+			{
+				//don't allow unspecified, that is merely a compat hook for IROM.UI
+				if(value == Cursor.UNSPECIFIED) value = Cursor.ARROW;
+				currentCursor = value;
+				//if old non-null, means we are inside, so update
+				if(oldCursor != IntPtr.Zero)
+				{
+					//set cursor
+					SetCursor(currentCursor.GetPointer());
+				}//else will be automatically applied when we re-enter
 			}
 		}
 		
@@ -347,35 +370,42 @@
 		}
 		
 		/// <summary>
-		/// Creates a new <see cref="Window"/> with the given frame buffer type.
+		/// Creates a new <see cref="Window"/> with the given render buffer type.
 		/// </summary>
-		/// <param name="frameBufferType">The frame buffer type class.</param>
-		public Window(Type frameBufferType) : this(100, 100, frameBufferType)
+		/// <param name="renderBufferType">The render buffer type class.</param>
+		public Window(Type renderBufferType) : this(100, 100, renderBufferType)
 		{
 			
 		}
 		
 		/// <summary>
-		/// Creates a new <see cref="Window"/> with the given size and frame buffer type.
+		/// Creates a new <see cref="Window"/> with the given size and render buffer type.
 		/// </summary>
 		/// <param name="width">The width.</param>
 		/// <param name="height">The height.</param>
-		/// <param name="frameBufferType">The frame buffer type class.</param>
-		public Window(int width, int height, Type frameBufferType)
+		/// <param name="renderBufferType">The render buffer type class.</param>
+		public Window(int width, int height, Type renderBufferType)
 		{
 			InputStates = new InputState(this);
 			Width = width;
 			Height = height;
-			if(!frameBufferType.IsSubclassOf(typeof(FrameBufferStrategy)) || frameBufferType.GetConstructor(Type.EmptyTypes) == null)
+			if(!renderBufferType.IsSubclassOf(typeof(RenderBufferStrategy)) || renderBufferType.GetConstructor(Type.EmptyTypes) == null)
 			{
-				throw new Exception("[Window] Frame buffer type must be a subclass of FrameBuffer and have a default constructor");
+				throw new Exception("[Window] Render buffer type must be a subclass of RenderBufferStrategy and have a default constructor");
 			}
 			//create buffer
-			BufferStrategy = (FrameBufferStrategy)frameBufferType.GetConstructor(Type.EmptyTypes).Invoke(Type.EmptyTypes);
+			BufferStrategy = (RenderBufferStrategy)renderBufferType.GetConstructor(Type.EmptyTypes).Invoke(Type.EmptyTypes);
 			ToCenter();
 			OnResize += size => BufferStrategy.Resize(size.X, size.Y);
-			OnMouseEnter += () => OldCursor = SetCursor(STANDARD_CURSOR);
-			OnMouseExit += () => SetCursor(OldCursor);
+			OnMouseEnter += () => 
+			{
+				oldCursor = SetCursor(currentCursor.GetPointer());
+			};
+			OnMouseExit += () => 
+			{
+				SetCursor(oldCursor);
+				oldCursor = IntPtr.Zero;
+			};
 		}
 		
 		~Window()
@@ -385,9 +415,9 @@
 
 		public void Dispose()
 		{
-			bool started = System.Threading.Interlocked.Exchange(ref Started, false);
-			if(started)
+			if(Started)
 			{
+				Started = false;
 				DestroyHandle();
 			}
 		}
@@ -432,9 +462,9 @@
 		/// Returns the <see cref="Image"/> to render to this frame.
 		/// </summary>
 		/// <returns>The render target.</returns>
-		public FrameBuffer GetRenderBuffer()
+		public RenderBuffer GetRenderBuffer()
 		{
-			return BufferStrategy != null ? BufferStrategy.GetRenderFrame() : null;
+			return BufferStrategy != null ? BufferStrategy.GetRenderBuffer() : null;
 		}
 		
 		/// <summary>
@@ -546,10 +576,13 @@
 	            		IntPtr screenDC = BeginPaint(Handle, out data);
 	            		Assert(screenDC != IntPtr.Zero);
 	            		
-	            		//blit display frame to screen
-	            		Image frame = BufferStrategy.GetDisplayFrame().Image;
-	            		bool success = BitBlt(screenDC, 0, 0, frame.Width, frame.Height, frame.GetContext(), 0, 0, SRCCOPY);
-	            		Assert(success);
+	            		//blit display buffer to screen
+	            		Image buffer = BufferStrategy.GetDisplayBuffer().Image;
+	            		using(buffer.RenderLock)
+	            		{
+		            		bool success = BitBlt(screenDC, 0, 0, buffer.Width, buffer.Height, buffer.GetContext(), 0, 0, SRCCOPY);
+		            		Assert(success);
+	            		}
 	            		
 	            		EndPaint(Handle, ref data);
 	            		return;
@@ -813,8 +846,6 @@
 		[DllImport("user32.dll", SetLastError=true)]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		private static extern bool SetWindowPos(IntPtr window, IntPtr windowInsertAfter, int x, int y, int cx, int cy, uint flags);
-		[DllImport("user32.dll")]
-		private static extern IntPtr LoadCursor(IntPtr file, int name);
 		[DllImport("user32.dll")]
     	private static extern IntPtr SetCursor(IntPtr cursor);
 		

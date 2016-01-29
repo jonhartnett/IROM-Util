@@ -3,41 +3,39 @@
 	using System;
 	
 	/// <summary>
-	/// A buffer strategy for a Frame.
+	/// A buffer strategy for rendering with three buffers.
 	/// </summary>
-	public class TripleBufferStrategy : FrameBufferStrategy
+	public class TripleBufferStrategy : RenderBufferStrategy
 	{
-		private FrameBuffer FrontBuffer;
-		private FrameBuffer MiddleBuffer;
-		private FrameBuffer BackBuffer;
+		private RenderBuffer FrontBuffer;
+		private RenderBuffer MiddleBuffer;
+		private RenderBuffer BackBuffer;
 		
 		/// <summary>
 		/// Creates a new <see cref="TripleBufferStrategy"/>.
 		/// </summary>
 		public TripleBufferStrategy()
 		{
-			FrontBuffer = new FrameBuffer();
-			MiddleBuffer = new FrameBuffer();
-			BackBuffer = new FrameBuffer();
+			FrontBuffer = new RenderBuffer();
+			MiddleBuffer = new RenderBuffer();
+			BackBuffer = new RenderBuffer();
 		}
 		
-		public override FrameBuffer GetDisplayFrame()
+		public override RenderBuffer GetDisplayBuffer()
 		{
-			lock(this) Util.Swap(ref FrontBuffer, ref MiddleBuffer);
-			//always match screen bounds to current window bounds
-			FrontBuffer.Image.Resize(Width, Height);
+			FrontBuffer = System.Threading.Interlocked.Exchange(ref MiddleBuffer, FrontBuffer);
 			return FrontBuffer;
 		}
 		
-		public override FrameBuffer GetRenderFrame()
+		public override RenderBuffer GetRenderBuffer()
 		{
-			lock(this) Util.Swap(ref BackBuffer, ref MiddleBuffer);
+			BackBuffer = System.Threading.Interlocked.Exchange(ref MiddleBuffer, BackBuffer);
 			//always match buffer bounds to current window bounds
 			BackBuffer.Image.Resize(Width, Height);
 			return BackBuffer;
 		}
 		
-		public override FrameBuffer[] GetBuffers()
+		public override RenderBuffer[] GetBuffers()
 		{
 			return new []{FrontBuffer, MiddleBuffer, BackBuffer};
 		}

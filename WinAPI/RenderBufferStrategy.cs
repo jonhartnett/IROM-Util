@@ -4,16 +4,16 @@
 	using System.Collections.Generic;
 	
 	/// <summary>
-	/// A render buffer for a Frame.
+	/// A render buffer for rendering.
 	/// </summary>
-	public class FrameBuffer
+	public class RenderBuffer
 	{
 		//the actual buffer image
 		public Image Image;
 		//id of the last frame rendered
 		public ulong LastFrameId;
 		
-		public FrameBuffer()
+		public RenderBuffer()
 		{
 			Image = new Image(1, 1, true);
 			LastFrameId = 0;
@@ -21,15 +21,15 @@
 	}
 	
 	/// <summary>
-	/// A buffer strategy for a Frame.
+	/// A buffer strategy for rendering.
 	/// </summary>
-	public abstract class FrameBufferStrategy
+	public abstract class RenderBufferStrategy
 	{
 		protected int Width = 1;
 		protected int Height = 1;
 
 		/// <summary>
-		/// Resizes this FrameBuffer.
+		/// Resizes this <see cref="RenderBufferStrategy"/>.
 		/// </summary>
 		public void Resize(int w, int h)
 		{
@@ -38,20 +38,20 @@
 		}
 		
 		/// <summary>
-		/// Gets the current frame to be displayed.
+		/// Gets the current buffer to be displayed.
 		/// </summary>
-		/// <returns>The display frame.</returns>
-		public abstract FrameBuffer GetDisplayFrame();
+		/// <returns>The display buffer.</returns>
+		public abstract RenderBuffer GetDisplayBuffer();
 		
 		/// <summary>
-		/// Gets the current frame for rendering.
+		/// Gets the current buffer for rendering.
 		/// </summary>
-		/// <returns>The render frame.</returns>
-		public abstract FrameBuffer GetRenderFrame();
+		/// <returns>The render buffer.</returns>
+		public abstract RenderBuffer GetRenderBuffer();
 		
 		/// <summary>
 		/// Returns the buffers used by this strategy.
 		/// </summary>
-		public abstract FrameBuffer[] GetBuffers();
+		public abstract RenderBuffer[] GetBuffers();
 	}
 }

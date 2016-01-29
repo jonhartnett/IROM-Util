@@ -3,33 +3,33 @@
 	using System;
 	
 	/// <summary>
-	/// A buffer strategy for a Frame.
+	/// A buffer strategy for rendering with one buffer.
 	/// </summary>
-	public class SingleBufferStrategy : FrameBufferStrategy
+	public class SingleBufferStrategy : RenderBufferStrategy
 	{
-		private readonly FrameBuffer Buffer;
+		private readonly RenderBuffer Buffer;
 		
 		/// <summary>
 		/// Creates a new <see cref="SingleBufferStrategy"/>.
 		/// </summary>
 		public SingleBufferStrategy()
 		{
-			Buffer = new FrameBuffer();
+			Buffer = new RenderBuffer();
 		}
 		
-		public override FrameBuffer GetDisplayFrame()
+		public override RenderBuffer GetDisplayBuffer()
+		{
+			return Buffer;
+		}
+		
+		public override RenderBuffer GetRenderBuffer()
 		{
 			//always match buffer bounds to current window bounds
 			Buffer.Image.Resize(Width, Height);
 			return Buffer;
 		}
 		
-		public override FrameBuffer GetRenderFrame()
-		{
-			return Buffer;
-		}
-		
-		public override FrameBuffer[] GetBuffers()
+		public override RenderBuffer[] GetBuffers()
 		{
 			return new []{Buffer};
 		}
