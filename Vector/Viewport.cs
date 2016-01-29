@@ -177,6 +177,16 @@
         	return view.Min.X >= Min.X && view.Min.Y >= Min.Y && view.Max.X <= Max.X && view.Max.Y <= Max.Y;
         }
         
+        /// <summary>
+        /// Explicit cast to <see cref="Rectangle"/>.
+        /// </summary>
+        /// <param name="view">The viewport to cast.</param>
+        /// <returns>The resulting rectangle.</returns>
+        public static explicit operator Rectangle(Viewport view)
+        {
+        	return new Rectangle{Min = (Point2D)view.Min, Max = (Point2D)view.Max};
+        }
+        
 		/// <summary>
         /// Implicit cast from <see cref="Vec2D"/>.
         /// Resulting <see cref="Viewport"/> extends into quadrant 1 from the origin.

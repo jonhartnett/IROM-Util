@@ -178,6 +178,34 @@
         }
         
         /// <summary>
+        /// Returns a <see cref="Rectangle"/> expanded by the given amounts in all directions.
+        /// </summary>
+        /// <param name="extant">The x and y amount to expand. (well, half, because in two directions)</param>
+        public Rectangle Expand(Point2D extant)
+        {
+        	return new Rectangle{Min = Min - extant, Max = Max + extant};
+        }
+        
+        /// <summary>
+        /// Returns a <see cref="Rectangle"/> contracted by the given amounts in all directions.
+        /// </summary>
+        /// <param name="extant">The x and y amount to contract. (well, half, because in two directions)</param>
+        public Rectangle Contract(Point2D extant)
+        {
+        	return new Rectangle{Min = Min + extant, Max = Max - extant};
+        }
+        
+        /// <summary>
+        /// Implicit cast to <see cref="Viewport"/>.
+        /// </summary>
+        /// <param name="rect">The rectangle to cast.</param>
+        /// <returns>The resulting view.</returns>
+        public static implicit operator Viewport(Rectangle rect)
+        {
+        	return new Viewport{Min = rect.Min, Max = rect.Max};
+        }
+        
+        /// <summary>
         /// Explicit cast to <see cref="System.Drawing.Rectangle"/>.
         /// </summary>
         /// <param name="rect">The rect to cast.</param>
