@@ -245,10 +245,11 @@
         /// <returns>The blended <see cref="ARGB"/>.</returns>
         public static RGB operator &(RGB dest, ARGB src)
         {
-        	double srcA = src.A / 255D;
-        	return new RGB((byte)((src.R * srcA) + (dest.R * (1 - srcA))), 
-        	               (byte)((src.G * srcA) + (dest.G * (1 - srcA))), 
-        	               (byte)((src.B * srcA) + (dest.B * (1 - srcA))));
+        	if(src.A == 255) return src.RGB;
+        	if(src.A == 0) return dest;
+        	return new RGB((byte)(((src.R * src.A) >> 8) + ((dest.R * (255 - src.A)) >> 8)),
+        	               (byte)(((src.G * src.A) >> 8) + ((dest.G * (255 - src.A)) >> 8)),
+        	               (byte)(((src.B * src.A) >> 8) + ((dest.B * (255 - src.A)) >> 8)));
         }
         
         /// <summary>

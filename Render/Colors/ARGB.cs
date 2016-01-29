@@ -219,10 +219,10 @@
         /// <returns>The product <see cref="ARGB"/>.</returns>
         public static ARGB operator *(ARGB color, double val)
         {
-        	return new ARGB((byte)Util.Clip((int)(color.A * val), 0, 255), 
-        	                (byte)Util.Clip((int)(color.R * val), 0, 255), 
-        	                (byte)Util.Clip((int)(color.G * val), 0, 255), 
-        	                (byte)Util.Clip((int)(color.B * val), 0, 255));
+        	return new ARGB((byte)Math.Min(Math.Max(color.A * val, 0), 255), 
+        	                (byte)Math.Min(Math.Max(color.R * val, 0), 255), 
+        	                (byte)Math.Min(Math.Max(color.G * val, 0), 255), 
+        	                (byte)Math.Min(Math.Max(color.B * val, 0), 255));
         }
         
         /// <summary>
@@ -233,10 +233,10 @@
         /// <returns>The product <see cref="ARGB"/>.</returns>
         public static ARGB operator *(ARGB color, Vec4D vec)
         {
-        	return new ARGB((byte)Util.Clip((int)(color.A * vec.W), 0, 255),
-        				    (byte)Util.Clip((int)(color.R * vec.X), 0, 255),
-        	                (byte)Util.Clip((int)(color.G * vec.Y), 0, 255), 
-        	                (byte)Util.Clip((int)(color.B * vec.Z), 0, 255));
+        	return new ARGB((byte)Math.Min(Math.Max(color.A * vec.W, 0), 255),
+        				    (byte)Math.Min(Math.Max(color.R * vec.X, 0), 255),
+        	                (byte)Math.Min(Math.Max(color.G * vec.Y, 0), 255), 
+        	                (byte)Math.Min(Math.Max(color.B * vec.Z, 0), 255));
         }
 
         /// <summary>
@@ -247,10 +247,10 @@
         /// <returns>The quotient <see cref="ARGB"/>.</returns>
         public static ARGB operator /(ARGB color, double val)
         {
-            return new ARGB((byte)Util.Clip((int)(color.A / val), 0, 255), 
-        	                (byte)Util.Clip((int)(color.R / val), 0, 255), 
-        	                (byte)Util.Clip((int)(color.G / val), 0, 255), 
-        	                (byte)Util.Clip((int)(color.B / val), 0, 255));
+            return new ARGB((byte)Math.Min(Math.Max(color.A / val, 0), 255), 
+        	                (byte)Math.Min(Math.Max(color.R / val, 0), 255), 
+        	                (byte)Math.Min(Math.Max(color.G / val, 0), 255), 
+        	                (byte)Math.Min(Math.Max(color.B / val, 0), 255));
         }
         
         /// <summary>
@@ -261,10 +261,10 @@
         /// <returns>The quotient <see cref="ARGB"/>.</returns>
         public static ARGB operator /(ARGB color, Vec4D vec)
         {
-        	return new ARGB((byte)Util.Clip((int)(color.A / vec.W), 0, 255),
-        				    (byte)Util.Clip((int)(color.R / vec.X), 0, 255),
-        	                (byte)Util.Clip((int)(color.G / vec.Y), 0, 255), 
-        	                (byte)Util.Clip((int)(color.B / vec.Z), 0, 255));
+        	return new ARGB((byte)Math.Min(Math.Max(color.A / vec.W, 0), 255),
+        				    (byte)Math.Min(Math.Max(color.R / vec.X, 0), 255),
+        	                (byte)Math.Min(Math.Max(color.G / vec.Y, 0), 255), 
+        	                (byte)Math.Min(Math.Max(color.B / vec.Z, 0), 255));
         }
         
         /// <summary>
@@ -277,11 +277,10 @@
         {
         	if(src.A == 255) return src;
         	if(src.A == 0) return dest;
-        	double srcA = src.A / 255D;
         	return new ARGB((byte)(src.A + dest.A),
-        					(byte)((src.R * srcA) + (dest.R * (1 - srcA))),
-        	                (byte)((src.G * srcA) + (dest.G * (1 - srcA))), 
-        	                (byte)((src.B * srcA) + (dest.B * (1 - srcA))));
+        					(byte)(((src.R * src.A) >> 8) + ((dest.R * (255 - src.A)) >> 8)),
+        	                (byte)(((src.G * src.A) >> 8) + ((dest.G * (255 - src.A)) >> 8)),
+        	                (byte)(((src.B * src.A) >> 8) + ((dest.B * (255 - src.A)) >> 8)));
         }
         
         /// <summary>
