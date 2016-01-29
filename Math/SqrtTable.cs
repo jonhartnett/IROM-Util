@@ -48,7 +48,7 @@
 	    }
 
         /// <summary>
-        /// Lerped sqrt approximation. More accurate than sqrt().
+        /// Lerped sqrt approximation. More accurate than sqrt() but slower.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The sqrt value.</returns>
@@ -60,12 +60,6 @@
             }
             double mu = (value - Min) / Inc;
             int index = (int)mu;
-            //if exact value
-            // disable once CompareOfFloatsByEqualityOperator
-            if(index == mu)
-            {
-                return SqrtSamples[index];
-            } 
             mu -= index;
             return Interpolation.Linear(SqrtSamples[index], SqrtSamples[index + 1], mu);
         }
