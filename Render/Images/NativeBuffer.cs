@@ -3,6 +3,7 @@
 	using System;
 	using System.ComponentModel;
 	using System.Runtime.InteropServices;
+	using System.Threading;
 	
 	/// <summary>
 	/// A managed wrapper for an unmanaged ARGB buffer.
@@ -32,7 +33,7 @@
 	        	info.init(w, h);
 	        	//create DIB
 	        	handle = CreateDIBSection(context.Handle, ref info, DIB_RGB_COLORS, out pixels, IntPtr.Zero, 0);
-	        	Assert(handle != IntPtr.Zero);
+	        	WinAPIUtils.Assert(handle != IntPtr.Zero);
 	        	//select the DIB into the DC
 	        	context.Push(handle);
 			}else
@@ -73,7 +74,11 @@
 		/// </summary>
 		public void Dispose()
 		{
-			IntPtr handle = System.Threading.Interlocked.Exchange(ref Handle, IntPtr.Zero);
+			DeviceContext context = Interlocked.Exchange(ref Context, null);
+			if(context != null) 
+				context.Dispose();
+			
+			IntPtr handle = Interlocked.Exchange(ref Handle, IntPtr.Zero);
 			if(handle != IntPtr.Zero)
 			{
 				if(isDIB)
@@ -81,24 +86,12 @@
 					bool result = DeleteObject(handle);
 					try
 					{
-						Assert(result);
+						WinAPIUtils.Assert(result);
 					}catch(Win32Exception ex){Console.WriteLine(ex);}
 				}else
 				{
 					Marshal.FreeHGlobal(handle);
 				}
-			}
-		}
-		
-		/// <summary>
-		/// Throws a <see cref="Win32Exception"/> if the given condition is not true.
-		/// </summary>
-		/// <param name="test">The condition.</param>
-		private static void Assert(bool test)
-		{
-			if(!test)
-			{
-				throw new Win32Exception(Marshal.GetLastWin32Error());
 			}
 		}
 		

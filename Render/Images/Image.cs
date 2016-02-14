@@ -98,6 +98,7 @@
         
         protected override void BaseResize(int width, int height)
         {
+        	if(buffer != null) buffer.Dispose();
         	data = NativeBuffer.CreateBuffer(out buffer, width, height, isDIBSection);
         }
         
