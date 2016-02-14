@@ -51,9 +51,9 @@
 	    }
 	    
 	    // Windows CE native library with QueryPerformanceCounter().
-	    [DllImport("Kernel32.dll")]
+	    [DllImport("kernel32.dll")]
 	    private static extern bool QueryPerformanceCounter(out long count);
-	    [DllImport("Kernel32.dll")]
+	    [DllImport("kernel32.dll")]
 	    private static extern bool QueryPerformanceFrequency(out long freq);
 	}
 }

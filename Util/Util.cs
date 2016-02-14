@@ -2,12 +2,25 @@
 {
 	using System;
 	using System.Linq;
+	using System.Collections.Generic;
 	
     /// <summary>
     /// Simple util class for misc. methods.
     /// </summary>
     public static class Util
     {
+    	/// <summary>
+    	/// Returns an enumerable for the given Enum type.
+    	/// </summary>
+    	public static IEnumerable<T> GetEnumValues<T>() where T : struct
+    	{
+    		if(!typeof(T).IsEnum) throw new InvalidOperationException();
+    		foreach(T value in Enum.GetValues(typeof(T)).Cast<T>())
+    		{
+    			yield return value;
+    		}
+    	}
+    	
     	/// <summary>
     	/// Simply swaps the values of the given variables.
     	/// </summary>
