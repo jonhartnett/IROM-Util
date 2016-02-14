@@ -34,6 +34,33 @@
 			return new Vec4D(rand.NextDouble(), rand.NextDouble(), rand.NextDouble(), rand.NextDouble());
 		}
 		
+		/// <summary>
+		/// Returns a random Vec2D with each component between 0.0 and 1.0.
+		/// </summary>
+		/// <returns>A Vec2D with each component greater than or equal to 0.0, and less than 1.0.</returns>
+		public static Vec2D Next2D(this RNG rand)
+		{
+			return new Vec2D(rand.NextDouble(), rand.NextDouble());
+		}
+		
+		/// <summary>
+		/// Returns a random Vec3D with each component between 0.0 and 1.0.
+		/// </summary>
+		/// <returns>A Vec3D with each component greater than or equal to 0.0, and less than 1.0.</returns>
+		public static Vec3D Next3D(this RNG rand)
+		{
+			return new Vec3D(rand.NextDouble(), rand.NextDouble(), rand.NextDouble());
+		}
+		
+		/// <summary>
+		/// Returns a random Vec4D with each component between 0.0 and 1.0.
+		/// </summary>
+		/// <returns>A Vec4D with each component greater than or equal to 0.0, and less than 1.0.</returns>
+		public static Vec4D Next4D(this RNG rand)
+		{
+			return new Vec4D(rand.NextDouble(), rand.NextDouble(), rand.NextDouble(), rand.NextDouble());
+		}
+		
 		public static Point2D GetDimensions<T>(this T[,] array)
 		{
 			return new Point2D(array.GetLength(0), array.GetLength(1));
@@ -783,6 +810,130 @@
         		}
         	}
             return min;
+        }
+        
+        /// <summary>
+        /// Interpolates between the given vectors using the given interpolation function.
+        /// </summary>
+        /// <param name="bottom">The bottom value.</param>
+        /// <param name="top">The top value.</param>
+        /// <param name="mu">The mu value.</param>
+        /// <param name="func">The interpolation function to use.</param>
+        /// <returns>The resulting vector.</returns>
+        public static Vec1D Interpolate(Vec1D bottom, Vec1D top, double mu, InterpFunction func)
+        {
+        	return new Vec1D(func(bottom.X, top.X, mu));
+        }
+        
+        /// <summary>
+        /// Interpolates between the given vectors using the given interpolation function.
+        /// </summary>
+        /// <param name="bottom">The bottom value.</param>
+        /// <param name="top">The top value.</param>
+        /// <param name="mu">The mu value.</param>
+        /// <param name="func">The interpolation function to use.</param>
+        /// <returns>The resulting vector.</returns>
+        public static Vec2D Interpolate(Vec2D bottom, Vec2D top, double mu, InterpFunction func)
+        {
+        	return new Vec2D(func(bottom.X, top.X, mu), 
+        	                 func(bottom.Y, top.Y, mu));
+        }
+        
+        /// <summary>
+        /// Interpolates between the given vectors using the given interpolation function.
+        /// </summary>
+        /// <param name="bottom">The bottom value.</param>
+        /// <param name="top">The top value.</param>
+        /// <param name="mu">The mu value.</param>
+        /// <param name="func">The interpolation function to use.</param>
+        /// <returns>The resulting vector.</returns>
+        public static Vec3D Interpolate(Vec3D bottom, Vec3D top, double mu, InterpFunction func)
+        {
+        	return new Vec3D(func(bottom.X, top.X, mu), 
+        	                 func(bottom.Y, top.Y, mu),
+        	                 func(bottom.Z, top.Z, mu));
+        }
+        
+        /// <summary>
+        /// Interpolates between the given vectors using the given interpolation function.
+        /// </summary>
+        /// <param name="bottom">The bottom value.</param>
+        /// <param name="top">The top value.</param>
+        /// <param name="mu">The mu value.</param>
+        /// <param name="func">The interpolation function to use.</param>
+        /// <returns>The resulting vector.</returns>
+        public static Vec4D Interpolate(Vec4D bottom, Vec4D top, double mu, InterpFunction func)
+        {
+        	return new Vec4D(func(bottom.X, top.X, mu), 
+        	                 func(bottom.Y, top.Y, mu),
+        	                 func(bottom.Z, top.Z, mu),
+        	                 func(bottom.W, top.W, mu));
+        }
+        
+        /// <summary>
+        /// Interpolates between the given vectors using the given extended interpolation function.
+        /// </summary>
+        /// <param name="past">The past value.</param>
+        /// <param name="bottom">The bottom value.</param>
+        /// <param name="top">The top value.</param>
+        /// <param name="future">The future value.</param>
+        /// <param name="mu">The mu value.</param>
+        /// <param name="func">The extended interpolation function to use.</param>
+        /// <returns>The resulting vector.</returns>
+        public static Vec1D Interpolate(Vec1D past, Vec1D bottom, Vec1D top, Vec1D future, double mu, ExtendedInterpFunction func)
+        {
+        	return new Vec1D(func(past.X, bottom.X, top.X, future.X, mu));
+        }
+        
+        /// <summary>
+        /// Interpolates between the given vectors using the given extended interpolation function.
+        /// </summary>
+        /// <param name="past">The past value.</param>
+        /// <param name="bottom">The bottom value.</param>
+        /// <param name="top">The top value.</param>
+        /// <param name="future">The future value.</param>
+        /// <param name="mu">The mu value.</param>
+        /// <param name="func">The extended interpolation function to use.</param>
+        /// <returns>The resulting vector.</returns>
+        public static Vec2D Interpolate(Vec2D past, Vec2D bottom, Vec2D top, Vec2D future, double mu, ExtendedInterpFunction func)
+        {
+        	return new Vec2D(func(past.X, bottom.X, top.X, future.X, mu),
+        	                 func(past.Y, bottom.Y, top.Y, future.Y, mu));
+        }
+        
+        /// <summary>
+        /// Interpolates between the given vectors using the given extended interpolation function.
+        /// </summary>
+        /// <param name="past">The past value.</param>
+        /// <param name="bottom">The bottom value.</param>
+        /// <param name="top">The top value.</param>
+        /// <param name="future">The future value.</param>
+        /// <param name="mu">The mu value.</param>
+        /// <param name="func">The extended interpolation function to use.</param>
+        /// <returns>The resulting vector.</returns>
+        public static Vec3D Interpolate(Vec3D past, Vec3D bottom, Vec3D top, Vec3D future, double mu, ExtendedInterpFunction func)
+        {
+        	return new Vec3D(func(past.X, bottom.X, top.X, future.X, mu),
+        	                 func(past.Y, bottom.Y, top.Y, future.Y, mu),
+        	                 func(past.Z, bottom.Z, top.Z, future.Z, mu));
+        }
+        
+        /// <summary>
+        /// Interpolates between the given vectors using the given extended interpolation function.
+        /// </summary>
+        /// <param name="past">The past value.</param>
+        /// <param name="bottom">The bottom value.</param>
+        /// <param name="top">The top value.</param>
+        /// <param name="future">The future value.</param>
+        /// <param name="mu">The mu value.</param>
+        /// <param name="func">The extended interpolation function to use.</param>
+        /// <returns>The resulting vector.</returns>
+        public static Vec4D Interpolate(Vec4D past, Vec4D bottom, Vec4D top, Vec4D future, double mu, ExtendedInterpFunction func)
+        {
+        	return new Vec4D(func(past.X, bottom.X, top.X, future.X, mu),
+        	                 func(past.Y, bottom.Y, top.Y, future.Y, mu),
+        	                 func(past.Z, bottom.Z, top.Z, future.Z, mu),
+        	                 func(past.W, bottom.W, top.W, future.W, mu));
         }
         
         /// <summary>
