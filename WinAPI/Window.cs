@@ -299,11 +299,11 @@
 					    	SendMessage(Handle, /*WM_SYSCOMMAND*/0x0112, /*SC_RESTORE*/0xF120, IntPtr.Zero);
 					    }
 					    SavedStateStyle = GetWindowLong(Handle, /*GWL_STYLE*/-16);
-					    Assert(SavedStateStyle != 0);
+					    WinAPIUtils.Assert(SavedStateStyle != 0);
 					    SavedStateExStyle = GetWindowLong(Handle, /*GWL_EXSTYLE*/-20);
-					    Assert(SavedStateExStyle != 0);
+					    WinAPIUtils.Assert(SavedStateExStyle != 0);
 					    bool result = GetWindowRect(Handle, out SavedStateBounds);
-					    Assert(result);
+					    WinAPIUtils.Assert(result);
 					}
 					
 					BaseFullscreen = value;
@@ -319,10 +319,10 @@
 					    MONITORINFO monitor_info = default(MONITORINFO);
 				    	monitor_info.Size = sizeof(MONITORINFO);
 				    	bool result = GetMonitorInfo(MonitorFromWindow(Handle, /*MONITOR_DEFAULTTONEAREST*/2), ref monitor_info);
-				    	Assert(result);
+				    	WinAPIUtils.Assert(result);
 				    	result = SetWindowPos(Handle, IntPtr.Zero, monitor_info.Monitor.X, monitor_info.Monitor.Y, 
 				    	                      monitor_info.Monitor.Width, monitor_info.Monitor.Height, /*SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED*/0x0034);
-				    	Assert(result);
+				    	WinAPIUtils.Assert(result);
 					}else 
 					{
 					    // Reset original window style and size.  The multiple window size/moves
@@ -333,7 +333,7 @@
 						
 				    	// On restore, resize to the previous saved rect size.
 				    	bool result = SetWindowPos(Handle, IntPtr.Zero, SavedStateBounds.X, SavedStateBounds.Y, SavedStateBounds.Width, SavedStateBounds.Height, /*SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED*/0x0034);
-				    	Assert(result);
+				    	WinAPIUtils.Assert(result);
 				    	
 					    if(SavedStateMaximized)
 					    {
@@ -442,7 +442,7 @@
 			{
 				Rectangle dimension = GetWindowDimensions();
 				bool success = MoveWindow(Handle, dimension.X, dimension.Y, dimension.Width, dimension.Height, false);
-				Assert(success);
+				WinAPIUtils.Assert(success);
 			}
 		}
 		
@@ -454,7 +454,7 @@
 		{
 			Rectangle dimension = Bounds;
 			bool success = AdjustWindowRectEx(out dimension, DEFAULT_WINDOW_STYLE, false, 0);
-			Assert(success);
+			WinAPIUtils.Assert(success);
 			return dimension;
 		}
 		
@@ -529,7 +529,7 @@
 			if(Started)
 			{
 				bool success = SetWindowText(Handle, title);
-				Assert(success);
+				WinAPIUtils.Assert(success);
 			}
 		}
 		
@@ -541,7 +541,7 @@
 			if(Started)
 			{
 				bool success = RedrawWindow(Handle, IntPtr.Zero, IntPtr.Zero, 0x0001);//RDW_INVALIDATE
-				Assert(success);
+				WinAPIUtils.Assert(success);
 			}
 		}
 		
@@ -574,15 +574,12 @@
 	            	{	
 	            		PaintData data;
 	            		IntPtr screenDC = BeginPaint(Handle, out data);
-	            		Assert(screenDC != IntPtr.Zero);
+	            		WinAPIUtils.Assert(screenDC != IntPtr.Zero);
 	            		
 	            		//blit display buffer to screen
 	            		Image buffer = BufferStrategy.GetDisplayBuffer().Image;
-	            		using(buffer.RenderLock)
-	            		{
-		            		bool success = BitBlt(screenDC, 0, 0, buffer.Width, buffer.Height, buffer.GetContext(), 0, 0, SRCCOPY);
-		            		Assert(success);
-	            		}
+		            	bool success = BitBlt(screenDC, 0, 0, buffer.Width, buffer.Height, buffer.GetContext(), 0, 0, SRCCOPY);
+		            	WinAPIUtils.Assert(success);
 	            		
 	            		EndPaint(Handle, ref data);
 	            		return;
@@ -612,7 +609,7 @@
 							//start tracking mouse so we recieve WM_MOUSELEAVE
 							TRACKMOUSEEVENT eventTrack = new TRACKMOUSEEVENT(Handle);
 							bool success = TrackMouseEvent(ref eventTrack);
-							Assert(success);
+							WinAPIUtils.Assert(success);
 						}
 			    		
 						//call event
@@ -781,18 +778,6 @@
 			}
             base.WndProc(ref m);
         }
-		
-		/// <summary>
-		/// Throws a <see cref="Win32Exception"/> if the given condition is not true.
-		/// </summary>
-		/// <param name="test">The condition.</param>
-		private static void Assert(bool test)
-		{
-			if(!test)
-			{
-				throw new Win32Exception(Marshal.GetLastWin32Error());
-			}
-		}
 		
 		//winapi constants
 		private const int WM_CLOSE = 0x0010;

@@ -4,6 +4,7 @@
 	using System.ComponentModel;
 	using System.Runtime.InteropServices;
 	using System.Collections.Generic;
+	using System.Threading;
 	
 	/// <summary>
 	/// A managed wrapper for an unmanaged WinAPI device context.
@@ -21,17 +22,17 @@
 		private readonly Stack<IntPtr> ObjStack = new Stack<IntPtr>();
 		
 		/// <summary>
-		/// True if this object has already been disposed.
+		/// The backing handle var.
 		/// </summary>
-		private bool Disposed = false;
+		private IntPtr baseHandle;
 		
 		/// <summary>
 		/// The handle of this <see cref="DeviceContext"/>.
 		/// </summary>
 		public IntPtr Handle
 		{
-			get;
-			private set;
+			get{return baseHandle;}
+			private set{baseHandle = value;}
 		}
 		
 		/// <summary>
@@ -40,7 +41,7 @@
 		public DeviceContext()
 		{
 			Handle = CreateCompatibleDC(IntPtr.Zero);
-			Assert(Handle != IntPtr.Zero);
+			WinAPIUtils.Assert(Handle != IntPtr.Zero);
 		}
 		
 		/// <summary>
@@ -55,7 +56,7 @@
 		
 		~DeviceContext()
 		{
-			UDispose();
+			Dispose();
 		}
 		
 		/// <summary>
@@ -65,35 +66,32 @@
 		public DeviceContext(DeviceContext deviceContext)
 		{
 			Handle = CreateCompatibleDC(deviceContext.Handle);
-			Assert(Handle != IntPtr.Zero);
+			WinAPIUtils.Assert(Handle != IntPtr.Zero);
 		}
 		
 		public void Dispose()
 		{
-			UDispose();
 			GC.SuppressFinalize(this);
-		}
-		
-		/// <summary>
-		/// Disposes of unmanaged resources.
-		/// </summary>
-		private void UDispose()
-		{
-			if(!Disposed)
+			lock(this)
 			{
+				if(Handle == IntPtr.Zero) return;
+				while(ObjStack.Count > 0)
+				{
+					Pop();
+				}
 				//only delete if it is our Handle.
 				if(Owned)
 				{
 					bool result = DeleteDC(Handle);
+					Handle = IntPtr.Zero;
 					try
 					{
-						Assert(result);
+						WinAPIUtils.Assert(result);
 					}catch(Win32Exception ex)
 					{
 						Console.WriteLine(ex);
 					}
 				}
-				Disposed = true;
 			}
 		}
 		
@@ -103,28 +101,23 @@
 		/// <param name="obj"></param>
 		public void Push(IntPtr obj)
 		{
-			IntPtr old = SelectObject(Handle, obj);
-			Assert(old != IntPtr.Zero);
-			//save old on stack
-			ObjStack.Push(old);
+			if(Monitor.TryEnter(this))
+			{
+				IntPtr old = SelectObject(Handle, obj);
+				WinAPIUtils.Assert(old != IntPtr.Zero);
+				//save old on stack
+				ObjStack.Push(old);
+				Monitor.Exit(this);
+			}
 		}
 		
 		public void Pop()
 		{
-			//replace with prev object
-			IntPtr old = SelectObject(Handle, ObjStack.Pop());
-			Assert(old != IntPtr.Zero);
-		}
-		
-		/// <summary>
-		/// Throws a <see cref="Win32Exception"/> if the given condition is not true.
-		/// </summary>
-		/// <param name="test">The condition.</param>
-		private static void Assert(bool test)
-		{
-			if(!test)
+			if(Monitor.TryEnter(this))
 			{
-				throw new Win32Exception(Marshal.GetLastWin32Error());
+				//replace with prev object
+				SelectObject(Handle, ObjStack.Pop());
+				Monitor.Exit(this);
 			}
 		}
 		

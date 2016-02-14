@@ -112,7 +112,7 @@
 		private static bool GetMessage(out Message message)
 		{
 			sbyte code = GetMessage(out message, IntPtr.Zero, 0, 0);
-			Assert(code != -1);
+			WinAPIUtils.Assert(code != -1);
 			return code != 0;
 		}
 		
@@ -124,18 +124,6 @@
 		{
 			TranslateMessage(ref message);
 			DispatchMessage(ref message);
-		}
-		
-		/// <summary>
-		/// Throws a <see cref="Win32Exception"/> if the given condition is not true.
-		/// </summary>
-		/// <param name="test">The condition.</param>
-		private static void Assert(bool test)
-		{
-			if(!test)
-			{
-				throw new Win32Exception();
-			}
 		}
 		
 		[DllImport("user32.dll", SetLastError = true)]
