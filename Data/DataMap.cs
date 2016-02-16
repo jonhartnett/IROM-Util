@@ -120,7 +120,7 @@
         /// The lowest index context with a non-null delegate of the relavent type is used for the actual rendering.
         /// </summary>
         /// <returns>The content array.</returns>
-        protected internal RenderContext<T>[] GetContexts()
+        protected internal virtual RenderContext<T>[] GetContexts()
         {
         	return new []{UnsafeRenderer<T>.Instance, BasicRenderer<T>.Instance};
         }

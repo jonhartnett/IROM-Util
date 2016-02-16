@@ -578,7 +578,7 @@
 	            		
 	            		//blit display buffer to screen
 	            		Image buffer = BufferStrategy.GetDisplayBuffer().Image;
-		            	bool success = BitBlt(screenDC, 0, 0, buffer.Width, buffer.Height, buffer.GetContext(), 0, 0, SRCCOPY);
+		            	bool success = BitBlt(screenDC, 0, 0, buffer.Width, buffer.Height, buffer.GetDeviceContext(), 0, 0, SRCCOPY);
 		            	WinAPIUtils.Assert(success);
 	            		
 	            		EndPaint(Handle, ref data);

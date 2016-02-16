@@ -122,7 +122,7 @@
         /// Returns the <see cref="DeviceContext"/> for this DIB-backed <see cref="Image"/>.
         /// </summary>
         /// <returns>The <see cref="DeviceContext"/>.</returns>
-        internal IntPtr GetContext()
+        internal IntPtr GetDeviceContext()
         {
         	return buffer.Context.Handle;
         }
