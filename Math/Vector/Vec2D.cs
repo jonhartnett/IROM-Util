@@ -4,14 +4,14 @@
 	using System.Linq;
 	
     /// <summary>
-    /// Simple 3D double vector struct.
+    /// Simple 2D double vector struct.
     /// </summary>
-    public struct Vec3D
+    public struct Vec2D
     {
     	/// <summary>
     	/// The zero value.
     	/// </summary>
-    	public static readonly Vec3D Zero = 0;
+    	public static readonly Vec2D Zero = 0;
     	
         /// <summary>
         /// The x value.
@@ -24,21 +24,14 @@
         public double Y;
         
         /// <summary>
-        /// The z value.
-        /// </summary>
-        public double Z;
-        
-        /// <summary>
-        /// Creates a new <see cref="Vec3D"/> with the given values.
+        /// Creates a new <see cref="Vec2D"/> with the given values.
         /// </summary>
         /// <param name="i">The x value.</param>
         /// <param name="j">The y value.</param>
-        /// <param name="k">The z value.</param>
-        public Vec3D(double i, double j, double k)
+        public Vec2D(double i, double j)
         {
             X = i;
             Y = j;
-            Z = k;
         }
         
         /// <summary>
@@ -52,8 +45,7 @@
         		{
         			case 0: return X;
         			case 1: return Y;
-        			case 2: return Z;
-        			default: throw new IndexOutOfRangeException(index + " out of Vec3D range.");
+        			default: throw new IndexOutOfRangeException(index + " out of Vec2D range.");
         		}
         	}
         	set
@@ -62,22 +54,21 @@
         		{
         			case 0: X = value; break;
         			case 1: Y = value; break;
-        			case 2: Z = value; break;
-        			default: throw new IndexOutOfRangeException(index + " out of Vec3D range.");
+        			default: throw new IndexOutOfRangeException(index + " out of Vec2D range.");
         		}
         	}
         }
         
         public override string ToString()
 		{
-			return string.Format("Vec3D({0}, {1}, {2})", X, Y, Z);
+			return string.Format("Vec2D({0}, {1})", X, Y);
 		}
         
         public override bool Equals(object obj)
         {
-        	if(obj is Vec3D)
+        	if(obj is Vec2D)
         	{
-        		return this == (Vec3D)obj;
+        		return this == (Vec2D)obj;
         	}else
         	{
         		return false;
@@ -87,20 +78,47 @@
         public override int GetHashCode()
         {
         	// disable NonReadonlyReferencedInGetHashCode
-        	return (int)Hash.PerformStaticHash((uint)X.GetHashCode(), (uint)Y.GetHashCode(), (uint)Z.GetHashCode());
+        	return (int)Hash.PerformStaticHash((uint)X.GetHashCode(), (uint)Y.GetHashCode());
         }
         
         /// <summary>
-        /// Returns the squared length of this <see cref="Vec3D"/>.
+        /// Returns the component-wise rounded version of this vector.
+        /// </summary>
+        /// <returns>The rounded vec.</returns>
+        public Point2D Round()
+        {
+        	return new Point2D((int)Math.Round(X), (int)Math.Round(Y));
+        }
+        
+        /// <summary>
+        /// Returns the component-wise floor version of this vector.
+        /// </summary>
+        /// <returns>The rounded vec.</returns>
+        public Point2D Floor()
+        {
+        	return new Point2D((int)Math.Floor(X), (int)Math.Floor(Y));
+        }
+        
+        /// <summary>
+        /// Returns the component-wise ceiling version of this vector.
+        /// </summary>
+        /// <returns>The rounded vec.</returns>
+        public Point2D Ceiling()
+        {
+        	return new Point2D((int)Math.Ceiling(X), (int)Math.Ceiling(Y));
+        }
+        
+        /// <summary>
+        /// Returns the squared length of this <see cref="Vec2D"/>.
         /// </summary>
         /// <returns>The squared length.</returns>
         public double LengthSq()
         {
-        	return (X * X) + (Y * Y) + (Z * Z);
+        	return (X * X) + (Y * Y);
         }
         
         /// <summary>
-        /// Returns the length of this <see cref="Vec3D"/>.
+        /// Returns the length of this <see cref="Vec2D"/>.
         /// </summary>
         /// <returns>The length.</returns>
         public double Length()
@@ -109,22 +127,34 @@
         }
         
         /// <summary>
-        /// Returns the direction of this <see cref="Vec3D"/>.
+        /// Returns the direction of this <see cref="Vec2D"/>.
         /// </summary>
-        /// <returns>The direction <see cref="Vec3D"/></returns>
-        public Vec3D Normalized()
+        /// <returns>The direction <see cref="Vec2D"/></returns>
+        public Vec2D Normalized()
         {
         	return this / Length();
         }
         
         /// <summary>
-        /// Explicit cast to <see cref="Point3D"/>.
+        /// Rotates this <see cref="Vec2D"/> the given number of radians.
+        /// </summary>
+        /// <param name="theta">The angle in radians.</param>
+        /// <returns>The component-wise wrapped vec.</returns>
+        public Vec2D Rotate(double theta)
+        {
+        	double cos = Math.Cos(theta);
+        	double sin = Math.Sin(theta);
+        	return new Vec2D((X * cos) - (Y * sin), (X * sin) + (Y * cos));
+        }
+        
+        /// <summary>
+        /// Explicit cast to <see cref="Point2D"/>.
         /// </summary>
         /// <param name="vec">The vec to cast.</param>
         /// <returns>The resulting vec.</returns>
-        public static explicit operator Point3D(Vec3D vec)
+        public static explicit operator Point2D(Vec2D vec)
         {
-        	return new Point3D((int)vec.X, (int)vec.Y, (int)vec.Z);
+        	return new Point2D((int)vec.X, (int)vec.Y);
         }
         
         /// <summary>
@@ -132,39 +162,39 @@
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The resulting vec.</returns>
-        public static implicit operator Vec3D(double value)
+        public static implicit operator Vec2D(double value)
         {
-            return new Vec3D(value, value, value);
+            return new Vec2D(value, value);
         }
 
         /// <summary>
-        /// Explicit cast to <see cref="Vec2D"/>. Drops extra data.
+        /// Explicit cast to <see cref="Vec1D"/>. Drops extra data.
         /// </summary>
         /// <param name="vec">The vec to cast.</param>
         /// <returns>The resulting vec.</returns>
-        public static explicit operator Vec2D(Vec3D vec)
+        public static explicit operator Vec1D(Vec2D vec)
         {
-            return new Vec2D(vec.X, vec.Y);
+            return new Vec1D(vec.X);
         }
 
         /// <summary>
-        /// Explicit cast to <see cref="Vec4D"/>. Fills missing data with 0's.
+        /// Explicit cast to <see cref="Vec3D"/>. Fills missing data with 0's.
         /// </summary>
         /// <param name="vec">The vec to cast.</param>
         /// <returns>The resulting vec.</returns>
-        public static implicit operator Vec4D(Vec3D vec)
+        public static implicit operator Vec3D(Vec2D vec)
         {
-            return new Vec4D(vec.X, vec.Y, vec.Z, 0);
+            return new Vec3D(vec.X, vec.Y, 0);
         }
-
+        
 		/// <summary>
         /// Negates this vec.
         /// </summary>
         /// <param name="vec">The vec to negate.</param>
         /// <returns>The negated vec.</returns>
-        public static Vec3D operator -(Vec3D vec)
+        public static Vec2D operator -(Vec2D vec)
         {
-            return new Vec3D(-vec.X, -vec.Y, -vec.Z);
+            return new Vec2D(-vec.X, -vec.Y);
         }
 
         /// <summary>
@@ -173,9 +203,9 @@
         /// <param name="vec">The first vec.</param>
         /// <param name="vec2">The second vec.</param>
         /// <returns>The sum vec.</returns>
-        public static Vec3D operator +(Vec3D vec, Vec3D vec2)
+        public static Vec2D operator +(Vec2D vec, Vec2D vec2)
         {
-            return new Vec3D(vec.X + vec2.X, vec.Y + vec2.Y, vec.Z + vec2.Z);
+            return new Vec2D(vec.X + vec2.X, vec.Y + vec2.Y);
         }
 
         /// <summary>
@@ -184,9 +214,9 @@
         /// <param name="vec">The first vec.</param>
         /// <param name="vec2">The second vec.</param>
         /// <returns>The difference vec.</returns>
-        public static Vec3D operator -(Vec3D vec, Vec3D vec2)
+        public static Vec2D operator -(Vec2D vec, Vec2D vec2)
         {
-            return new Vec3D(vec.X - vec2.X, vec.Y - vec2.Y, vec.Z - vec2.Z);
+            return new Vec2D(vec.X - vec2.X, vec.Y - vec2.Y);
         }
 
         /// <summary>
@@ -195,9 +225,9 @@
         /// <param name="vec">The first vec.</param>
         /// <param name="vec2">The second vec.</param>
         /// <returns>The product vec.</returns>
-        public static Vec3D operator *(Vec3D vec, Vec3D vec2)
+        public static Vec2D operator *(Vec2D vec, Vec2D vec2)
         {
-            return new Vec3D(vec.X * vec2.X, vec.Y * vec2.Y, vec.Z * vec2.Z);
+            return new Vec2D(vec.X * vec2.X, vec.Y * vec2.Y);
         }
 
         /// <summary>
@@ -206,9 +236,9 @@
         /// <param name="vec">The first vec.</param>
         /// <param name="vec2">The second vec.</param>
         /// <returns>The quotient vec.</returns>
-        public static Vec3D operator /(Vec3D vec, Vec3D vec2)
+        public static Vec2D operator /(Vec2D vec, Vec2D vec2)
         {
-            return new Vec3D(vec.X / vec2.X, vec.Y / vec2.Y, vec.Z / vec2.Z);
+            return new Vec2D(vec.X / vec2.X, vec.Y / vec2.Y);
         }
         
         /// <summary>
@@ -217,9 +247,9 @@
         /// <param name="vec">The first vec.</param>
         /// <param name="vec2">The second vec.</param>
         /// <returns>The modulo vec.</returns>
-        public static Vec3D operator %(Vec3D vec, Vec3D vec2)
+        public static Vec2D operator %(Vec2D vec, Vec2D vec2)
         {
-            return new Vec3D(vec.X % vec2.X, vec.Y % vec2.Y, vec.Z % vec2.Z);
+            return new Vec2D(vec.X % vec2.X, vec.Y % vec2.Y);
         }
         
         /// <summary>
@@ -228,9 +258,9 @@
         /// <param name="vec">The first vec.</param>
         /// <param name="vec2">The second vec.</param>
         /// <returns>True if equal.</returns>
-        public static bool operator ==(Vec3D vec, Vec3D vec2)
+        public static bool operator ==(Vec2D vec, Vec2D vec2)
         {
-        	return vec.X == vec2.X && vec.Y == vec2.Y && vec.Z == vec2.Z;
+        	return vec.X == vec2.X && vec.Y == vec2.Y;
         }
         
         /// <summary>
@@ -239,7 +269,7 @@
         /// <param name="vec">The first vec.</param>
         /// <param name="vec2">The second vec.</param>
         /// <returns>True if not equal.</returns>
-        public static bool operator !=(Vec3D vec, Vec3D vec2)
+        public static bool operator !=(Vec2D vec, Vec2D vec2)
         {
         	return !(vec == vec2);
         }
@@ -250,20 +280,9 @@
         /// <param name="vec">The first vector.</param>
         /// <param name="vec2">The second vector.</param>
         /// <returns>The dot product.</returns>
-        public static double Dot(Vec3D vec, Vec3D vec2)
+        public static double Dot(Vec2D vec, Vec2D vec2)
         {
-        	return vec.X * vec2.X + vec.Y * vec2.Y + vec.Z * vec2.Z;
-        }
-        
-        /// <summary>
-        /// Performs the cross product of two vectors.
-        /// </summary>
-        /// <param name="vec">The first vector.</param>
-        /// <param name="vec2">The second vector.</param>
-        /// <returns>The cross product.</returns>
-        public static Vec3D Cross(Vec3D vec, Vec3D vec2)
-        {
-        	return new Vec3D((vec.Y * vec2.Z) - (vec.Z * vec2.Y), (vec.Z * vec2.X) - (vec.X * vec2.Z), (vec.X * vec2.Y) - (vec.Y * vec2.X));
+        	return vec.X * vec2.X + vec.Y * vec2.Y;
         }
     }
 }

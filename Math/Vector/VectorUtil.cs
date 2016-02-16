@@ -61,16 +61,31 @@
 			return new Vec4D(rand.NextDouble(), rand.NextDouble(), rand.NextDouble(), rand.NextDouble());
 		}
 		
+		/// <summary>
+		/// Returns the dimension of this array.
+		/// </summary>
+		/// <param name="array">The array.</param>
+		/// <returns>The dimensions.</returns>
 		public static Point2D GetDimensions<T>(this T[,] array)
 		{
 			return new Point2D(array.GetLength(0), array.GetLength(1));
 		}
 		
+		/// <summary>
+		/// Returns the dimension of this array.
+		/// </summary>
+		/// <param name="array">The array.</param>
+		/// <returns>The dimensions.</returns>
 		public static Point3D GetDimensions<T>(this T[,,] array)
 		{
 			return new Point3D(array.GetLength(0), array.GetLength(1), array.GetLength(2));
 		}
 		
+		/// <summary>
+		/// Returns the dimension of this array.
+		/// </summary>
+		/// <param name="array">The array.</param>
+		/// <returns>The dimensions.</returns>
 		public static Point4D GetDimensions<T>(this T[,,,] array)
 		{
 			return new Point4D(array.GetLength(0), array.GetLength(1), array.GetLength(2), array.GetLength(4));
@@ -934,75 +949,6 @@
         	                 func(past.Y, bottom.Y, top.Y, future.Y, mu),
         	                 func(past.Z, bottom.Z, top.Z, future.Z, mu),
         	                 func(past.W, bottom.W, top.W, future.W, mu));
-        }
-        
-        /// <summary>
-        /// Returns the overlap of the given <see cref="Rectangle"/>s.
-        /// </summary>
-        /// <typeparam name="T">The type.</typeparam>
-        /// <param name="rects">The rectangles.</param>
-        /// <returns>The overlapping <see cref="Rectangle"/>.</returns>
-        public static Rectangle Overlap(params Rectangle[] rects)
-        {
-        	Point2D min = rects[0].Min;
-        	Point2D max = rects[0].Max;
-        	for(int i = 1; i < rects.Length; i++)
-        	{
-        		min = Max(min, rects[i].Min);
-        		max = Min(max, rects[i].Max);
-        	}
-        	return new Rectangle{Min = min, Max = max};
-        }
-        
-        /// <summary>
-        /// Returns the encompassing <see cref="Rectangle"/> of the given <see cref="Rectangle"/>s.
-        /// </summary>
-        /// <param name="rects">The rectangles.</param>
-        /// <returns>The encompassing <see cref="Rectangle"/>.</returns>
-        public static Rectangle Encompass(params Rectangle[] rects)
-        {
-        	Point2D min = rects[0].Min;
-        	Point2D max = rects[0].Max;
-        	for(int i = 1; i < rects.Length; i++)
-        	{
-        		min = Min(min, rects[i].Min);
-        		max = Max(max, rects[i].Max);
-        	}
-        	return new Rectangle{Min = min, Max = max};
-        }
-        
-        /// <summary>
-        /// Returns the overlap of the given <see cref="Viewport"/>s.
-        /// </summary>
-        /// <param name="views">The viewports.</param>
-        /// <returns>The overlapping <see cref="Viewport"/>.</returns>
-        public static Viewport Overlap(params Viewport[] views)
-        {
-        	Vec2D min = views[0].Min;
-        	Vec2D max = views[0].Max;
-        	for(int i = 1; i < views.Length; i++)
-        	{
-        		min = Max(min, views[i].Min);
-        		max = Min(max, views[i].Max);
-        	}
-        	return new Viewport{Min = min, Max = max};
-        }
-        
-        /// <summary>
-        /// Returns the encompassing <see cref="Viewport"/> of the given <see cref="Viewport"/>s.
-        /// </summary>
-        /// <param name="views">The viewports.</param>
-        /// <returns>The encompassing <see cref="Viewport"/>.</returns>
-        public static Viewport Encompass(params Viewport[] views)
-        {
-        	Vec2D min = views[0].Min;
-        	Vec2D max = views[0].Max;
-        	for(int i = 1; i < views.Length; i++)
-        	{
-        		min = Min(min, views[i].Min);
-        		max = Max(max, views[i].Max);
-        	}
-        	return new Viewport{Min = min, Max = max};
         }
 	}
 }

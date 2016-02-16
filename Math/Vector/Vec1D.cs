@@ -70,6 +70,33 @@
         	// disable NonReadonlyReferencedInGetHashCode
         	return (int)Hash.PerformStaticHash((uint)X.GetHashCode());
         }
+        
+        /// <summary>
+        /// Returns the component-wise rounded version of this vector.
+        /// </summary>
+        /// <returns>The rounded vec.</returns>
+        public Point1D Round()
+        {
+        	return new Point1D((int)Math.Round(X));
+        }
+        
+        /// <summary>
+        /// Returns the component-wise floor version of this vector.
+        /// </summary>
+        /// <returns>The rounded vec.</returns>
+        public Point1D Floor()
+        {
+        	return new Point1D((int)Math.Floor(X));
+        }
+        
+        /// <summary>
+        /// Returns the component-wise ceiling version of this vector.
+        /// </summary>
+        /// <returns>The rounded vec.</returns>
+        public Point1D Ceiling()
+        {
+        	return new Point1D((int)Math.Ceiling(X));
+        }
 
         /// <summary>
         /// Implicit cast to the data type.

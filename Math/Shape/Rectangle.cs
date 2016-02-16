@@ -5,7 +5,7 @@
 	/// <summary>
 	/// Simple int rectangle struct.
 	/// </summary>
-	public struct Rectangle
+	public struct Rectangle : IRenderableShape
 	{
 		/// <summary>
 		/// The <see cref="Rectangle"/> minimum coordinates (inclusive).
@@ -108,6 +108,30 @@
         	// disable NonReadonlyReferencedInGetHashCode
         	return (int)Hash.PerformStaticHash((uint)Min.GetHashCode(), (uint)Max.GetHashCode());
         }
+        
+        public void Scan(Scanner scanner, Rectangle clip)
+		{
+			scanner.yMin = Min.Y;
+			scanner.yMax = Max.Y;
+			//clip to clip, but with leeway
+			if(scanner.yMin < clip.Min.Y - 1) scanner.yMin = clip.Min.Y - 1;
+			if(scanner.yMax > clip.Max.Y + 1) scanner.yMax = clip.Max.Y + 1;
+			for(int y = scanner.yMin; y <= scanner.yMax; y++)
+			{
+				scanner[y] = new Scanner.Scan{min = Min.X, max = Max.X};
+			}
+			//true clip
+			if(scanner.yMin < clip.Min.Y)
+			{
+				scanner.yMin = clip.Min.Y;
+				scanner.isYMinClipped = true;
+			}
+			if(scanner.yMax > clip.Max.Y)
+			{
+				scanner.yMax = clip.Max.Y;
+				scanner.isYMaxClipped = true;
+			}
+		}
         
         /// <summary>
         /// Returns true if this <see cref="Rectangle"/> is a valid, space-filling rectangle.

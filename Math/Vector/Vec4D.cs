@@ -100,6 +100,33 @@
         }
         
         /// <summary>
+        /// Returns the component-wise rounded version of this vector.
+        /// </summary>
+        /// <returns>The rounded vec.</returns>
+        public Point4D Round()
+        {
+        	return new Point4D((int)Math.Round(X), (int)Math.Round(Y), (int)Math.Round(Z), (int)Math.Round(W));
+        }
+        
+        /// <summary>
+        /// Returns the component-wise floor version of this vector.
+        /// </summary>
+        /// <returns>The rounded vec.</returns>
+        public Point4D Floor()
+        {
+        	return new Point4D((int)Math.Floor(X), (int)Math.Floor(Y), (int)Math.Floor(Z), (int)Math.Floor(W));
+        }
+        
+        /// <summary>
+        /// Returns the component-wise ceiling version of this vector.
+        /// </summary>
+        /// <returns>The rounded vec.</returns>
+        public Point4D Ceiling()
+        {
+        	return new Point4D((int)Math.Ceiling(X), (int)Math.Ceiling(Y), (int)Math.Ceiling(Z), (int)Math.Ceiling(W));
+        }
+        
+        /// <summary>
         /// Returns the squared length of this <see cref="Vec4D"/>.
         /// </summary>
         /// <returns>The squared length.</returns>

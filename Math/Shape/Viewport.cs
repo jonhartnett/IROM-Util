@@ -5,7 +5,7 @@
 	/// <summary>
 	/// Simple double view struct.
 	/// </summary>
-	public struct Viewport
+	public struct Viewport : IRenderableShape
 	{
 		/// <summary>
 		/// The <see cref="Viewport"/> minimum coordinates (inclusive).
@@ -108,7 +108,12 @@
         	// disable NonReadonlyReferencedInGetHashCode
         	return (int)Hash.PerformStaticHash((uint)Min.GetHashCode(), (uint)Max.GetHashCode());
         }
-        
+
+		public void Scan(Scanner scanner, Rectangle clip)
+		{
+			new Rectangle{Min = Min.Round(), Max = Max.Round()}.Scan(scanner, clip);
+		}
+		
         /// <summary>
         /// Returns true if this <see cref="Viewport"/> is a valid, space-filling view.
         /// </summary>
