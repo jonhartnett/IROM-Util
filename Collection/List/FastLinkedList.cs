@@ -79,9 +79,7 @@
 		/// <param name="item">The item to add.</param>
 		public void AddLast(E item)
 		{
-			DoubleNode<E> node = new DoubleNode<E>(item, root.Prev, root);
-			root.Prev = root.Prev.Next = node;
-			Count++;
+			Add(item, root.Prev, root);
 		}
 		
 		/// <summary>
@@ -90,8 +88,32 @@
 		/// <param name="item">The item to add.</param>
 		public void AddFirst(E item)
 		{
-			DoubleNode<E> node = new DoubleNode<E>(item, root.Prev, root);
-			root.Next = root.Next.Prev = node;
+			Add(item, root, root.Next);
+		}
+		
+		/// <summary>
+		/// Adds the given item to the list according to the sort defined in compare.
+		/// Assumes the list is already sorted.
+		/// </summary>
+		/// <param name="item">The item to add.</param>
+		/// <param name="compare">The compare function.</param>
+		public void AddSorted(E item, Comparison<E> compare)
+		{
+			for(DoubleNode<E> node = root.Next; node != root; node = node.Next)
+			{
+				if(compare(node.Value, item) >= 0)
+				{
+					Add(item, node.Prev, node.Next);
+					return;
+				}
+			}
+			AddLast(item);
+		}
+		
+		private void Add(E item, DoubleNode<E> prev, DoubleNode<E> next)
+		{
+			DoubleNode<E> node = new DoubleNode<E>(item, prev, next);
+			next.Prev = prev.Next = node;
 			Count++;
 		}
 		
