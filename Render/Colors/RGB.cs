@@ -56,7 +56,7 @@
         {
         	get
         	{
-        		byte grey = (byte)((R + G + B) / 3D);
+        		byte grey = (byte)((R + G + B) / 3);
         		return new RGB(grey, grey, grey);
         	}
         }
