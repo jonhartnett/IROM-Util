@@ -22,42 +22,42 @@
 	}
 	
 	/// <summary>
-	/// Stores a number of extension methods for specialty rendering methods for DataMap2D<ARGB>s.
+	/// Stores a number of extension methods for specialty rendering methods for DataMap<ARGB>s.
 	/// </summary>
 	public static class Render
 	{
-		/// <summary>
-		/// Copies the given <see cref="DataMap2D{ARGB}"/> onto this <see cref="DataMap2D{ARGB}"/> with the given render mode.
+		/*/// <summary>
+		/// Copies the given <see cref="DataMap{ARGB}"/> onto this <see cref="DataMap{ARGB}"/> with the given render mode.
 		/// </summary>
-		/// <param name="dest">The src <see cref="DataMap2D{ARGB}"/>.</param>
-		/// <param name="src">The dest <see cref="DataMap2D{ARGB}"/>.</param>
+		/// <param name="dest">The src <see cref="DataMap{ARGB}"/>.</param>
+		/// <param name="src">The dest <see cref="DataMap{ARGB}"/>.</param>
 		/// <param name="mode">The render mode.</param>
-		public static void Copy(this DataMap2D<ARGB> dest, DataMap2D<ARGB> src, RenderMode mode)
+		public static void Copy(this DataMap<ARGB> dest, DataMap<ARGB> src, RenderMode mode)
 		{
 			dest.Blit(src, 0, 0, mode);
 		}
 		
 		/// <summary>
-		/// Blits the source <see cref="DataMap2D{ARGB}"/> to this <see cref="DataMap2D{ARGB}"/> in the given position with the given render mode.
+		/// Blits the source <see cref="DataMap{ARGB}"/> to this <see cref="DataMap{ARGB}"/> in the given position with the given render mode.
 		/// </summary>
-		/// <param name="dest">The <see cref="DataMap2D{ARGB}"/>.</param>
-		/// <param name="src">The source <see cref="DataMap2D{ARGB}"/>.</param>
+		/// <param name="dest">The <see cref="DataMap{ARGB}"/>.</param>
+		/// <param name="src">The source <see cref="DataMap{ARGB}"/>.</param>
 		/// <param name="x">The x coord to blit to.</param>
 		/// <param name="y">The y coord to blit to.</param>
 		/// <param name="mode">The render mode.</param>
-		public static void Blit(this DataMap2D<ARGB> dest, DataMap2D<ARGB> src, int x, int y, RenderMode mode)
+		public static void Blit(this DataMap<ARGB> dest, DataMap<ARGB> src, int x, int y, RenderMode mode)
 		{
 			dest.Blit(src, new Point2D(x, y), mode);
 		}
 		
 		/// <summary>
-		/// Blits the source <see cref="DataMap2D{ARGB}"/> to this <see cref="DataMap2D{ARGB}"/> in the given position with the given render mode.
+		/// Blits the source <see cref="DataMap{ARGB}"/> to this <see cref="DataMap{ARGB}"/> in the given position with the given render mode.
 		/// </summary>
-		/// <param name="dest">The <see cref="DataMap2D{ARGB}"/>.</param>
-		/// <param name="src">The source <see cref="DataMap2D{ARGB}"/>.</param>
+		/// <param name="dest">The <see cref="DataMap{ARGB}"/>.</param>
+		/// <param name="src">The source <see cref="DataMap{ARGB}"/>.</param>
 		/// <param name="position">The position to blit to.</param>
 		/// <param name="mode">The render mode.</param>
-		public unsafe static void Blit(this DataMap2D<ARGB> dest, DataMap2D<ARGB> src, Point2D position, RenderMode mode)
+		public unsafe static void Blit(this DataMap<ARGB> dest, DataMap<ARGB> src, Point2D position, RenderMode mode)
 		{
 			if(mode == RenderMode.NORMAL)
 			{
@@ -113,24 +113,24 @@
 		}
 		
 		/// <summary>
-		/// Fills this <see cref="DataMap2D{ARGB}"/> with the given value with the given render mode.
+		/// Fills this <see cref="DataMap{ARGB}"/> with the given value with the given render mode.
 		/// </summary>
-		/// <param name="image">The <see cref="DataMap2D{ARGB}"/>.</param>
+		/// <param name="image">The <see cref="DataMap{ARGB}"/>.</param>
 		/// <param name="value">The value.</param>
 		/// <param name="mode">The render mode.</param>
-		public static void Fill(this DataMap2D<ARGB> image, ARGB value, RenderMode mode)
+		public static void Fill(this DataMap<ARGB> image, ARGB value, RenderMode mode)
 		{
 			image.FillRectangle(new Rectangle{Size = image.Size}, value, mode);
 		}
 		
 		/// <summary>
-		/// Fills a <see cref="Rectangle"/> in this <see cref="DataMap2D{ARGB}"/> with the given value with the given render mode.
+		/// Fills a <see cref="Rectangle"/> in this <see cref="DataMap{ARGB}"/> with the given value with the given render mode.
 		/// </summary>
-		/// <param name="image">The <see cref="DataMap2D{ARGB}"/>.</param>
+		/// <param name="image">The <see cref="DataMap{ARGB}"/>.</param>
 		/// <param name="rect">The <see cref="Rectangle"/> to fill.</param>
 		/// <param name="value">The value.</param>
 		/// <param name="mode">The render mode.</param>
-		public static void FillRectangle(this DataMap2D<ARGB> image, Rectangle rect, ARGB value, RenderMode mode)
+		public static void FillRectangle(this DataMap<ARGB> image, Rectangle rect, ARGB value, RenderMode mode)
 		{
 			if(mode != RenderMode.NORMAL && value.A == 0) return;
 			switch(mode)
@@ -146,12 +146,12 @@
 		}
 		
 		/// <summary>
-		/// Fills a blended <see cref="Rectangle"/> in this <see cref="DataMap2D{ARGB}"/> with the given value.
+		/// Fills a blended <see cref="Rectangle"/> in this <see cref="DataMap{ARGB}"/> with the given value.
 		/// </summary>
-		/// <param name="image">The <see cref="DataMap2D{ARGB}"/>.</param>
+		/// <param name="image">The <see cref="DataMap{ARGB}"/>.</param>
 		/// <param name="rect">The <see cref="Rectangle"/> to fill.</param>
 		/// <param name="value">The value.</param>
-		private unsafe static void FillBlendRectangle(this DataMap2D<ARGB> image, Rectangle rect, ARGB value)
+		private unsafe static void FillBlendRectangle(this DataMap<ARGB> image, Rectangle rect, ARGB value)
 		{
 			Rectangle clip = VectorUtil.Overlap((Rectangle)image.Size, image.GetClip(), rect);
 			if(clip.IsValid())
@@ -180,27 +180,27 @@
 		}
 		
 		/// <summary>
-		/// Draws the outline of a circle in this <see cref="DataMap2D{ARGB}"/> with the given value with the given render mode.
+		/// Draws the outline of a circle in this <see cref="DataMap{ARGB}"/> with the given value with the given render mode.
 		/// </summary>
-		/// <param name="image">The <see cref="DataMap2D{ARGB}"/>.</param>
+		/// <param name="image">The <see cref="DataMap{ARGB}"/>.</param>
 		/// <param name="c">The center of the circle.</param>
 		/// <param name="r">The radius of the circle.</param>
 		/// <param name="value">The value.</param>
 		/// <param name="mode">The render mode.</param>
-		public static void DrawCircle(this DataMap2D<ARGB> image, Point2D c, int r, ARGB value, RenderMode mode)
+		public static void DrawCircle(this DataMap<ARGB> image, Point2D c, int r, ARGB value, RenderMode mode)
 		{
 			image.DrawEllipse(c, (Point2D)r, value, mode);
 		}
 		
 		/// <summary>
-		/// Draws the outline of an ellipse in this <see cref="DataMap2D{ARGB}"/> with the given value with the given render mode.
+		/// Draws the outline of an ellipse in this <see cref="DataMap{ARGB}"/> with the given value with the given render mode.
 		/// </summary>
-		/// <param name="image">The <see cref="DataMap2D{ARGB}"/>.</param>
+		/// <param name="image">The <see cref="DataMap{ARGB}"/>.</param>
 		/// <param name="c">The center of the ellipse.</param>
 		/// <param name="r">The radii of the ellipse.</param>
 		/// <param name="value">The value.</param>
 		/// <param name="mode">The render mode.</param>
-		public static void DrawEllipse(this DataMap2D<ARGB> image, Point2D c, Point2D r, ARGB value, RenderMode mode)
+		public static void DrawEllipse(this DataMap<ARGB> image, Point2D c, Point2D r, ARGB value, RenderMode mode)
 		{
 			if(mode != RenderMode.NORMAL && value.A == 0) return;
 			if(mode == RenderMode.NORMAL || mode == RenderMode.MASK)
@@ -214,13 +214,13 @@
 		}
 		
 		/// <summary>
-		/// Draws the outline of a blended ellipse in this <see cref="DataMap2D{ARGB}"/> with the given value.
+		/// Draws the outline of a blended ellipse in this <see cref="DataMap{ARGB}"/> with the given value.
 		/// </summary>
-		/// <param name="image">The <see cref="DataMap2D{ARGB}"/>.</param>
+		/// <param name="image">The <see cref="DataMap{ARGB}"/>.</param>
 		/// <param name="c">The center of the ellipse.</param>
 		/// <param name="r">The radii of the ellipse.</param>
 		/// <param name="value">The value.</param>
-		private unsafe static void DrawBlendEllipse(this DataMap2D<ARGB> image, Point2D c, Point2D r, ARGB value)
+		private unsafe static void DrawBlendEllipse(this DataMap<ARGB> image, Point2D c, Point2D r, ARGB value)
 		{
 			Rectangle clip = new Rectangle{Min = c - r, Max = c + r};
 			clip = VectorUtil.Overlap((Rectangle)image.Size, image.GetClip(), clip);
@@ -328,29 +328,29 @@
 		}
 		
 		/// <summary>
-		/// Fills a circle in this <see cref="DataMap2D{ARGB}"/> with the given value with the given render mode.
+		/// Fills a circle in this <see cref="DataMap{ARGB}"/> with the given value with the given render mode.
 		/// </summary>
-		/// <param name="image">The <see cref="DataMap2D{ARGB}"/>.</param>
+		/// <param name="image">The <see cref="DataMap{ARGB}"/>.</param>
 		/// <param name="c">The center of the circle.</param>
 		/// <param name="r">The radius of the circle.</param>
 		/// <param name="value">The value.</param>
 		/// <param name="mode">The render mode.</param>
 		/// <param name="aa">True if the circle is anti-aliased.</param>
-		public static void FillCircle(this DataMap2D<ARGB> image, Point2D c, double r, ARGB value, RenderMode mode, bool aa = false)
+		public static void FillCircle(this DataMap<ARGB> image, Point2D c, double r, ARGB value, RenderMode mode, bool aa = false)
 		{
 			image.FillEllipse(c, (Vec2D)r, value, mode, aa);
 		}
 		
 		/// <summary>
-		/// Fills an ellipse in this <see cref="DataMap2D{ARGB}"/> with the given value with the given render mode.
+		/// Fills an ellipse in this <see cref="DataMap{ARGB}"/> with the given value with the given render mode.
 		/// </summary>
-		/// <param name="image">The <see cref="DataMap2D{ARGB}"/>.</param>
+		/// <param name="image">The <see cref="DataMap{ARGB}"/>.</param>
 		/// <param name="c">The center of the ellipse.</param>
 		/// <param name="r">The radii of the ellipse.</param>
 		/// <param name="value">The value.</param>
 		/// <param name="mode">The render mode.</param>
 		/// <param name="aa">True if the ellipse is anti-aliased.</param>
-		public static void FillEllipse(this DataMap2D<ARGB> image, Point2D c, Vec2D r, ARGB value, RenderMode mode, bool aa = false)
+		public static void FillEllipse(this DataMap<ARGB> image, Point2D c, Vec2D r, ARGB value, RenderMode mode, bool aa = false)
 		{
 			if(mode != RenderMode.NORMAL && value.A == 0) return;
 			if(!aa)
@@ -370,13 +370,13 @@
 		}
 		
 		/// <summary>
-		/// Fills an blended ellipse in this <see cref="DataMap2D{ARGB}"/> with the given value.
+		/// Fills an blended ellipse in this <see cref="DataMap{ARGB}"/> with the given value.
 		/// </summary>
-		/// <param name="image">The <see cref="DataMap2D{ARGB}"/>.</param>
+		/// <param name="image">The <see cref="DataMap{ARGB}"/>.</param>
 		/// <param name="c">The center of the ellipse.</param>
 		/// <param name="r">The radii of the ellipse.</param>
 		/// <param name="value">The value.</param>
-		private unsafe static void FillBlendEllipse(this DataMap2D<ARGB> image, Point2D c, Point2D r, ARGB value)
+		private unsafe static void FillBlendEllipse(this DataMap<ARGB> image, Point2D c, Point2D r, ARGB value)
 		{
 			Rectangle clip = new Rectangle{Min = c - r, Max = c + r};
 			clip = VectorUtil.Overlap((Rectangle)image.Size, image.GetClip(), clip);
@@ -438,14 +438,14 @@
 		}
 		
 		/// <summary>
-		/// Fills an anti-aliased ellipse in this <see cref="DataMap2D{ARGB}"/> with the given value with the given render mode.
+		/// Fills an anti-aliased ellipse in this <see cref="DataMap{ARGB}"/> with the given value with the given render mode.
 		/// </summary>
-		/// <param name="image">The <see cref="DataMap2D{ARGB}"/>.</param>
+		/// <param name="image">The <see cref="DataMap{ARGB}"/>.</param>
 		/// <param name="c">The center of the ellipse.</param>
 		/// <param name="r">The radii of the ellipse.</param>
 		/// <param name="value">The value.</param>
 		/// <param name="mode">The render mode.</param>
-		private static void FillAAEllipse(this DataMap2D<ARGB> image, Point2D c, Vec2D r, ARGB value, RenderMode mode)
+		private static void FillAAEllipse(this DataMap<ARGB> image, Point2D c, Vec2D r, ARGB value, RenderMode mode)
 		{
 			if(mode != RenderMode.NORMAL && value.A == 0) return;
 			
@@ -514,14 +514,14 @@
 		}
 		
 		/// <summary>
-		/// Draws the outline of a rounded <see cref="Rectangle"/> in this <see cref="DataMap2D{ARGB}"/> with the given value with the given render mode.
+		/// Draws the outline of a rounded <see cref="Rectangle"/> in this <see cref="DataMap{ARGB}"/> with the given value with the given render mode.
 		/// </summary>
-		/// <param name="image">The <see cref="DataMap2D{ARGB}"/>.</param>
+		/// <param name="image">The <see cref="DataMap{ARGB}"/>.</param>
 		/// <param name="rect">The <see cref="Rectangle"/> to fill.</param>
 		/// <param name = "r">The radii.</param>
 		/// <param name="value">The value.</param>
 		/// <param name="mode">The render mode.</param>
-		public static void DrawRoundedRectangle(this DataMap2D<ARGB> image, Rectangle rect, Point2D r, ARGB value, RenderMode mode)
+		public static void DrawRoundedRectangle(this DataMap<ARGB> image, Rectangle rect, Point2D r, ARGB value, RenderMode mode)
 		{
 			if(mode != RenderMode.NORMAL && value.A == 0) return;
 			if(mode == RenderMode.NORMAL || mode == RenderMode.MASK)
@@ -535,13 +535,13 @@
 		}
 		
 		/// <summary>
-		/// Draws the outline of a rounded <see cref="Rectangle"/> in this <see cref="DataMap2D{ARGB}"/> with the given value.
+		/// Draws the outline of a rounded <see cref="Rectangle"/> in this <see cref="DataMap{ARGB}"/> with the given value.
 		/// </summary>
-		/// <param name="image">The <see cref="DataMap2D{ARGB}"/>.</param>
+		/// <param name="image">The <see cref="DataMap{ARGB}"/>.</param>
 		/// <param name="rect">The <see cref="Rectangle"/> to fill.</param>
 		/// <param name = "r">The radii.</param>
 		/// <param name="value">The value.</param>
-		private unsafe static void DrawBlendRoundedRectangle(this DataMap2D<ARGB> image, Rectangle rect, Point2D r, ARGB value)
+		private unsafe static void DrawBlendRoundedRectangle(this DataMap<ARGB> image, Rectangle rect, Point2D r, ARGB value)
 		{
 			Rectangle clip = VectorUtil.Overlap((Rectangle)image.Size, image.GetClip(), rect);
 			if(clip.IsValid())
@@ -698,15 +698,15 @@
 		}
 		
 		/// <summary>
-		/// Fills a rounded <see cref="Rectangle"/> in this <see cref="DataMap2D{ARGB}"/> with the given value with the given render mode.
+		/// Fills a rounded <see cref="Rectangle"/> in this <see cref="DataMap{ARGB}"/> with the given value with the given render mode.
 		/// </summary>
-		/// <param name="image">The <see cref="DataMap2D{ARGB}"/>.</param>
+		/// <param name="image">The <see cref="DataMap{ARGB}"/>.</param>
 		/// <param name="rect">The <see cref="Rectangle"/> to fill.</param>
 		/// <param name = "r">The radii.</param>
 		/// <param name="value">The value.</param>
 		/// <param name="mode">The render mode.</param>
 		/// <param name="aa">True if the rect is anti-aliased.</param>
-		public static void FillRoundedRectangle(this DataMap2D<ARGB> image, Rectangle rect, Vec2D r, ARGB value, RenderMode mode, bool aa = false)
+		public static void FillRoundedRectangle(this DataMap<ARGB> image, Rectangle rect, Vec2D r, ARGB value, RenderMode mode, bool aa = false)
 		{
 			if(mode != RenderMode.NORMAL && value.A == 0) return;
 			if(!aa)
@@ -726,13 +726,13 @@
 		}
 		
 		/// <summary>
-		/// Fills a blended rounded <see cref="Rectangle"/> in this <see cref="DataMap2D{ARGB}"/> with the given value.
+		/// Fills a blended rounded <see cref="Rectangle"/> in this <see cref="DataMap{ARGB}"/> with the given value.
 		/// </summary>
-		/// <param name="image">The <see cref="DataMap2D{ARGB}"/>.</param>
+		/// <param name="image">The <see cref="DataMap{ARGB}"/>.</param>
 		/// <param name="rect">The <see cref="Rectangle"/> to fill.</param>
 		/// <param name = "r">The radii.</param>
 		/// <param name="value">The value.</param>
-		private unsafe static void FillBlendRoundedRectangle(this DataMap2D<ARGB> image, Rectangle rect, Point2D r, ARGB value)
+		private unsafe static void FillBlendRoundedRectangle(this DataMap<ARGB> image, Rectangle rect, Point2D r, ARGB value)
 		{
 			Rectangle clip = VectorUtil.Overlap((Rectangle)image.Size, image.GetClip(), rect);
 			if(clip.IsValid())
@@ -809,14 +809,14 @@
 		}
 		
 		/// <summary>
-		/// Fills an anti-aliased rounded <see cref="Rectangle"/> in this <see cref="DataMap2D{ARGB}"/> with the given value with the given render mode.
+		/// Fills an anti-aliased rounded <see cref="Rectangle"/> in this <see cref="DataMap{ARGB}"/> with the given value with the given render mode.
 		/// </summary>
-		/// <param name="image">The <see cref="DataMap2D{ARGB}"/>.</param>
+		/// <param name="image">The <see cref="DataMap{ARGB}"/>.</param>
 		/// <param name="rect">The <see cref="Rectangle"/> to fill.</param>
 		/// <param name = "r">The radii.</param>
 		/// <param name="value">The value.</param>
 		/// <param name="mode">The render mode.</param>
-		private static void FillAARoundedRectangle(this DataMap2D<ARGB> image, Rectangle rect, Vec2D r, ARGB value, RenderMode mode)
+		private static void FillAARoundedRectangle(this DataMap<ARGB> image, Rectangle rect, Vec2D r, ARGB value, RenderMode mode)
 		{
 			Rectangle clip = VectorUtil.Overlap((Rectangle)image.Size, image.GetClip(), rect);
 			if(clip.IsValid())
@@ -876,7 +876,7 @@
 			}
 		}
 		
-		private static void FillRightXScan(this DataMap2D<ARGB> image, int x1, double x2, int y, ARGB value, RenderMode mode)
+		private static void FillRightXScan(this DataMap<ARGB> image, int x1, double x2, int y, ARGB value, RenderMode mode)
 		{
 			if(x1 <= x2)
 			{
@@ -902,7 +902,7 @@
 			}
 		}
 		
-		private static void FillLeftXScan(this DataMap2D<ARGB> image, double x1, int x2, int y, ARGB value, RenderMode mode)
+		private static void FillLeftXScan(this DataMap<ARGB> image, double x1, int x2, int y, ARGB value, RenderMode mode)
 		{
 			if(x1 <= x2)
 			{
@@ -928,7 +928,7 @@
 			}
 		}
 		
-		private static void FillUpYScan(this DataMap2D<ARGB> image, int x, int y1, double y2, ARGB value, RenderMode mode)
+		private static void FillUpYScan(this DataMap<ARGB> image, int x, int y1, double y2, ARGB value, RenderMode mode)
 		{
 			if(y1 <= y2)
 			{
@@ -954,7 +954,7 @@
 			}
 		}
 		
-		private static void FillDownYScan(this DataMap2D<ARGB> image, int x, double y1, int y2, ARGB value, RenderMode mode)
+		private static void FillDownYScan(this DataMap<ARGB> image, int x, double y1, int y2, ARGB value, RenderMode mode)
 		{
 			if(y1 <= y2)
 			{
@@ -981,9 +981,9 @@
 		}
 		
 		/// <summary>
-		/// Fills a triangle in this <see cref="DataMap2D{ARGB}"/> with the given value with the given render mode.
+		/// Fills a triangle in this <see cref="DataMap{ARGB}"/> with the given value with the given render mode.
 		/// </summary>
-		/// <param name="image">The <see cref="DataMap2D{ARGB}"/>.</param>
+		/// <param name="image">The <see cref="DataMap{ARGB}"/>.</param>
 		/// <param name = "scans">The scan storage. Generally should by exclusive to one image.</param>
 		/// <param name="v1">The first vertex.</param>
 		/// <param name="v2">The second vertex.</param>
@@ -991,21 +991,21 @@
 		/// <param name="value">The value.</param>
 		/// <param name="mode">The render mode.</param>
 		/// <param name="aa">True if the triangle is anti-aliased.</param>
-		public static void FillTriangle(this DataMap2D<ARGB> image, ref double[,] scans, ARGB value, RenderMode mode, bool aa, Point2D v1, Point2D v2, Point2D v3)
+		public static void FillTriangle(this DataMap<ARGB> image, ref double[,] scans, ARGB value, RenderMode mode, bool aa, Point2D v1, Point2D v2, Point2D v3)
 		{
 			image.FillPolygon(ref scans, value, mode, aa, v1, v2, v3);
 		}
 		
 		/// <summary>
-		/// Fills a polygon in this <see cref="DataMap2D{ARGB}"/> with the given value with the given render mode.
+		/// Fills a polygon in this <see cref="DataMap{ARGB}"/> with the given value with the given render mode.
 		/// </summary>
-		/// <param name="image">The <see cref="DataMap2D{ARGB}"/>.</param>
+		/// <param name="image">The <see cref="DataMap{ARGB}"/>.</param>
 		/// <param name = "scans">The scan storage. Generally should by exclusive to one image.</param>
 		/// <param name="verts">The verticies of the polygon.</param>
 		/// <param name="value">The value.</param>
 		/// <param name="mode">The render mode.</param>
 		/// <param name="aa">True if the polygon is anti-aliased.</param>
-		public static void FillPolygon(this DataMap2D<ARGB> image, ref double[,] scans, ARGB value, RenderMode mode, bool aa, params Point2D[] verts)
+		public static void FillPolygon(this DataMap<ARGB> image, ref double[,] scans, ARGB value, RenderMode mode, bool aa, params Point2D[] verts)
 		{
 			if(mode != RenderMode.NORMAL && value.A == 0) return;
 			if(!aa)
@@ -1025,13 +1025,13 @@
 		}
 		
 		/// <summary>
-		/// Fills a blended polygon in this <see cref="DataMap2D{ARGB}"/> with the given value.
+		/// Fills a blended polygon in this <see cref="DataMap{ARGB}"/> with the given value.
 		/// </summary>
-		/// <param name="dest">The <see cref="DataMap2D{ARGB}"/>.</param>
+		/// <param name="dest">The <see cref="DataMap{ARGB}"/>.</param>
 		/// <param name = "scans">The scan storage. Generally should by exclusive to one image.</param>
 		/// <param name="value">The value.</param>
 		/// <param name="verts">The verticies of the polygon.</param>
-		private unsafe static void FillBlendPolygon(this DataMap2D<ARGB> dest, ref double[,] scans, ARGB value, params Point2D[] verts)
+		private unsafe static void FillBlendPolygon(this DataMap<ARGB> dest, ref double[,] scans, ARGB value, params Point2D[] verts)
 		{
 			Rectangle clip = VectorUtil.Overlap((Rectangle)dest.Size, dest.GetClip());
 			if(clip.IsValid())
@@ -1075,14 +1075,14 @@
 		}
 		
 		/// <summary>
-		/// Fills an anti-aliased polygon in this <see cref="DataMap2D{ARGB}"/> with the given value with the given render mode.
+		/// Fills an anti-aliased polygon in this <see cref="DataMap{ARGB}"/> with the given value with the given render mode.
 		/// </summary>
-		/// <param name="image">The <see cref="DataMap2D{ARGB}"/>.</param>
+		/// <param name="image">The <see cref="DataMap{ARGB}"/>.</param>
 		/// <param name = "scans">The scan storage. Generally should by exclusive to one image.</param>
 		/// <param name="value">The value.</param>
 		/// <param name="verts">The verticies of the polygon.</param>
 		/// <param name="mode">The render mode.</param>
-		private unsafe static void FillAAPolygon(this DataMap2D<ARGB> image, ref double[,] scans, ARGB value, RenderMode mode, params Point2D[] verts)
+		private unsafe static void FillAAPolygon(this DataMap<ARGB> image, ref double[,] scans, ARGB value, RenderMode mode, params Point2D[] verts)
 		{
 			Rectangle clip = VectorUtil.Overlap((Rectangle)image.Size, image.GetClip());
 			if(clip.IsValid())
@@ -1181,7 +1181,7 @@
 			}
 		}
 		
-		private static void FillLeftAAEdge(DataMap2D<ARGB> dest, double x1, double x2, int y, ARGB value)
+		private static void FillLeftAAEdge(DataMap<ARGB> dest, double x1, double x2, int y, ARGB value)
 		{
 			if(x1 > x2) Util.Swap(ref x1, ref x2);
 			
@@ -1204,7 +1204,7 @@
 			}while(xmax != x2);
 		}
 		
-		private static void FillRightAAEdge(DataMap2D<ARGB> dest, double x1, double x2, int y, ARGB value)
+		private static void FillRightAAEdge(DataMap<ARGB> dest, double x1, double x2, int y, ARGB value)
 		{
 			if(x1 > x2) Util.Swap(ref x1, ref x2);
 			
@@ -1225,6 +1225,6 @@
 				alpha += (ymax + ymin) * (xmax - xmin) / 2;
 				dest[(int)xmin, y] &= new ARGB((byte)(value.A * alpha), value.RGB);
 			}while(xmax != x2);
-		}
+		}*/
 	}
 }

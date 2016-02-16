@@ -1,0 +1,266 @@
+﻿namespace IROM.Util
+{
+	using System;
+	using IROM.Util;
+	//NAMESPACE
+	
+	/*
+	public struct Dummy
+	{
+		public int value;
+	}
+	//*/
+	
+	public static unsafe class UnsafeDummyRenderer
+	{
+		/// <summary>
+		/// Basic implementation of a constant src solid filling renderer.
+		/// </summary>
+		/// <param name="clip">The clipping rectangle.</param>
+		/// <param name="scanner">The scans to render.</param>
+		/// <param name="dest">The map to render to.</param>
+		/// <param name="value">The constant value.</param>
+		public static void SolidConstRender(Rectangle clip, Scanner scanner, DataMap<Dummy> dest, Dummy value)
+		{
+			IUnsafeMap uDest = dest as IUnsafeMap;
+			if(uDest == null)
+			{
+				BasicRenderer<Dummy>.Instance.SolidConst(clip, scanner, dest, value);
+				return;
+			}
+			byte* addr = uDest.BeginUnsafeOperation();
+			int stride = uDest.GetStride();
+			
+			Scanner.Scan scan;
+			for(int y = scanner.yMin; y <= scanner.yMax; y++)
+			{
+				scan = scanner[y];
+				scan.min = Math.Max(scan.min, clip.Min.X);
+				scan.max = Math.Min(scan.max, clip.Max.X);
+				/*for(int x = (int)scan.min; x <= (int)scan.max; x++)
+				{
+					dest[x, y] = value;
+				}*/
+				byte* ptr = addr + (((int)scan.min) + (y * dest.Width)) * stride;
+				byte* endPtr = addr + (((int)scan.max) + (y * dest.Width) + 1) * stride;
+				while(ptr != endPtr)
+				{
+					*((Dummy*)ptr) = value;
+					ptr += stride;
+				}
+			}
+			
+			uDest.EndUnsafeOperation();
+		}
+		
+		/// <summary>
+		/// Basic implementation of a map src solid filling renderer.
+		/// </summary>
+		/// <param name="clip">The clipping rectangle.</param>
+		/// <param name="scanner">The scans to render.</param>
+		/// <param name="dest">The map to render to.</param>
+		/// <param name="src">The source map.</param>
+		/// <param name="offset">The offset of the source map.</param>
+		public static void SolidCopyRender(Rectangle clip, Scanner scanner, DataMap<Dummy> dest, DataMap<Dummy> src, Point2D offset)
+		{
+			IUnsafeMap uDest = dest as IUnsafeMap;
+			IUnsafeMap uSrc = src as IUnsafeMap;
+			if(uDest == null || uSrc == null)
+			{
+				BasicRenderer<Dummy>.Instance.SolidCopy(clip, scanner, dest, src, offset);
+				return;
+			}
+			byte* addr = uDest.BeginUnsafeOperation();
+			int stride = uDest.GetStride();
+			byte* srcAddr = uSrc.BeginUnsafeOperation();
+			int srcStride = uSrc.GetStride();
+			
+			Console.WriteLine(dest.Size);
+			Console.WriteLine(src.Size + " " + offset);
+			Console.ReadKey();
+			
+			Scanner.Scan scan;
+			for(int y = scanner.yMin; y <= scanner.yMax; y++)
+			{
+				scan = scanner[y];
+				scan.min = Math.Max(scan.min, clip.Min.X);
+				scan.max = Math.Min(scan.max, clip.Max.X);
+				/*for(int x = (int)scan.min; x <= (int)scan.max; x++)
+				{
+					dest[x, y] = src[x + offset.X, y + offset.Y];
+				}*/
+				byte* ptr = addr + (((int)scan.min) + (y * dest.Width)) * stride;
+				byte* srcPtr = srcAddr + (((int)scan.min + offset.X) + ((y + offset.Y) * src.Width)) * srcStride;
+				byte* endPtr = addr + (((int)scan.max) + (y * dest.Width) + 1) * stride;
+				while(ptr != endPtr)
+				{
+					*((Dummy*)ptr) = *((Dummy*)srcPtr);
+					ptr += stride;
+					srcPtr += srcStride;
+				}
+			}
+			
+			uDest.EndUnsafeOperation();
+			uSrc.EndUnsafeOperation();
+		}
+		
+		/// <summary>
+		/// Basic implementation of a constant src outlining renderer.
+		/// </summary>
+		/// <param name="clip">The clipping rectangle.</param>
+		/// <param name="scanner">The scans to render.</param>
+		/// <param name="dest">The map to render to.</param>
+		/// <param name="value">The constant value.</param>
+		public static void OutlineConstRender(Rectangle clip, Scanner scanner, DataMap<Dummy> dest, Dummy value)
+		{
+			double prevLeft = 0;
+			double left = 0;
+			double prevRight = 0;
+			double right = 0;
+			double min;
+			double max;
+			bool isEndScan = false;
+			
+			for(int y = scanner.yMin; y <= scanner.yMax; y++)
+			{
+				if(y == scanner.yMin)
+				{
+					if(scanner.isYMinClipped)
+					{
+						prevLeft = (scanner[y].min + scanner[y-1].min) / 2;
+						prevRight = (scanner[y].max + scanner[y-1].max) / 2;
+					}else
+					{
+						isEndScan = true;
+					}
+				}else
+				{
+					prevLeft = left;
+					prevRight = right;
+				}
+				if(y == scanner.yMax && !scanner.isYMaxClipped)
+				{
+					isEndScan = true;
+					left = prevLeft;
+					right = prevRight;
+				}else
+				{
+					left = (scanner[y].min + scanner[y+1].min) / 2;
+					right = (scanner[y].max + scanner[y+1].max) / 2;
+				}
+				
+				if(isEndScan)
+				{
+					min = left;
+					max = right;
+					min = Math.Max(min, clip.Min.X);
+					max = Math.Min(max, clip.Max.X);
+					for(int x = (int)min; x <= (int)max; x++)
+					{
+						dest[x, y] = value;
+					}
+				}else
+				{
+					min = Math.Min(prevLeft, left);
+					max = Math.Max(prevLeft, left);
+					min = Math.Max(min, clip.Min.X);
+					max = Math.Min(max, clip.Max.X);
+					for(int x = (int)min; x <= (int)max; x++)
+					{
+						dest[x, y] = value;
+					}
+					
+					min = Math.Min(prevRight, right);
+					max = Math.Max(prevRight, right);
+					min = Math.Max(min, clip.Min.X);
+					max = Math.Min(max, clip.Max.X);
+					for(int x = (int)min; x <= (int)max; x++)
+					{
+						dest[x, y] = value;
+					}
+				}
+				isEndScan = false;
+			}
+		}
+		
+		/// <summary>
+		/// Basic implementation of a map src outlining renderer.
+		/// </summary>
+		/// <param name="clip">The clipping rectangle.</param>
+		/// <param name="scanner">The scans to render.</param>
+		/// <param name="dest">The map to render to.</param>
+		/// <param name="src">The source map.</param>
+		/// <param name="offset">The offset of the source map.</param>
+		public static void OutlineCopyRender(Rectangle clip, Scanner scanner, DataMap<Dummy> dest, DataMap<Dummy> src, Point2D offset)
+		{
+			double prevLeft = 0;
+			double left = 0;
+			double prevRight = 0;
+			double right = 0;
+			double min;
+			double max;
+			bool isEndScan = false;
+			
+			for(int y = scanner.yMin; y <= scanner.yMax; y++)
+			{
+				if(y == scanner.yMin)
+				{
+					if(scanner.isYMinClipped)
+					{
+						prevLeft = (scanner[y].min + scanner[y-1].min) / 2;
+						prevRight = (scanner[y].max + scanner[y-1].max) / 2;
+					}else
+					{
+						isEndScan = true;
+					}
+				}else
+				{
+					prevLeft = left;
+					prevRight = right;
+				}
+				if(y == scanner.yMax && !scanner.isYMaxClipped)
+				{
+					isEndScan = true;
+					left = prevLeft;
+					right = prevRight;
+				}else
+				{
+					left = (scanner[y].min + scanner[y+1].min) / 2;
+					right = (scanner[y].max + scanner[y+1].max) / 2;
+				}
+				
+				if(isEndScan)
+				{
+					min = left;
+					max = right;
+					min = Math.Max(min, clip.Min.X);
+					max = Math.Min(max, clip.Max.X);
+					for(int x = (int)min; x <= (int)max; x++)
+					{
+						dest[x, y] = src[x + offset.X, y + offset.Y];
+					}
+				}else
+				{
+					min = Math.Min(prevLeft, left);
+					max = Math.Max(prevLeft, left);
+					min = Math.Max(min, clip.Min.X);
+					max = Math.Min(max, clip.Max.X);
+					for(int x = (int)min; x <= (int)max; x++)
+					{
+						dest[x, y] = src[x + offset.X, y + offset.Y];
+					}
+					
+					min = Math.Min(prevRight, right);
+					max = Math.Max(prevRight, right);
+					min = Math.Max(min, clip.Min.X);
+					max = Math.Min(max, clip.Max.X);
+					for(int x = (int)min; x <= (int)max; x++)
+					{
+						dest[x, y] = src[x + offset.X, y + offset.Y];
+					}
+				}
+				isEndScan = false;
+			}
+		}
+	}
+}
