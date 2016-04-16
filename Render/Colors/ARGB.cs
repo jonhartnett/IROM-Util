@@ -278,9 +278,9 @@
         	if(src.A == 255) return src;
         	if(src.A == 0) return dest;
         	return new ARGB((byte)(src.A + dest.A),
-        					(byte)(((src.R * src.A) >> 8) + ((dest.R * (255 - src.A)) >> 8)),
-        	                (byte)(((src.G * src.A) >> 8) + ((dest.G * (255 - src.A)) >> 8)),
-        	                (byte)(((src.B * src.A) >> 8) + ((dest.B * (255 - src.A)) >> 8)));
+        	                (byte)(((src.R * src.A) + (dest.R * (255 - src.A))) >> 8),
+        	                (byte)(((src.G * src.A) + (dest.G * (255 - src.A))) >> 8),
+        	                (byte)(((src.B * src.A) + (dest.B * (255 - src.A))) >> 8));
         }
         
         /// <summary>
