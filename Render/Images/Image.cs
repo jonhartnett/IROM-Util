@@ -72,6 +72,11 @@
 		{
         	isDIBSection = isDIB;
         	Resize(w, h);
+        	ChannelAlpha = new AlphaChannel(this);
+        	ChannelRed = new RedChannel(this);
+        	ChannelGreen = new GreenChannel(this);
+        	ChannelBlue = new BlueChannel(this);
+        	ChannelGrey = new GreyChannel(this);
 		}
 
 		public void Dispose()
@@ -141,6 +146,18 @@
 		{
 			return sizeof(ARGB);
 		}
+		
+		/// <summary>
+        /// Returns a set of rendering contexts to be used for rendering on this <see cref="DataMap{T}">DataMap</see>.
+        /// The lowest index context with a non-null delegate of the relavent type is used for the actual rendering.
+        /// </summary>
+        /// <returns>The content array.</returns>
+        protected internal override RenderContext<ARGB>[] GetContexts()
+        {
+        	RenderContext<ARGB>[] contexts = base.GetContexts();
+        	ArrayUtil.Add(ref contexts, ColorRenderer.Instance, 0);
+        	return contexts;
+        }
 		
         public unsafe static Image LoadImage(string path)
         {
@@ -222,12 +239,17 @@
         /// <summary>
         /// Represents a single channel in an <see cref="Image"/>.
         /// </summary>
-        private abstract class Channel : DataMap<byte>, IUnsafeMap
+        public abstract class Channel : DataMap<byte>, IUnsafeMap
         {
         	/// <summary>
         	/// The parent <see cref="Image"/>.
         	/// </summary>
         	public readonly Image Parent;
+        	public override Point2D Size 
+			{
+				get{return Parent.Size;}
+	    		protected set{throw new InvalidOperationException("Image channels cannot be resized individually, use Image.Resize!");}
+			}
         	public Channel(Image parent){Parent = parent;}
 	        protected override void BaseResize(int width, int height){throw new InvalidOperationException("Image channels cannot be resized individually, use Image.Resize!");}
 			public byte* BeginUnsafeOperation(){return (byte*)Parent.data;}
@@ -330,12 +352,17 @@
         /// <summary>
         /// Represents a grey channel in an <see cref="Image"/>.
         /// </summary>
-        private abstract class GreyChannel : DataMap<byte>
+        public class GreyChannel : DataMap<byte>
         {
         	/// <summary>
         	/// The parent <see cref="Image"/>.
         	/// </summary>
         	public readonly Image Parent;
+        	public override Point2D Size 
+			{
+				get{return Parent.Size;}
+	    		protected set{throw new InvalidOperationException("Image channels cannot be resized individually, use Image.Resize!");}
+			}
         	public GreyChannel(Image parent){Parent = parent;}
         	
         	public new byte this[int x, int y]
@@ -357,7 +384,7 @@
 	        protected override byte BaseGet(int x, int y)
 	        {
 	        	ARGB* target = Parent.data + x + y * Width;
-					return (byte)(((*target).R + (*target).G + (*target).B) / 3);
+				return (byte)(((*target).R + (*target).G + (*target).B) / 3);
 	        }
 	        
 	        protected override void BaseSet(int x, int y, byte value)
