@@ -94,7 +94,7 @@
 	            }
             }catch(ThreadAbortException)
             {
-            	//do nothing, simple means we we're exited.
+            	//do nothing, simply means we we're exited.
             }catch(Exception ex)
             {
                 //report exception

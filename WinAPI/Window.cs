@@ -54,9 +54,9 @@
 		private bool BaseFullscreen = false;
 		
 		/// <summary>
-		/// The previous maximized value when fullscreen.
+		/// True if maximized.
 		/// </summary>
-		private bool SavedStateMaximized;
+		private bool BaseMaximized = false;
 		
 		/// <summary>
 		/// The previous style value when fullscreen.
@@ -275,6 +275,34 @@
 		public event Action<char, bool> OnCharTyped;
 		
 		/// <summary>
+		/// True if this windows is maximized.
+		/// </summary>
+		public bool Maximized
+		{
+			get
+			{
+				return BaseMaximized;
+			}
+			set
+			{
+				BaseMaximized = value;
+				if(Started && !Fullscreen)
+				{
+					int mode;
+					if(BaseMaximized)
+					{
+						mode = /*SW_MAXIMIZE*/3;
+					}else
+					{
+						mode = /*SW_RESTORE*/9;
+					}
+					bool result = ShowWindow(Handle, mode);
+					WinAPIUtils.Assert(result);
+				}
+			}
+		}
+		
+		/// <summary>
 		/// True if this window is fullscreen.
 		/// </summary>
 		public bool Fullscreen
@@ -293,8 +321,7 @@
 					    // Save current window information.  We force the window into restored mode
 					    // before going fullscreen because Windows doesn't seem to hide the
 					    // taskbar if the window is in the maximized state.
-					    SavedStateMaximized = IsZoomed(Handle);
-					    if(SavedStateMaximized)
+					    if(Maximized)
 					    {
 					    	SendMessage(Handle, /*WM_SYSCOMMAND*/0x0112, /*SC_RESTORE*/0xF120, IntPtr.Zero);
 					    }
@@ -335,7 +362,7 @@
 				    	bool result = SetWindowPos(Handle, IntPtr.Zero, SavedStateBounds.X, SavedStateBounds.Y, SavedStateBounds.Width, SavedStateBounds.Height, /*SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED*/0x0034);
 				    	WinAPIUtils.Assert(result);
 				    	
-					    if(SavedStateMaximized)
+					    if(Maximized)
 					    {
 					      	SendMessage(Handle, /*WM_SYSCOMMAND*/0x0112, /*SC_MAXIMIZE*/0xF030, IntPtr.Zero);
 					    }else
@@ -495,12 +522,14 @@
 			Started = true;
 			
 			//if pending fullscreen, actually perform action
-			if(Fullscreen)
-			{
+			if(Fullscreen) 
 				Fullscreen = true;
-			}
 			
 			ShowWindow(Handle, 1);//WINDOW_SHOW_NORMAL
+			
+			//if pending maximize, actually perform action
+			if(Maximized) 
+				Maximized = true;
 		}
 		
 		/// <summary>
@@ -772,7 +801,10 @@
 	            		break;
 	        		}
 	            }
-			}catch(Exception ex)
+			}catch(System.Threading.ThreadAbortException)
+            {
+            	//do nothing, simply means we called Stop on the message thread
+            }catch(Exception ex)
 			{
 				Console.WriteLine(ex);
 			}
