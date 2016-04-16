@@ -33,7 +33,7 @@
 				scan = scanner[y];
 				scan.min = Math.Max(scan.min, clip.Min.X);
 				scan.max = Math.Min(scan.max, clip.Max.X);
-				for(int x = (int)scan.min; x <= (int)scan.max; x++)
+				for(int x = (int)Math.Floor(scan.min); x <= (int)Math.Ceiling(scan.max); x++)
 				{
 					dest[x, y] = value;
 				}
@@ -58,7 +58,7 @@
 				scan.max = Math.Min(scan.max, clip.Max.X);
 				for(int x = (int)scan.min; x <= (int)scan.max; x++)
 				{
-					dest[x, y] = src[x + offset.X, y + offset.Y];
+					dest[x, y] = src[(x + offset.X) % src.Width, (y + offset.Y) % src.Height];
 				}
 			}
 		}
@@ -196,7 +196,7 @@
 					max = Math.Min(max, clip.Max.X);
 					for(int x = (int)min; x <= (int)max; x++)
 					{
-						dest[x, y] = src[x + offset.X, y + offset.Y];
+						dest[x, y] = src[(x + offset.X) % src.Width, (y + offset.Y) % src.Height];
 					}
 				}else
 				{
@@ -206,7 +206,7 @@
 					max = Math.Min(max, clip.Max.X);
 					for(int x = (int)min; x <= (int)max; x++)
 					{
-						dest[x, y] = src[x + offset.X, y + offset.Y];
+						dest[x, y] = src[(x + offset.X) % src.Width, (y + offset.Y) % src.Height];
 					}
 					
 					min = Math.Min(prevRight, right);
@@ -215,7 +215,7 @@
 					max = Math.Min(max, clip.Max.X);
 					for(int x = (int)min; x <= (int)max; x++)
 					{
-						dest[x, y] = src[x + offset.X, y + offset.Y];
+						dest[x, y] = src[(x + offset.X) % src.Width, (y + offset.Y) % src.Height];
 					}
 				}
 				isEndScan = false;

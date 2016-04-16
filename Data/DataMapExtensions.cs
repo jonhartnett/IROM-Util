@@ -215,7 +215,7 @@
 		/// <param name="map">The <see cref="DataMap{T}">DataMap</see>.</param>
 		/// <param name="shape">The shape to render.</param>
 		/// <param name="func">A function that attempts to render with the given context, returning true if successful.</param>
-		private static void RenderHelper<T>(this DataMap<T> map, IRenderableShape shape, Func<RenderContext<T>, Rectangle, Scanner, bool> func) where T : struct
+		internal static void RenderHelper<T>(this DataMap<T> map, IRenderableShape shape, Func<RenderContext<T>, Rectangle, Scanner, bool> func) where T : struct
 		{
 			Scanner scanner = Scanner.Get(map.Height);
 			Rectangle clip = ShapeUtil.Overlap(map.GetClip(), (Rectangle)map.Size);

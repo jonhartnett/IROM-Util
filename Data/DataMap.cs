@@ -14,7 +14,7 @@
 		/// <summary>
 		/// Gets the size of this map. For resizing, see <see cref="Resize"/>.
 		/// </summary>
-		public Point2D Size 
+		public virtual Point2D Size 
 		{
 			get{return BaseSize;}
     		protected set{BaseSize = value;}
@@ -25,8 +25,13 @@
     	/// </summary>
         public int Width
         {
-            get{return BaseSize.X;}
-            protected set{BaseSize.X = value;}
+            get{return Size.X;}
+            protected set
+            {
+            	Point2D temp = Size;
+            	temp.X = value;
+            	Size = temp;
+            }
         }
         
         /// <summary>
@@ -34,8 +39,13 @@
         /// </summary>
         public int Height
         {
-            get{return BaseSize.Y;}
-            protected set{BaseSize.Y = value;}
+            get{return Size.Y;}
+            protected set
+            {
+            	Point2D temp = Size;
+            	temp.Y = value;
+            	Size = temp;
+            }
         }
         
         /// <summary>

@@ -45,11 +45,6 @@
 				return;
 			}
 			
-			foreach(var name in Assembly.GetExecutingAssembly().GetManifestResourceNames())
-			{
-				Console.WriteLine(name);
-			}
-			
 			string src = UnsafeSrcStorage.src;
 			if(typeof(T).Namespace != "System" && typeof(T).Namespace != "IROM.Util")
 			{
