@@ -1,4 +1,4 @@
-﻿namespace IROM.Core
+﻿namespace IROM.Util
 {
 	using System;
 	using System.Runtime.InteropServices;
@@ -10,7 +10,7 @@
 	public static class HiResTimer
 	{
 		public static readonly bool isSupported = false;
-		private static readonly long frequency;
+		public static readonly long frequency;
 	
 	    static HiResTimer()
 	    {
@@ -36,18 +36,26 @@
 	    {
 	        get
 	        {
-	            if (isSupported)
+	        	return CurrentTick / frequency;
+	        }
+	    }
+	    
+	    public static long CurrentTick
+	    {
+	    	get
+	    	{
+	    		if (isSupported)
 	            {
 	            	long tickCount = 0;
 	                // Get the value here if the counter is supported.
 	                QueryPerformanceCounter(out tickCount);
-	                return tickCount / (double)frequency;
+	                return tickCount;
 	            }else
 	            {
 	                // Otherwise, use Environment.TickCount.
-	                return Environment.TickCount / (double)frequency;
+	                return Environment.TickCount;
 	            }
-	        }
+	    	}
 	    }
 	    
 	    // Windows CE native library with QueryPerformanceCounter().
