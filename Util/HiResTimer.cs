@@ -36,7 +36,7 @@
 	    {
 	        get
 	        {
-	        	return CurrentTick / frequency;
+	        	return CurrentTick / (double)frequency;
 	        }
 	    }
 	    
